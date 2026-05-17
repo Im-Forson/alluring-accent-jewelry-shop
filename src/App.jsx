@@ -12,8 +12,8 @@ function App() {
           <h1 class='text-3xl md:text-5xl font-bold uppercase'>alluring <span  class="text-pink-500">accent</span></h1>
           
           <div class="flex flex-row items-center justify-cennter gap-2">
-            <p class="italic md:text-[16px] text-center">under development</p>
-            <Settings class="w-4 h-4 animate-spin"/>
+            <p class=" md:text-[16px] text-center text-[grey] font-bold">Under Development</p>
+            <Settings class="w-4 h-4 animate-spin text-[grey] font-bold"/>
           </div>
           
       </section>
