@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
+
+import { Settings } from 'lucide-react'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -10,10 +9,13 @@ function App() {
   return (
     <>
       <section id="center">
-        <div>
           <h1 class='text-3xl md:text-5xl font-bold uppercase'>alluring <span  class="text-pink-500">accent</span></h1>
-          <p class="italic md:text-lg text-center mt-[10px]">website under development</p>
-        </div>
+          
+          <div class="flex flex-row items-center justify-cennter gap-2">
+            <p class="italic md:text-[16px] text-center">under development</p>
+            <Settings class="w-4 h-4 animate-spin"/>
+          </div>
+          
       </section>
     </>
   )
