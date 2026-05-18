@@ -15,6 +15,11 @@ function LoginPage() {
 
           <h1 className="login-title">
             Admin Login</h1>
+            
+            {/* DONT HAVE AN ACCOUNT? SIGN UP */}
+          <p className="signup-link">
+            Don't have an account? <a href="#">Sign Up</a>
+          </p>
 
 
           {/* USERNAME OR EMAIL */}
