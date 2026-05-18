@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 
-import HomePage from './pages/home';
+import HomePage from './pages/Home';
 import Shop from './pages/Shop';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
