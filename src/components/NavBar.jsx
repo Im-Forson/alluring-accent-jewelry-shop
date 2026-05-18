@@ -41,7 +41,7 @@ export default function NavBar({ activePage }) {
             </div>
             <div class="flex flex-row items-center justify-between px-4 md:px-8 py-2">
                 <button className="md:hidden cursor-pointer">
-                    <Menu className="w-5 h-5"/>
+                    <Menu className="w-6 h-5"/>
                 </button>
                 <div class="logo">
                     <img src={logo} alt="Logo" class="w-25 h-8 md:w-25 md:h-12" />

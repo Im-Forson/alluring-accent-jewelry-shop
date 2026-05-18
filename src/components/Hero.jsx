@@ -95,7 +95,7 @@ export default function Hero() {
                     SHOP NOW
                   </button>
 
-                  <button className="flex border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition">
+                  <button className="hidden md:flex border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition">
                     EXPLORE COLLECTION
                   </button>
                 </div>
