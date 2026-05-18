@@ -7,8 +7,10 @@ import Hero from '../components/Hero'
 export default function HomePage() {
     return (
         <div>
-            <NavBar activePage={'home'}/>
-            <Hero/>
+            <section className="h-[100vh]">
+                <NavBar activePage={'home'}/>
+                <Hero/>
+            </section>
         </div>
     )
 }

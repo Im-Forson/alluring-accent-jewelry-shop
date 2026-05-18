@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link } from "react-router"
 
-import { Sparkles, UserRound, Heart, ShoppingBag  } from "lucide-react"
+import { Sparkles, UserRound, Heart, ShoppingBag, Menu  } from "lucide-react"
 import { Settings  } from "lucide-react"
 import { LogIn } from "lucide-react"
 import { User } from "lucide-react"
@@ -35,16 +35,19 @@ export default function NavBar({ activePage }) {
 
     return (
         <div>
-            <div class="flex flex-row justify-center items-center gap-1 py-1 bg-pink-200">
-                <Sparkles class="w-4 h-4 col"/>
-                <p class="text-center">Enjoy your shopping to the max</p>
+            <div class="flex flex-row justify-center items-center gap-1 py-[2px] bg-pink-200">
+                {/* <Sparkles class="w-4 h-4 col"/> */}
+                {/* <p class="text-center">Enjoy your shopping to the max</p> */}
             </div>
-            <div class="flex flex-row items-center justify-between px-8 py-2">
+            <div class="flex flex-row items-center justify-between px-4 md:px-8 py-2">
+                <button className="md:hidden cursor-pointer">
+                    <Menu className="w-5 h-5"/>
+                </button>
                 <div class="logo">
-                    <img src={logo} alt="Logo" class="w-25 h-15" />
+                    <img src={logo} alt="Logo" class="w-25 h-8 md:w-25 md:h-12" />
                 </div>
 
-                <div class="flex flex-row items-center gap-10">
+                <div class="hidden md:flex flex-row items-center gap-10">
                     <div className="">
                         <Link to={'/'} class={`${activePage=='home'?'text-pink-600':'black'} cursor-pointer hover:text-pink-300`}
                             onClick={homeHandler}
@@ -72,10 +75,10 @@ export default function NavBar({ activePage }) {
                 </div>
                 <div class="flex flex-row items-center gap-5">
                     <button className=" cursor-pointer">
-                        <UserRound class="w-5 h-4 text-[grey] font-bold"/>
+                        <UserRound class="w-5 h-5 text-[grey] font-bold"/>
                     </button>
                     <Link className="flex flex-row items-center cursor-pointer">
-                        <ShoppingBag class="w-5 h-4 text-[grey] font-bold"/>
+                        <ShoppingBag class="w-5 h-5 text-[grey] font-bold"/>
                         <p className={`relative bottom-[6px] right-[3px] text-pink-600 text-[12px] font-bold`}>3</p>
                     </Link>
                     
