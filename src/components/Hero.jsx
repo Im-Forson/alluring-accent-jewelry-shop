@@ -41,7 +41,7 @@ const slides = [
     id: 4,
     // title: "Shine With Confidence",
     title: "Elegance in Every Detail",
-    subtitle: "EXCLUSIVE PIECES",
+    subtitle: "EXCLUSIVE PERFECT JEWELRY",
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Designed to elevate your everyday style.",
     description: "Discover stunning jewellery pieces designed to make every moment special.",
@@ -56,7 +56,7 @@ export default function Hero() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
