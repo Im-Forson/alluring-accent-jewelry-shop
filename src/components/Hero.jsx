@@ -5,7 +5,10 @@ import lady3 from '../assets/hero-image-3.png'
 import lady4 from '../assets/hero-image-4.png'
 import collection1 from '../assets/hero-collection.png'
 import collection2 from '../assets/collection-2.png'
+import collection3 from '../assets/collection-1.png'
+import collectiongold from '../assets/collection-gold.png'
 import necklace from '../assets/hero-necklace.png'
+import necklacegold from '../assets/necklace-gold.png'
 import ringHand from '../assets/ring-hand.png'
 
 const slides = [
@@ -25,7 +28,8 @@ const slides = [
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Designed to elevate your everyday style.",
     description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: lady,
+    image: collection3,
+    // image: lady,
   },
   {
     id: 3,
@@ -35,7 +39,8 @@ const slides = [
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Crafted with precision and passion for modern elegance.",
     description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: lady2,
+    image: collection1,
+    // image: lady2,
   },
   {
     id: 4,
@@ -45,7 +50,7 @@ const slides = [
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Designed to elevate your everyday style.",
     description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: collection1,
+    image: collectiongold,
   },
 ];
 

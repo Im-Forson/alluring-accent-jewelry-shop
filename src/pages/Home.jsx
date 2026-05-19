@@ -17,6 +17,10 @@ const categories = [
     {title: 'necklaces', image: flowernecklace},
     {title: 'earrings', image: earring},
     {title: 'bracelets', image: bracelet},
+    {title: 'bracelets', image: bracelet},
+    {title: 'rings', image: ring},
+    {title: 'necklaces', image: flowernecklace},
+    {title: 'earrings', image: earring},
     // {title: 'bracelets', image: necklace},
 ];
 
@@ -28,17 +32,17 @@ export default function HomePage() {
                 <Hero/>
             </section>
             {/* categories */}
-            <section className='px-10 mb-20'>
+            <section className='px-4 mb-20'>
                 <div className="flex justify-between items-center mb-4">
                     <div className="">
-                        <h1 className='text-sm md:text-lg font-bold mb-1'>SHOP BY <span className='text-pink-600'>CATEGORY</span></h1>
+                        <h1 className='text-[11px] md:text-lg font-bold mb-1'>SHOP <span className='text-pink-600'>CATEGORY</span></h1>
                         <p className="hidden md:flex text-[11px]">Explore our most loved pieces</p>
                     </div>
-                    <button className="text-[11px] text-pink-500 md:text-black md:text-sm font-bold uppercase cursor-pointer hover:text-pink-500 active:opacity-25">view all</button>
+                    <button className="text-[10px] text-pink-500 md:text-black md:text-sm font-bold uppercase cursor-pointer hover:text-pink-500 active:opacity-25">view all</button>
                 </div>
                 <div className="flex flex-wrap justify-between">
                     {categories.map((category, index) => (
-                        <div key={index}  className="w-[20%] md:w-[24%] ">
+                        <div key={index}  className="w-[24%] mb-5">
                             <div 
                                 className="group relative h-[70px] md:h-[200px] w-full rounded-full md:rounded-xl bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)] cursor-pointer overflow-hidden active:opacity-25"
                             >
@@ -55,8 +59,8 @@ export default function HomePage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-full flex justify-center md:hidden mt-2">
-                                <h1 className='text-[12px] capitalize font-bold'>{category.title}</h1>
+                            <div className="w-full flex justify-center md:hidden mt-1">
+                                <h1 className='text-[10px] capitalize font-bold'>{category.title}</h1>
                             </div>
                         </div>
                       
