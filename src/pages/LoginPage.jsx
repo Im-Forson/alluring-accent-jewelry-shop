@@ -9,9 +9,9 @@ function LoginPage() {
   return (
     <div className="main-lp bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
 
-      <div className="login-cont sm:max-w-[460px]">
+      <div className="login-cont w-full h-full flex items-center justify-center">
 
-        <div className="login-card w-[300px] md:w-[460px]    ">
+        <div className="login-card w-[380px] md:w-[460px]    ">
 
           <h1 className="login-title">
             Admin Login</h1>
