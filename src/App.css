@@ -116,7 +116,7 @@
 
                                 /* LOGIN PAGE CONTAINER */
 .main-lp{
-  background-image: url(./assets/login-page.png);
+   /* background-image: url('./assets/login_bg.png'); */
   background-size: 100% 100%;
   background-position: center;
   height: 100vh;  
@@ -127,7 +127,6 @@
 
                                          /* LOGIN CONTAINER */
 .login-cont{
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -174,13 +173,13 @@
                                 /* LOGIN CARD */
 
 .login-card{
-   width:460px;
-   background:rgba(255,255,255,0.9);
+   
    padding:35px;
    margin-top: 90px;
    border-radius:16px;
-   border:1px solid #e6d8dc;
+   border:3px solid #000;
    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+
 }
 
 
