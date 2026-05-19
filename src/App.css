@@ -177,7 +177,7 @@
    padding:35px;
    margin-top: 90px;
    border-radius:16px;
-   border:3px solid #111;
+   border:1px solid #111;
    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 
 }
@@ -660,9 +660,8 @@
   background-color: #fff; 
   height: auto;
   color: #000;
-  padding: 10px 40px 10px;
   font-family: 'Poppins', sans-serif;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: -5px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer-container {

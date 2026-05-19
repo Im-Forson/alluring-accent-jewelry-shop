@@ -6,8 +6,9 @@ import logo from '../assets/logo.png'
 export default function Footer() {
     return (
          <footer className="footer">
+            <div class="flex flex-row justify-center items-center gap-1 py-[2px] bg-pink-200 "></div>
         
-          <div className="footer-container">
+          <div className="footer-container" >
         
             {/* BRAND SECTION */}
             <div className="footer-brand">
