@@ -53,14 +53,7 @@ function LoginPage() {
 
           {/* LOGIN BUTTON */}
           <button className="login-btn">Login</button>
-
-
-
-          {/* CHECKBOX */}
-          <div className="checkbox">
-            <input type="checkbox" id="remember" />
-            <label htmlFor="remember">Stay Logged In</label>
-          </div>
+          
 
         </div>
 
