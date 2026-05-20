@@ -28,8 +28,8 @@ const slides = [
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Designed to elevate your everyday style.",
     description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: collection3,
-    // image: lady,
+    // image: collection3,
+    image: lady,
   },
   {
     id: 3,
@@ -39,7 +39,7 @@ const slides = [
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Crafted with precision and passion for modern elegance.",
     description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: collection1,
+    image: collection3,
     // image: lady2,
   },
   {
@@ -50,7 +50,7 @@ const slides = [
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Designed to elevate your everyday style.",
     description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: collectiongold,
+    image: lady2,
   },
 ];
 
@@ -67,7 +67,7 @@ export default function Hero() {
 
   return (
     <section className=" w-full pt-[53px] bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
-      <div className="relative h-[90vh] md:h-[70vh] overflow-hidden">
+      <div className="relative h-[55vh] md:h-[70vh] overflow-hidden">
 
         {/* Slides */}
         {slides.map((slide, index) => (
@@ -84,9 +84,9 @@ export default function Hero() {
                 md:static md:items-start md:text-left md:justify-center w-full md:w-1/2 md:pl-16
               ">
                 <div className="">
-                  <p className="text-2xl md:text-3xl tracking-widest text-pink-600 font-bold mb-5">
+                  <h1 className="text-xl md:text-3xl tracking-widest text-pink-600 font-bold mb-5">
                   {slide.subtitle}
-                </p>
+                </h1>
                 </div>
 
                 {/* <h1 className="text-3xl md:text-5xl font-serif text-black md:text-black leading-tight mb-4">
@@ -98,11 +98,11 @@ export default function Hero() {
                 </p>
 
                 <div className="flex gap-4 justify-center md:justify-start">
-                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-10 md:px-6 py-3 rounded-md font-bold transition active:opacity-25">
+                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 md:px-8 py-3 rounded-md font-bold transition active:scale-95 transition-all">
                     SHOP NOW
                   </button>
 
-                  <button className="hidden md:flex border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition active:opacity-25">
+                  <button className="md:flex border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition active:scale-95 transition-all">
                     EXPLORE COLLECTION
                   </button>
                 </div>
