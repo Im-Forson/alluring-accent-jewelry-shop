@@ -15,7 +15,7 @@ import Footer from '../components/Footer'
 
 
 
-export default function Contact() {
+ function Contact() {
     return (
 
 
@@ -109,3 +109,5 @@ export default function Contact() {
 
     )
 }
+
+export default Contact 
