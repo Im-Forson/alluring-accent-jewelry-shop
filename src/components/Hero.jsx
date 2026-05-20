@@ -72,7 +72,7 @@ export default function Hero() {
 
   return (
     <section className=" w-full pt-[53px] bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
-      <div className="relative h-[95vh] md:h-[70vh] overflow-hidden">
+      <div className="relative h-[90vh] md:h-[70vh] overflow-hidden">
 
         {/* Slides */}
         {slides.map((slide, index) => (
@@ -96,10 +96,10 @@ export default function Hero() {
                   {slide.title}
                 </h1> */}
 
-                <h2 className="text-lg md:text-lg capitalize mb-15 md:mb-8 w-[70%] md:w-[90%] text-[rgba(0,0,0,0.7)] font-medium font-mono">Discover stunning jewellery pieces designed to make every moment special</h2>
+                <h2 className="text-base md:text-lg capitalize mb-15 md:mb-8 w-[70%] md:w-[90%] text-[rgba(0,0,0,0.6)] font-medium font-mono">Discover stunning jewellery pieces designed to make every moment special</h2>
 
                 <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
-                  <button className="md:flex border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition active:scale-95 transition-all">
+                  <button className="md:flex text-[rgba(0,0,0,0.6)] border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition active:scale-95 transition-all">
                     EXPLORE COLLECTION
                   </button>
 
