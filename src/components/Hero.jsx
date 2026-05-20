@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import lady from '../assets/hero-lady.png'
+import heroLady from '../assets/hero-lady-2.png'
 import lady2 from '../assets/hero-image-2.png'
 import lady3 from '../assets/hero-image-3.png'
 import lady4 from '../assets/hero-image-4.png'
 import collection1 from '../assets/hero-collection.png'
 import collection2 from '../assets/collection-2.png'
+import newCollection from '../assets/new-collection.png'
+import newCollection1 from '../assets/new-collection-1.png'
 import collection3 from '../assets/collection-1.png'
 import collectiongold from '../assets/collection-gold.png'
 import necklace from '../assets/hero-necklace.png'
 import necklacegold from '../assets/necklace-gold.png'
-import ringHand from '../assets/ring-hand.png'
+import ring from '../assets/ring-2.png'
+import trippleRing from '../assets/tripple-ring.png'
 
 const slides = [
   {
@@ -17,8 +21,8 @@ const slides = [
     title: "Elegance in Every Detail",
     subtitle: "PURE LUXURY JEWELRY",
     // subtitle: "TIMELESS BEAUTY.",
-    description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: necklace,
+    description: "Discover stunning jewellery pieces designed to make every moment special",
+    image: heroLady,
   },
   {
     id: 2,
@@ -27,9 +31,10 @@ const slides = [
     subtitle: "CLASSIC FINE JEWELRY",
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Designed to elevate your everyday style.",
-    description: "Discover stunning jewellery pieces designed to make every moment special.",
+    description: "Discover stunning jewellery pieces designed to make every moment special",
     // image: collection3,
-    image: lady,
+    image: necklace,
+    // image: lady,
   },
   {
     id: 3,
@@ -38,8 +43,8 @@ const slides = [
     subtitle: "JEWELRY FOR LEADERS",
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Crafted with precision and passion for modern elegance.",
-    description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: collection3,
+    description: "Discover stunning jewellery pieces designed to make every moment special",
+    image: trippleRing,
     // image: lady2,
   },
   {
@@ -49,8 +54,8 @@ const slides = [
     subtitle: "EXCLUSIVE PERFECT JEWELRY",
     // subtitle: "TIMELESS BEAUTY.",
     // description: "Designed to elevate your everyday style.",
-    description: "Discover stunning jewellery pieces designed to make every moment special.",
-    image: lady2,
+    description: "Discover stunning jewellery pieces designed to make every moment special",
+    image: newCollection1,
   },
 ];
 
@@ -67,7 +72,7 @@ export default function Hero() {
 
   return (
     <section className=" w-full pt-[53px] bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
-      <div className="relative h-[55vh] md:h-[70vh] overflow-hidden">
+      <div className="relative h-[95vh] md:h-[70vh] overflow-hidden">
 
         {/* Slides */}
         {slides.map((slide, index) => (
@@ -83,27 +88,23 @@ export default function Hero() {
                 absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20
                 md:static md:items-start md:text-left md:justify-center w-full md:w-1/2 md:pl-16
               ">
-                <div className="">
-                  <h1 className="text-xl md:text-3xl tracking-widest text-pink-600 font-bold mb-5">
+                <h1 className="h-18 text-xl md:text-3xl tracking-widest text-pink-600 font-bold mb-">
                   {slide.subtitle}
                 </h1>
-                </div>
 
                 {/* <h1 className="text-3xl md:text-5xl font-serif text-black md:text-black leading-tight mb-4">
                   {slide.title}
                 </h1> */}
 
-                <p className="md:text-lg capitalize mb-8 w-[70%] md:w-[90%] font-medium">
-                  {slide.description}
-                </p>
+                <h2 className="text-lg md:text-lg capitalize mb-15 md:mb-8 w-[70%] md:w-[90%] text-[rgba(0,0,0,0.7)] font-medium font-mono">Discover stunning jewellery pieces designed to make every moment special</h2>
 
-                <div className="flex gap-4 justify-center md:justify-start">
-                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 md:px-8 py-3 rounded-md font-bold transition active:scale-95 transition-all">
-                    SHOP NOW
-                  </button>
-
+                <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
                   <button className="md:flex border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition active:scale-95 transition-all">
                     EXPLORE COLLECTION
+                  </button>
+
+                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 md:px-8 py-3 rounded-md font-bold transition active:scale-95 transition-all">
+                    SHOP NOW
                   </button>
                 </div>
               </div>
@@ -121,19 +122,6 @@ export default function Hero() {
             </div>
           </div>
         ))}
-
-        {/* DOTS */}
-        {/* <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 z-30">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrent(index)}
-              className={`w-2.5 h-2.5 rounded-full transition ${
-                current === index ? "bg-pink-500" : "bg-gray-300"
-              }`}
-            />
-          ))}
-        </div> */}
       </div>
     </section>
   );
