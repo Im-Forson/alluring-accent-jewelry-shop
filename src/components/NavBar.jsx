@@ -1,7 +1,9 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router" 
-
 import { Sparkles, UserRound, Heart, ShoppingBag, Menu, X, Trash2, Plus, Minus, CheckSquare, Check, CheckSquare2Icon, Square } from "lucide-react"
+
+import ProductPage from "../pages/ProductPage"
+
 import logo from '../assets/logo.png'
 
 const colors= []
@@ -120,6 +122,26 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
     function shopHandler() { navigate('/shop'); closeAllDrawers(); }
     function contactHandler() { navigate('/contact'); closeAllDrawers(); }
     function loginHandler() { navigate('/login'); closeAllDrawers(); }
+    function viewProduct(product) {
+        navigate(
+            '/product', 
+            {
+                state: {
+                    title: product.title, 
+                    description: product.description, 
+                    images: product.images,
+                    price: product.price,
+                    oldPrice: product.oldPrice,
+                    colors: product.colors,
+                    preferedColor: product.preferedColor,
+                    minimumOrder: product.minimumOrder,
+                    purchaseQty: product.purchaseQty,
+                    // price: product.price,
+                    // price: product.price,
+                }
+            }
+        ); 
+    }
 
     // UseMOQ Modification Logic
     const updateUseMOQ = (index) => {
@@ -147,25 +169,35 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
                     <img src={logo} alt="Logo" className="w-24 h-8 md:w-28 md:h-10 object-contain" />
                 </div>
 
-                <div className="hidden md:flex flex-row items-center gap-10">
-                    <div>
-                        <span className={`${activePage === 'home' ? 'text-pink-600' : 'text-black'} font-medium cursor-pointer hover:text-pink-500 transition-colors`} onClick={homeHandler}>Home</span>
-                        <div className={`${activePage === 'home' ? 'bg-pink-600' : 'bg-transparent'} w-full h-[2px] mt-1 transition-all`}></div>
-                    </div>
-                    <div>
-                        <span className={`${activePage === 'shop' ? 'text-pink-600' : 'text-black'} font-medium cursor-pointer hover:text-pink-500 transition-colors`} onClick={shopHandler}>Shop</span>
-                        <div className={`${activePage === 'shop' ? 'bg-pink-600' : 'bg-transparent'} w-full h-[2px] mt-1 transition-all`}></div>
-                    </div>
-                    <div>
-                        <span className={`${activePage === 'contact' ? 'text-pink-600' : 'text-black'} font-medium cursor-pointer hover:text-pink-500 transition-colors`} onClick={contactHandler}>Contact</span>
-                        <div className={`${activePage === 'contact' ? 'bg-pink-600' : 'bg-transparent'} w-full h-[2px] mt-1 transition-all`}></div>
-                    </div>
-                </div>
+                {
+                    activePage === 'product' ? <></> :
+                    <>
+                        <div className="hidden md:flex flex-row items-center gap-10">
+                            <div>
+                                <span className={`${activePage === 'home' ? 'text-pink-600' : 'text-black'} font-medium cursor-pointer hover:text-pink-500 transition-colors`} onClick={homeHandler}>Home</span>
+                                <div className={`${activePage === 'home' ? 'bg-pink-600' : 'bg-transparent'} w-full h-[2px] mt-1 transition-all`}></div>
+                            </div>
+                            <div>
+                                <span className={`${activePage === 'shop' ? 'text-pink-600' : 'text-black'} font-medium cursor-pointer hover:text-pink-500 transition-colors`} onClick={shopHandler}>Shop</span>
+                                <div className={`${activePage === 'shop' ? 'bg-pink-600' : 'bg-transparent'} w-full h-[2px] mt-1 transition-all`}></div>
+                            </div>
+                            <div>
+                                <span className={`${activePage === 'contact' ? 'text-pink-600' : 'text-black'} font-medium cursor-pointer hover:text-pink-500 transition-colors`} onClick={contactHandler}>Contact</span>
+                                <div className={`${activePage === 'contact' ? 'bg-pink-600' : 'bg-transparent'} w-full h-[2px] mt-1 transition-all`}></div>
+                            </div>
+                        </div>
+                    </>
+                }
 
                 <div className="flex flex-row items-center gap-4 md:gap-5">
-                    <button className="hidden md:flex cursor-pointer hover:text-pink-500 transition-colors" onClick={loginHandler}>
-                        <UserRound className="w-5 h-5 text-zinc-700 font-bold"/>
-                    </button>
+                    {
+                        activePage === 'product' ? '' :
+                        <>
+                            <button className="hidden md:flex cursor-pointer hover:text-pink-500 transition-colors" onClick={loginHandler}>
+                                <UserRound className="w-5 h-5 text-zinc-700 font-bold"/>
+                            </button>
+                        </>
+                    }
                     
                     {/* Favorites Activation Button Hook */}
                     <button onClick={() => setIsFavoritesOpen(true)} className="flex flex-row items-center relative cursor-pointer hover:text-pink-500 transition-colors">
@@ -248,7 +280,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
                                             <button onClick={() => moveToCart(item)} className="bg-zinc-900 text-white text-[10px] font-bold px-3 py-1 rounded-md hover:bg-pink-500 transition-colors cursor-pointer active:opacity-25">
                                                 Add To Cart
                                             </button>
-                                            <Link className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></Link>
+                                            <button onClick={() => viewProduct(item)} className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></button>
                                         </div>
                                     </div>
                                 </div>
@@ -359,7 +391,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
                                         
                                         {/* Dynamic Quantity Controller & Price Summation Row */}
                                         <div className="flex items-center justify-between mt-3">
-                                            <Link className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></Link>
+                                            <button onClick={() => viewProduct(item)} className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></button>
                                             <p className="text-xs text-zinc-800 font-bold">₵{(item.price * item.purchaseQty).toLocaleString()}</p>
                                         </div>
                                     </div>

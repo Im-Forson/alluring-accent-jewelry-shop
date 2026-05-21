@@ -32,19 +32,19 @@ const categories = [
 ];
 
 const bestSellers = [
-    {id: '0', title: 'rose gold ring', status: 'new', image: ring, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 6, purchaseQty: 6,  orderQty: 6, isAllowBelowMOQ: false, isUseMOQ: true},
+    {id: '0', title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: ring, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 6, purchaseQty: 6,  orderQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
 
-    {id: '2',title: 'classic hoop earrings', status: '-15%',  image: earring, price: 270.00, oldPrice: 330, isFavorite: false, colors: ['white', 'silver', 'black'], preferedColor: 'white', minimumOrder: 30,  purchaseQty: 30, isAllowBelowMOQ: false, isUseMOQ: true},
+    {id: '2',title: 'classic hoop earrings', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-15%',  image: earring, price: 270.00, oldPrice: 330, isFavorite: false, colors: ['white', 'silver', 'black'], preferedColor: 'white', minimumOrder: 30,  purchaseQty: 30, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
 
-    {id: '1',title: 'heart necklace', status: 'new', image: flowernecklace, price: 380.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 5, purchaseQty: 5, isAllowBelowMOQ: false, isUseMOQ: true},
+    {id: '1',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: flowernecklace, price: 380.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 5, purchaseQty: 5, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
 
-    {id: '3',title: 'tennie bracelet', status: '',  image: bracelet, price: 520.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 12, purchaseQty: 12, isAllowBelowMOQ: false, isUseMOQ: true},
+    {id: '3',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: bracelet, price: 520.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 12, purchaseQty: 12, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
 
-    {id: '4',title: 'rose gold ring', status: 'new',  image: bracelet, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 1, purchaseQty: 1, isAllowBelowMOQ: false, isUseMOQ: true},
+    {id: '4',title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new',  image: bracelet, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 1, purchaseQty: 1, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
 
-    {id: '5',title: 'heart necklace', status: '-5%',  image: ring, price: 380, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'black', minimumOrder: 6, purchaseQty: 6, isAllowBelowMOQ: false, isUseMOQ: true},
+    {id: '5',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-5%',  image: ring, price: 380, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'black', minimumOrder: 6, purchaseQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
 
-    {id: '6',title: 'tennie bracelet', status: '',  image: flowernecklace, price: 270, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 24, purchaseQty: 24, isAllowBelowMOQ: false, isUseMOQ: true},
+    {id: '6',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: flowernecklace, price: 270, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 24, purchaseQty: 24, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
 ];
 
 export default function HomePage() {

@@ -10,7 +10,6 @@ import SignupPage from './pages/SignupPage';
 import ProductPage from './pages/ProductPage';
 
 
-
 const appRouter = createBrowserRouter([
   {path: '/', element: <HomePage/>},
   {path: '/shop', element: <Shop/>},
