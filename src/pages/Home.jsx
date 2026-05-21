@@ -32,13 +32,19 @@ const categories = [
 ];
 
 const bestSellers = [
-    {id: '0', title: 'rose gold ring', status: 'new', image: ring, newPrice: 450, oldPrice: 0, isFavorite: false},
-    {id: '2',title: 'classic hoop earrings', status: '-15%',  image: earring, newPrice: 270.00, oldPrice: 330, isFavorite: false},
-    {id: '1',title: 'heart necklace', status: 'new', image: flowernecklace, newPrice: 380.00, oldPrice: 0, isFavorite: false},
-    {id: '3',title: 'tennie bracelet', status: '',  image: bracelet, newPrice: 520.00, oldPrice: 0, isFavorite: false},
-    {id: '4',title: 'rose gold ring', status: 'new',  image: bracelet, newPrice: 450, oldPrice: 0, isFavorite: false},
-    {id: '5',title: 'heart necklace', status: '-5%',  image: ring, newPrice: 380, oldPrice: 0, isFavorite: false},
-    {id: '6',title: 'tennie bracelet', status: '',  image: flowernecklace, newPrice: 270, oldPrice: 0, isFavorite: false},
+    {id: '0', title: 'rose gold ring', status: 'new', image: ring, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 6, purchaseQty: 6,  orderQty: 6, isAllowBelowMOQ: false, isUseMOQ: true},
+
+    {id: '2',title: 'classic hoop earrings', status: '-15%',  image: earring, price: 270.00, oldPrice: 330, isFavorite: false, colors: ['white', 'silver', 'black'], preferedColor: 'white', minimumOrder: 30,  purchaseQty: 30, isAllowBelowMOQ: false, isUseMOQ: true},
+
+    {id: '1',title: 'heart necklace', status: 'new', image: flowernecklace, price: 380.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 5, purchaseQty: 5, isAllowBelowMOQ: false, isUseMOQ: true},
+
+    {id: '3',title: 'tennie bracelet', status: '',  image: bracelet, price: 520.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 12, purchaseQty: 12, isAllowBelowMOQ: false, isUseMOQ: true},
+
+    {id: '4',title: 'rose gold ring', status: 'new',  image: bracelet, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 1, purchaseQty: 1, isAllowBelowMOQ: false, isUseMOQ: true},
+
+    {id: '5',title: 'heart necklace', status: '-5%',  image: ring, price: 380, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'black', minimumOrder: 6, purchaseQty: 6, isAllowBelowMOQ: false, isUseMOQ: true},
+
+    {id: '6',title: 'tennie bracelet', status: '',  image: flowernecklace, price: 270, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 24, purchaseQty: 24, isAllowBelowMOQ: false, isUseMOQ: true},
 ];
 
 export default function HomePage() {
@@ -48,7 +54,7 @@ export default function HomePage() {
     const [bestSellerFavoriteIndex, setBestSellerFavoriteIndex] = useState();
 
     const [cartCount, setCartCount] = useState(0);
-    const [cartList, setCartList] = useState([]);
+    const [cart, setCart] = useState([]);
 
     const [] = useState(false);
 
@@ -72,6 +78,12 @@ export default function HomePage() {
                 activePage={'home'} 
                 favoriteCount={favoriteCount}
                 cartCount={cartCount}
+                favorites={favorites}
+                setFavorites={setFavorites}
+                cart={cart}
+                setCart={setCart}
+                bestSellers={bestSellersCopy}
+                setBestSellers={setBestSellersCopy}
                 />
                 <Hero/>
             </section>
@@ -122,8 +134,8 @@ export default function HomePage() {
                 setBestSellerFavoriteIndex={setBestSellerFavoriteIndex}
                 cartCount={cartCount}
                 setCartCount={setCartCount}
-                cartList={cartList}
-                setCartList={setCartList}
+                cartList={cart}
+                setCartList={setCart}
             />
             <TrackYourOrder/>
             <WhyShopWithUs/>

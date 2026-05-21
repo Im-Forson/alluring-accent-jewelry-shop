@@ -22,7 +22,7 @@ const slides = [
     subtitle: "PURE LUXURY JEWELRY",
     // subtitle: "TIMELESS BEAUTY.",
     description: "Discover stunning jewellery pieces designed to make every moment special",
-    image: heroLady,
+    image: necklace,
   },
   {
     id: 2,
@@ -33,7 +33,7 @@ const slides = [
     // description: "Designed to elevate your everyday style.",
     description: "Discover stunning jewellery pieces designed to make every moment special",
     // image: collection3,
-    image: necklace,
+    image: heroLady,
     // image: lady,
   },
   {

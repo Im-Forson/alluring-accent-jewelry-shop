@@ -10,20 +10,11 @@ import flowernecklace from '../assets/necklace-flower.png'
 import collection1 from '../assets/hero-collection.png'
 import collection2 from '../assets/collection-2.png'
 
-const bestSellers = [
-    {id: '0', title: 'rose gold ring', status: 'new', image: ring, newPrice: 450, oldPrice: 0, isFavorite: false},
-    {id: '2',title: 'classic hoop earrings', status: '-15%',  image: earring, newPrice: 270.00, oldPrice: 330, isFavorite: false},
-    {id: '1',title: 'heart necklace', status: 'new', image: flowernecklace, newPrice: 380.00, oldPrice: 0, isFavorite: false},
-    {id: '3',title: 'tennie bracelet', status: '',  image: bracelet, newPrice: 520.00, oldPrice: 0, isFavorite: false},
-    {id: '4',title: 'rose gold ring', status: 'new',  image: bracelet, newPrice: 450, oldPrice: 0, isFavorite: false},
-    {id: '5',title: 'heart necklace', status: '-5%',  image: ring, newPrice: 380, oldPrice: 0, isFavorite: false},
-    {id: '6',title: 'tennie bracelet', status: '',  image: flowernecklace, newPrice: 270, oldPrice: 0, isFavorite: false},
-];
 
 export default function BestSellers({favorites, setFavorites, favoriteCount, setFavoriteCount, bestSellersCopy, setBestSellersCopy, bestSellerFavoriteIndex, setBestSellerFavoriteIndex, cartCount, setCartCount, cartList, setCartList}) {
     const [] = useState([]);
     const [] = useState(0);
-    const [] = useState(bestSellers);
+    const [] = useState();
     const [] = useState();
 
     const [] = useState(0);
@@ -78,7 +69,6 @@ export default function BestSellers({favorites, setFavorites, favoriteCount, set
                                 
                                     // toggle favorite
                                     updated[index].isFavorite = !updated[index].isFavorite;
-                                
                                     setBestSellersCopy(updated);
                                 
                                     // update favorites list
@@ -101,8 +91,8 @@ export default function BestSellers({favorites, setFavorites, favoriteCount, set
                         <div className="w-full pt-1 pb-2 md:pb-3 px-2">
                             <h1 className='text-xs md:text-sm text-black capitalize font-bold mb-1'>{item.title}</h1>
                             <div className="flex gap-3 mb-[5px] md:mb-[10px]">
-                                <h1 className={`${item.oldPrice > item.newPrice ? 'flex':'hidden'} text-xs md:text-sm text-[grey] capitalize font-bold line-through`}>Gh₵ {item.oldPrice}</h1>
-                                <h1 className='text-xs md:text-sm capitalize font-bold'>Gh₵ {item.newPrice}</h1>
+                                <h1 className={`${item.oldPrice > item.price ? 'flex':'hidden'} text-xs md:text-sm text-[grey] capitalize font-bold line-through`}>Gh₵ {item.oldPrice}</h1>
+                                <h1 className='text-xs md:text-sm capitalize font-bold'>Gh₵ {item.price}</h1>
                             </div>
                             <button className='text-center text-white font-bold uppercase text-[8px] md:text-[10px] px-5 md:px-10 pt-[7px] pb-[5px] rounded bg-black active:opacity-25 cursor-pointer'
                             
