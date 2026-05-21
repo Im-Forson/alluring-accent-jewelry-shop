@@ -7,6 +7,7 @@ import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ProductPage from './pages/ProductPage';
 
 
 
@@ -16,7 +17,8 @@ const appRouter = createBrowserRouter([
   {path: '/contact', element: <Contact/>},
   {path: '/*', element: <NotFound/>},
   {path: '/login', element: <LoginPage/>},
-  {path: '/signup', element: <SignupPage/>}
+  {path: '/signup', element: <SignupPage/>},
+  {path: '/product', element: <ProductPage/>} 
 
 ])
 

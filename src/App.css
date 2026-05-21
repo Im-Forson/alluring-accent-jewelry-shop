@@ -184,7 +184,9 @@
 }
 
 
-.input-group{
+.lg-input-group label{
+     color:#111;
+     font-size:14px;
     text-align:left;
     margin-bottom:10px;
     font-weight: bold;
@@ -213,7 +215,7 @@
 
 
 
-.input-group label{
+.lg-input-group label{
     display:block;
     margin-bottom:10px;
     font-size:16px;
@@ -230,11 +232,11 @@
     width: 100%;
 } 
 
-.input-box input{
+.lg-input-group .input-box input{
     width:100%;
     height:35px;
     border-radius:12px;
-    border:3px solid #ddb5c1;
+    border:1px solid #ddb5c1;
     outline:none;
     padding:0 12px 0 40px;
     font-size:16px;
@@ -300,20 +302,6 @@
 .login-btn:hover{
     transform:translateY(-2px);
 }
-
-
-
-
-                                /* CHECKBOX */
-
- .checkbox{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 5px;
-   
-
-} 
 
 .login-card input[type="checkbox"] {
   width: auto;
@@ -772,4 +760,326 @@
   .footer-container {
     gap: 30px;
   }
+}    
+
+                  /* PORDUCT PAGE CSS */
+
+        
+/* --- Navigation & Store Banner Utilities --- */
+
+.store-container{
+  padding-top: 40px;
 }
+
+.promo-banner {
+  background-color: #ffdae7;
+  color: #c41e5e;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 5%;
+  border-bottom: 1px solid  #e2e2e2;
+  background: white;
+}
+
+.brand-logo {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.logo-sub {
+  font-size: 0.6rem;
+  letter-spacing: 4px;
+  color: #777777;
+}
+
+.header-icons {
+  display: flex;
+  gap: 18px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.cart-badge {
+  background: #e02b74;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  position: relative;
+  top: -10px;
+  left: -5px;
+}
+
+/* --- Product Detail Layout Split --- */
+.product-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 5%;
+}
+
+
+/* --- Left Side: Media Components --- */
+.main-image-wrapper {
+  position: relative;
+  width: 100%;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.main-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.thumbnail-box {
+  aspect-ratio: 1 / 1;
+  border: 1px solid  #e2e2e2;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #f9f9f9;
+}
+
+.thumbnail-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-box.active-thumb {
+  border: 2px solid #e02b74;
+}
+
+/* --- Right Side: Info Components --- */
+.product-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.product-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e02b74;
+  margin-bottom: 20px;
+}
+
+.product-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #555555;
+  margin-bottom: 30px;
+}
+
+/* --- Interactive Swatch Swaps --- */
+.selector-group {
+  margin-bottom: 25px;
+}
+
+.selector-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.options-grid.text-options {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.option-btn {
+  background: #ffffff;
+  border: 1px solid  #e2e2e2;
+  padding: 12px 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+  border-color: #222222;
+}
+
+.option-btn.selected {
+  border: 2px solid #e02b74;
+  color: #e02b74;
+  font-weight: 600;
+  background-color: #fff8fa;
+}
+
+.quantity-counter {
+  display: inline-flex;
+  border: 1px solid  #e2e2e2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.quantity-counter button {
+  background: #f9f9f9;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.quantity-counter input {
+  width: 50px;
+  border: none;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* --- Action Buttons (CTAs) --- */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 35px;
+}
+
+.btn {
+  width: 100%;
+  padding: 15px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-add-cart {
+  background-color:  #b81d5a;
+  color: white;
+}
+
+.btn-buy-now {
+  background-color: #000000;
+  color: white;
+}
+
+
+/* --- Recommendation Footer Layout --- */
+.recommendations-section {
+  max-width: 1200px;
+  margin: 40px auto 20px auto;
+  padding: 0 5%;
+  border-top: 1px solid #e2e2e2;
+  padding-top: 40px;
+}
+
+.rec-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.rec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+}
+
+.rec-card {
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.rec-image-wrapper {
+  aspect-ratio: 1 / 1;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.rec-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rec-info {
+  padding: 12px 4px;
+}
+
+.rec-info h4 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #222222;
+}
+
+.rec-price {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e02b74;
+}
+
+/* --- Mobile Breakpoints --- */
+@media (max-width: 768px) {
+  .product-layout {
+    grid-template-columns: 1fr;
+    padding: 20px 5%;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 500px) {
+  .rec-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}          

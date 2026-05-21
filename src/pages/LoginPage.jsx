@@ -17,7 +17,7 @@ function LoginPage() {
             Admin Login</h1>
 
           {/* USERNAME OR EMAIL */}
-          <div className="input-group">
+          <div className="lg-input-group">
             <label className='l-ue' htmlFor="Username">USERNAME/EMAIL</label>
 
             <div className="input-box">
@@ -29,7 +29,7 @@ function LoginPage() {
 
 
           {/* PASSWORD */}
-          <div className="input-group">
+          <div className="lg-input-group">
             <label className='l-p' htmlFor="Password">PASSWORD</label>
 
             <div className="input-box">
