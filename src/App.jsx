@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProductPage from './pages/ProductPage';
+import AllProducts from './pages/AllProducts';
 
 
 const appRouter = createBrowserRouter([
@@ -17,7 +18,8 @@ const appRouter = createBrowserRouter([
   {path: '/*', element: <NotFound/>},
   {path: '/login', element: <LoginPage/>},
   {path: '/signup', element: <SignupPage/>},
-  {path: '/product', element: <ProductPage/>} 
+  {path: '/product', element: <ProductPage/>},
+  {path: '/all-products', element: <AllProducts/>}
 
 ])
 
