@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProductPage from './pages/ProductPage';
 
+
 const appRouter = createBrowserRouter([
   {path: '/', element: <HomePage/>},
   {path: '/shop', element: <Shop/>},
@@ -19,6 +20,7 @@ const appRouter = createBrowserRouter([
   {path: '/login', element: <LoginPage/>},
   {path: '/signup', element: <SignupPage/>},
   {path: '/product', element: <ProductPage/>} 
+
 ])
 
 function App() {
