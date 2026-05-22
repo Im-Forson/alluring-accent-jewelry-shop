@@ -86,9 +86,13 @@ export default function Footer() {
                 
                 <div className="relative w-full min-h-[60px]">
                   <div className="flex justify-center items-center absolute md:static right-[20%] bottom-60 ">
-                    <button className="rounded-full shadow-sm animate-pulse hover:animate-none cursor-pointer">
+                    <a className="rounded-full shadow-sm animate-pulse hover:animate-none cursor-pointer"
+                         href={`https://wa.me/+233556981498`}
+                         target="_blank"
+                         rel="noreferrer"
+                    >
                       <FaWhatsapp className="text-5xl md:text-5xl text-[#25D366]" />
-                    </button>
+                    </a>
                   </div>
                 </div>
             </div>

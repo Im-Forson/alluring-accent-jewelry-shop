@@ -3,6 +3,8 @@ import '../App.css'
 import { Settings, MoveRight, Heart, ChevronLeft, ChevronRight, HeartIcon, Phone, Mail, MessageSquare,  } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 
+import { useShop } from '../../utilities/ShopContext'
+
 import NavBar from '../components/NavBar'
 import Hero from '../components/Hero'
 import BestSellers from '../components/BestSellers'
@@ -18,6 +20,7 @@ import necklacesilver from '../assets/silver-necklace.png'
 import flowernecklace from '../assets/necklace-flower.png'
 import collection1 from '../assets/hero-collection.png'
 import collection2 from '../assets/collection-2.png'
+import OrderSuccessModal from '../components/OrderSuccessModal'
 
 const categories = [
     {title: 'rings', image: ring},
@@ -32,22 +35,24 @@ const categories = [
 ];
 
 const bestSellers = [
-    {id: '0', title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: ring, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 6, purchaseQty: 6,  orderQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
+    {id: '0', title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: ring, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 6, purchaseQty: 6,  orderQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 550, purchasingPrice: 450},
 
-    {id: '2',title: 'classic hoop earrings', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-15%',  image: earring, price: 270.00, oldPrice: 330, isFavorite: false, colors: ['white', 'silver', 'black'], preferedColor: 'white', minimumOrder: 30,  purchaseQty: 30, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
+    {id: '2',title: 'classic hoop earrings', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-15%',  image: earring, price: 270.00, oldPrice: 330, isFavorite: false, colors: ['white', 'silver', 'black'], preferedColor: 'white', minimumOrder: 30,  purchaseQty: 30, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 335.00, purchasingPrice: 270},
 
-    {id: '1',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: flowernecklace, price: 380.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 5, purchaseQty: 5, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
+    {id: '1',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: flowernecklace, price: 380.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 5, purchaseQty: 5, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 425, purchasingPrice: 380},
 
-    {id: '3',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: bracelet, price: 520.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 12, purchaseQty: 12, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
+    {id: '3',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: bracelet, price: 520.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 12, purchaseQty: 12, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 585, purchasingPrice: 520},
 
-    {id: '4',title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new',  image: bracelet, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 1, purchaseQty: 1, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
+    {id: '4',title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new',  image: bracelet, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 1, purchaseQty: 1, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 493, purchasingPrice: 450},
 
-    {id: '5',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-5%',  image: ring, price: 380, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'black', minimumOrder: 6, purchaseQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
+    {id: '5',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-5%',  image: ring, price: 380, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'black', minimumOrder: 6, purchaseQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 415, purchasingPrice: 380},
 
-    {id: '6',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: flowernecklace, price: 270, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 24, purchaseQty: 24, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet]},
+    {id: '6',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: flowernecklace, price: 270, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 24, purchaseQty: 24, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 290, purchasingPrice: 270},
 ];
 
 export default function HomePage() {
+    const { loadBestSellers } = useShop();
+
     const [favorites, setFavorites] = useState([]);
     const [favoriteCount, setFavoriteCount] = useState(0);
     const [bestSellersCopy, setBestSellersCopy] = useState(bestSellers);
@@ -57,6 +62,9 @@ export default function HomePage() {
     const [cart, setCart] = useState([]);
 
     const [] = useState(false);
+
+    // Initialize best sellers
+    loadBestSellers(bestSellers);
 
     const scrollContainerRef = useRef(null);
 
@@ -123,20 +131,8 @@ export default function HomePage() {
                     ))}
                 </div>
             </section>
-            <BestSellers
-                favorites={favorites}
-                setFavorites={setFavorites}
-                favoriteCount={favoriteCount}
-                setFavoriteCount={setFavoriteCount}
-                bestSellersCopy={bestSellersCopy}
-                setBestSellersCopy={setBestSellersCopy}
-                bestSellerFavoriteIndex={bestSellerFavoriteIndex}
-                setBestSellerFavoriteIndex={setBestSellerFavoriteIndex}
-                cartCount={cartCount}
-                setCartCount={setCartCount}
-                cartList={cart}
-                setCartList={setCart}
-            />
+            <OrderSuccessModal/>
+            <BestSellers/>
             <TrackYourOrder/>
             <WhyShopWithUs/>
             <Footer/>

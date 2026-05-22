@@ -2,13 +2,15 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router" 
 import { Sparkles, UserRound, Heart, ShoppingBag, Menu, X, Trash2, Plus, Minus, CheckSquare, Check, CheckSquare2Icon, Square } from "lucide-react"
 
+import { useShop } from "../../utilities/ShopContext"
 import ProductPage from "../pages/ProductPage"
 
 import logo from '../assets/logo.png'
 
 const colors= []
 
-export default function NavBar({ activePage, favoriteCount, cartCount, favorites, setFavorites, cart, setCart,bestSellers, setBestSellers }) {
+export default function NavBar({ activePage, favoriteCount, cartCount, setFavorites, bestSellers, setBestSellers }) {
+    const { cart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails } = useShop();
     const navigate = useNavigate();
 
     // Drawer Interface Visibility States
@@ -16,38 +18,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
-    // const [selectedColor, setSelectedColor] =useState(null);
-
-    // Mock Database Arrays for testing state updates reactively
-    // const [favorites, setFavorites] = useState([
-    //     { id: 1, title: "Diamond Halo Ring", price: 4200, image: "https://unsplash.com" },
-    //     { id: 2, title: "Sapphire Drop Earrings", price: 5800, image: "https://unsplash.com" }
-    // ]);
-
-    // const [cart, setCart] = useState([
-    //     { id: 3, title: "Gold Tennis Bracelet", price: 7500, quantity: 1, image: "https://unsplash.com" },
-    //     { id: 4, title: "Pearl Pendant Necklace", price: 3100, quantity: 2, image: "https://unsplash.com" }
-    // ]);
-
-    // Derived values for live dynamic numerical indicator dots
-    // const favoriteCount = favorites.length;
-    // const cartCount = cart.reduce((acc, curr) => acc + curr.quantity, 0);
-    const totalCartCost = cart.reduce((acc, curr) => acc + (curr.price * curr.purchaseQty), 0);
-    // const totalCartCost = 5000;
-
-    // Favorites Mutation Handlers
-    const removeFavorite = (id) => {
-        setFavorites(favorites.filter(item => item.id !== id));
-
-        // Remove favorite in best seller
-        bestSellers.map((item, index) => {
-            if (item.id === id) {
-                const updated = bestSellers;
-                updated[index].isFavorite = false
-                setBestSellers(updated);
-            }
-        });
-    };
+    const totalCartCost = cart.reduce((acc, curr) => acc + (curr.purchasingPrice * curr.purchaseQty), 0);
 
     const moveToCart = (item) => {
         // Remove item from wishlist array
@@ -74,13 +45,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
     // Cart Modification Logic
     const updateQuantity = (id, change) => {
         
-        setCart(cart.map(item => {
-            if (item.id === id) {
-                const newQty = item.purchaseQty + change;
-                return newQty > 0 ? { ...item, purchaseQty: newQty } : item;
-            }
-            return item;
-        }));
+        
     };
 
     const handleInputChange = (id, val) => {
@@ -107,9 +72,9 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
         }));
     };
 
-    const removeCartItem = (id) => {
-        setCart(cart.filter(item => item.id !== id));
-    };
+    const handleInputBlur = (id, val) => {
+
+    }
 
     // Global route state handlers
     function closeAllDrawers() {
@@ -121,26 +86,31 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
     function homeHandler() { navigate('/'); closeAllDrawers(); }
     function shopHandler() { navigate('/shop'); closeAllDrawers(); }
     function contactHandler() { navigate('/contact'); closeAllDrawers(); }
-    function loginHandler() { navigate('/login'); closeAllDrawers(); }
+    function loginHandler() { navigate('/login'); closeAllDrawers(); };
+
     function viewProduct(product) {
-        navigate(
-            '/product', 
-            {
-                state: {
-                    title: product.title, 
-                    description: product.description, 
-                    images: product.images,
-                    price: product.price,
-                    oldPrice: product.oldPrice,
-                    colors: product.colors,
-                    preferedColor: product.preferedColor,
-                    minimumOrder: product.minimumOrder,
-                    purchaseQty: product.purchaseQty,
-                    // price: product.price,
-                    // price: product.price,
-                }
-            }
-        ); 
+        if (activePage === 'product' && product.id === viewingProduct.productId) {
+           return;
+        }
+
+        const details = {
+            productId: product.id,
+            title: product.title, 
+            description: product.description, 
+            images: product.images,
+            price: product.price,
+            oldPrice: product.oldPrice,
+            colors: product.colors,
+            preferedColor: product.preferedColor,
+            minimumOrder: product.minimumOrder,
+            purchaseQty: product.purchaseQty,
+            isUseMOQ: product.isUseMOQ,
+            belowMOQPrice: product.belowMOQPrice,
+            // price: product.price,
+        }
+
+        setViewingProductDetails(details);
+        navigate('/product'); 
     }
 
     // UseMOQ Modification Logic
@@ -266,21 +236,21 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
                             </div>
                         ) : (
                             favorites.map(item => (
-                                <div key={item.id} className="flex gap-3 bg-pink-0 border border-zinc-100 shadow rounded-xl p-3 items-center">
+                                <div key={item.id} className="flex gap-3 bg-pink-50 p-3 items-center">
                                     <img src={item.image} alt={item.title} className="w-16 h-16 rounded-lg object-cover  shrink-0" />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
-                                            <h4 className="text-sm font-bold text-zinc-800 truncate capitalize font-mono">{item.title}</h4>
-                                            <button onClick={() => removeFavorite(item.id)} className="text-[11px] font-medium font-mono font-black text-[maroon] hover:text-red-500 p-0.5 transition-colors hover:text-red-300 transition-colors flex items-center gap-1 cursor-pointer active:text-red-500">
+                                            <h4 className="text-sm font-bold font-sans text-zinc-800 truncate capitalize font-mono mb-1">{item.title}</h4>
+                                            <button onClick={() => removeFavorite(item.id)} className="text-xs font-mono text-[grey] hover:text-[maroon] p-0.5 transition-colors flex items-center gap-1 cursor-pointer active:text-red-500">
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
-                                        <p className="text-sm text-pink-600 font-mono font-bold mt-0.5">Gh₵ {item.price.toLocaleString()}</p>
+                                        <p className="text-sm text-pink-600 font-sans font-bold mt-0.5">Gh₵ {item.price.toLocaleString()}</p>
                                         <div className="flex justify-between gap-5 items-center mt-2">
-                                            <button onClick={() => moveToCart(item)} className="bg-zinc-900 text-white text-[10px] font-bold px-3 py-1 rounded-md hover:bg-pink-500 transition-colors cursor-pointer active:opacity-25">
+                                            <button onClick={() => moveToCart(item)} className="bg-zinc-800 text-white text-[10px] font-bold px-3 py-1 rounded-md hover:bg-pink-500 transition-colors cursor-pointer active:opacity-25">
                                                 Add To Cart
                                             </button>
-                                            <button onClick={() => viewProduct(item)} className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></button>
+                                            {/* <button onClick={() => viewProduct(item)} className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></button> */}
                                         </div>
                                     </div>
                                 </div>
@@ -313,45 +283,51 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
                             </div>
                         ) : (
                             cart.map((item, index) => (
-                                <div key={item.id} className="flex gap-3 border border-zinc-500 shadow rounded-lg p-3 items-center">
+                                <div key={index} className={`flex gap-3  p-3 items-center ${activePage === 'product' && item.id === viewingProduct.productId ? ' bg-pink-0' : ' bg-pink-50'}`}>
                                     <img src={item.image} alt={item.title} className="w-16 h-16 rounded-lg object-cover shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-start">
-                                            <h4 className="text-medium font-bold text-zinc-800 font-mono  pr-2 capitalize mb-1">{item.title}</h4>
-                                            <button onClick={() => removeCartItem(item.id)} className="text-[maroon] hover:text-red-500 p-0.5 transition-colors cursor-pointer">
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                        <div className="flex justify-between items-start mb-1">
+                                            <h5 className="text-sm font-bold text-zinc-800 font-sans truncate pr-2 capitalize mb-">{item.title}</h5>
+                                            <button onClick={() => removeCartItem(item.id)} className="text-[gray] hover:text-[maroon] p-0.5 transition-colors cursor-pointer">
+                                                <Trash2 className="w-3 h-3" />
                                             </button>
                                         </div>
-                                        <p className="text-sm text-pink-400 font-mono font-bold  mb-1">Gh₵ {item.price.toLocaleString()}</p>
+                                        <p className="text-sm text-pink-400  font-bold  mb-2">Gh₵ {item.purchasingPrice.toLocaleString()}</p>
                                         <div className=""></div>
 
                                         {/* Product Colors Display */}
-                                        <div className="flex flex-wrap">
-                                            <p className="text-sm font-mono capitalize mr-2">color:</p>
+                                        <div className="flex flex-wrap mb-2">
+                                            <p className="text-xs font-sans capitalize mr-2">color:</p>
                                             {item.colors.map((color, colorIndex) => (
-                                            <div className={`${item.preferedColor === color ? 'bg-zinc-200':'bg-zinc-50'} mr-2 px-[5px] py-[2px] rounded mb-1`}
+                                            <div key={colorIndex} className={`${item.preferedColor === color ? 'bg-zinc-100':'bg-zinc-0'} mr-2 px-[5px] py-[2px] rounded mb-1 cursor-pointer`}
                                                 onClick={() => {
-                                                    const updated = [...cart];
-                                                    updated[index].preferedColor = color
-                                                    setCart(updated);
+                                                    if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                        return;
+                                                     }
+
+                                                    updateCartItemColor(color, index)
                                                 }}
                                             >
-                                                <p className="text-xs font-mono capitalize ">{color} </p>
+                                                <p className="text-xs font-sans capitalize ">{color} </p>
                                             </div>
                                             ))}
                                         </div>
 
                                         {/* Minimum Order and Purchase Quantity */}
-                                        <div className="flex justify-between">
-                                        {/* Dynamic Quantity Controller & Price Summation Row */}
-                                            <div className="flex items-center justify-between mt-3">
-                                                <div className="flex items-center shadow border border-zinc-500 bg-white rounded-md">
+                                        <div className="">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <p className="text-xs font-sans">Quantity</p>
+                                                <div className="flex items-center shadow borde border-zinc-500 bg-white rounded-md">
                                                     <button onClick={() => {
+                                                        if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                            return;
+                                                         }
+
                                                         let subValue = -1;
 
                                                         if (item.isUseMOQ && item.purchaseQty <= item.minimumOrder) {subValue = 0}
 
-                                                        updateQuantity(item.id, subValue)
+                                                        updateCartItemQty(item.id, subValue)
                                                         
                                                     }} className="p-1 text-zinc-500 hover:bg-gray-50 cursor-pointer">
                                                         <Minus className="w-3 h-3" />
@@ -360,39 +336,49 @@ export default function NavBar({ activePage, favoriteCount, cartCount, favorites
                                                         type="text" 
                                                         inputMode="numeric"
                                                         pattern="[0-9]*"
-                                                        className="w-8 text-center text-xs font-bold text-zinc-700 border-none focus:outline-none bg-transparent" 
+                                                        className="w-8 text-center text-xs font-sans text-zinc-700 border-none focus:outline-none bg-transparent" 
                                                         value={item.purchaseQty} 
                                                         onChange={(e) => handleInputChange(item.id, e.target.value)}
                                                         onBlur={() => handleInputBlur(item.id)}
+                                                        readOnly={activePage === 'product' && item.id === viewingProduct.productId}
                                                     />
-                                                    <button onClick={() => updateQuantity(item.id, 1)} className="p-1 text-zinc-500 hover:bg-gray-50 cursor-pointer">
+                                                    <button onClick={() => {
+                                                        if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                            return;
+                                                         }
+                                                        updateCartItemQty(item.id, 1)
+                                                    }} className="p-1 text-zinc-500 hover:bg-gray-50 cursor-pointer">
                                                         <Plus className="w-3 h-3" />
                                                     </button>
                                                 </div>
                                             </div>
 
                                             <div className="">
-                                                <p className={`${item.isUseMOQ ? '':'line-through'} text-xs font-mono font-bold mb-1`}>minimum order: {item.minimumOrder}</p>
+                                                <p className={`${item.isUseMOQ ? '':'line-through'} text-zinc-500 text-xs font-mono font-bld mb-1`}>minimum order: {item.minimumOrder}</p>
 
-                                                <div className="flex items-center active:opacity-25"
-                                                    onClick={()=>{
-                                                        const updated = [...cart];
-                                    
-                                                        updated[index].isUseMOQ = !updated[index].isUseMOQ;
-                                                        updated[index].purchaseQty = updated[index].minimumOrder;
-                                                        setCart(updated);
+                                                <div 
+                                                    onClick={() => {
+                                                        if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                            return;
+                                                         }
+
+                                                        updateCartItemUseMOQ(index);
                                                     }}
+
+                                                    className={`flex items-center cursor-pointer ${activePage === 'product' && item.id === viewingProduct.productId ? 'active:opacity-100' : 'active:opacity-25'}`}
                                                 >
                                                     {item.isUseMOQ ? <Square className="h-3 ml-[-5px]"/>:<CheckSquare className="h-3 ml-[-5px]"/>}
-                                                    <p className="text-xs font-mono font-bold">order less</p>
+                                                    <p className="text-xs text-zinc-500 font-mono font-old">order less</p>
                                                 </div>
                                             </div>
                                         </div>
                                         
                                         {/* Dynamic Quantity Controller & Price Summation Row */}
                                         <div className="flex items-center justify-between mt-3">
-                                            <button onClick={() => viewProduct(item)} className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></button>
-                                            <p className="text-xs text-zinc-800 font-bold">₵{(item.price * item.purchaseQty).toLocaleString()}</p>
+                                            <button onClick={() => viewProduct(item)} className={`${activePage === 'product' && item.id === viewingProduct.productId ? 'active:opacity-100' : 'active:opacity-25'} px-[5px] py-[3px] bg-zinc-800 rounded-[5px] cursor-pointer`}>
+                                                <p className="text-xs font-bold font-sans text-white">Details</p>
+                                            </button>
+                                            <p className="text-sm text-zinc-800 font-bold">₵{(item.purchasingPrice * item.purchaseQty).toLocaleString()}</p>
                                         </div>
                                     </div>
                                 </div>

@@ -1,57 +1,126 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router';
-import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle } from 'lucide-react';
+import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle, Square, CheckSquare } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
+import { useShop } from '../../utilities/ShopContext';
 import NavBar from '../components/NavBar';
 import WhyShopWithUs from '../components/WhyShopWithUs';
 import Footer from '../components/Footer';
 import { FaWhatsapp } from 'react-icons/fa';
+import BestSellers from '../components/BestSellers';
+import PurchaseOrderSummary from '../components/PurchaseOrderSummary';
 
 export default function ProductPage() {
   const location = useLocation();
+  const { allProducts, cart, addToCart, removeCartItem, viewingProduct, addOrder } = useShop();
   
-  const {  title, description, price, oldPrice, colors, preferedColor, minimumOrder, purchaseQty, images } = location.state || {}
+  const { productId, title, description, price, oldPrice, colors, preferedColor, minimumOrder, purchaseQty, images, isUseMOQ, belowMOQPrice, } = viewingProduct
+    const [isOpenPurchaseOrderSummary, setIsOpenPurchaseOrderSummary] = useState(false);
+    const [selectedColor, setSelectedColor] = useState(preferedColor);
+    const [isUseMOQSelected, setIsUseMOQSelected] = useState(isUseMOQ);
+    const [productPrice, setProductPrice] = useState(isUseMOQ ? price : belowMOQPrice);
 
-    // 1. Core State Handlers
-    const [selectedSize, setSelectedSize] = useState('7');
-    const [selectedMaterial, setSelectedMaterial] = useState('Rose Gold');
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState(purchaseQty);
     
     
     const [activeImg, setActiveImg] = useState(images[0]);
 
     // Quantity modifiers
     const handleIncrement = () => setQuantity(prev => prev + 1);
-    const handleDecrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+    const handleDecrement = () => {
+      if (isUseMOQSelected) {
+        return setQuantity(prev => (prev === minimumOrder ? prev : prev -1))
+      }
+
+      setQuantity(prev => (prev > 1 ? prev - 1 : 1))
+    };
+
+    const handleInputChange = (val) => {
+      // Strip out anything that isn't a numeric digit
+      const numericValue = val.replace(/\D/g, '');
+
+      if (numericValue === '') {
+         return setQuantity('');
+      }
+
+      let parsedQty = parseInt(numericValue, 10);
+
+      setQuantity(parsedQty);
+      // console.log('val:', numericValue)
+    };
+
+    const handleInputBlur = () => {
+        if (quantity === '') {
+          if (isUseMOQSelected) {
+            return setQuantity(minimumOrder);
+          }
+
+          return setQuantity(1);
+        }
+
+        if (isUseMOQSelected && quantity < minimumOrder) {
+          return setQuantity(minimumOrder);
+        }
+    }
+
+    const handleAddToCart = () => {
+      const foundProduct = cart.find((item) => item.id === productId);
+      // console.log("is exist: ",foundProduct)
+
+      if (!foundProduct) {
+        const product = allProducts.find((item) => item.id === productId);
+        toast.success('Added to cart', {duration: 2000});
+        return addToCart(product);
+      }
+
+      removeCartItem(productId);
+      foundProduct.purchasingPrice = productPrice;
+      foundProduct.purchaseQty = quantity;
+      foundProduct.preferedColor = selectedColor;
+      foundProduct.isUseMOQ = isUseMOQSelected;
+      addToCart(foundProduct);
+
+      toast.success('Added to cart', {duration: 2000});
+    }
+
+    const prepareOrder = () => {
+      const order =[ {
+        id: viewingProduct.id,
+        title: viewingProduct.title,
+        price: productPrice,
+        quantity: quantity,
+        totalPrice: quantity * productPrice,
+      }];
+
+      // order.purchasingPrice = productPrice;
+      // order.purchaseQty = quantity;
+      // order.preferedColor = selectedColor;
+      // order.isUseMOQ = isUseMOQSelected;
+
+      addOrder(order);
+      // console.log(order)
+    }
 
     return (
         <div className="">
-          <NavBar 
-            activePage={'product'} 
-            favoriteCount={0}
-            cartCount={0}
-            favorites={[]}
-            setFavorites={[]}
-            cart={[]}
-            setCart={[]}
-            bestSellers={[]}
-            setBestSellers={[]} 
+          <NavBar/>
+          <PurchaseOrderSummary
+            isOpen={isOpenPurchaseOrderSummary}
+            setIsOpen={setIsOpenPurchaseOrderSummary}
           />
 
-          
-          <div className="min-h-screen bg-white text-zinc-800 font-sans pt-25 pb-16">
-              <div className="px-10 mb-10">
-                  <h2 className='text-medium md:text-2xl font-bold'>Product <span className='text-pink-600'>Details</span></h2>
+          <div className="min-h-screen bg-white text-zinc-800 font-sans pt-20 pb-16">
+              <div className="px-8 mb-5">
+                  <h2 className='text-lg md:text-2xl font-bold'>Product <span className='text-pink-600'>Details</span></h2>
                   {/* <h3 className="hidden md:flex text-sm">Explore our most loved pieces</h3> */}
               </div>
               {/* MAIN CORE HERO GRID */}
-              <main className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 mt-4 mb-20">
+              <main className="max-w-6xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 mt-4 mb-20">
                   
                   {/* LEFT ELEMENT: PRODUCT GALLERY VIEWER */}
                   <div className="space-y-4">
-                      {/* Main Focus Frame */}
-
-                      <div className="relative rounded-2xl border-3 overflow-hidden border-zinc-100 flex items-center justify-center aspect-square group ">
+                      <div className="relative rounded-2xl border-3 overflow-hidden border-zinc-300 flex items-center justify-center aspect-square group ">
                           <img 
                               src={activeImg} 
                               alt="Rose Gold Infinity Ring Main Focus" 
@@ -87,7 +156,7 @@ export default function ProductPage() {
                       <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 font-serif capitalize">{title}</h1>
 
                       <div className="text-2xl font-black text-pink-600 tracking-wide font-sans">
-                          GH₵ {price}
+                          GH₵ {productPrice}
                       </div>
 
                       <p className="text-xs md:text-sm text-zinc-500 font-serif leading-relaxed max-w-md">{description}</p>
@@ -98,7 +167,7 @@ export default function ProductPage() {
                               <label className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Size</label>
                               <span className="text-[11px] font-semibold text-zinc-400 hover:text-pink-600 underline cursor-pointer">Size Guide</span>
                           </div> */}
-                          <div className="grid grid-cols-4 gap-2.5 max-w-sm">
+                          {/* <div className="grid grid-cols-4 gap-2.5 max-w-sm">
                               {['6', '7', '8', '9'].map((size) => (
                                   <button
                                       key={size}
@@ -112,73 +181,110 @@ export default function ProductPage() {
                                       {size}
                                   </button>
                               ))}
-                          </div>
+                          </div> */}
                       </div>
 
-                      {/* COMPONENT FILTER B: CORE METALLIC MATERIALS TRACKER */}
+                      {/* PRODUCT COLORS */}
                       <div>
-                          <label className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase block mb-2">Material</label>
+                          <label className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase block mb-2">COLOR</label>
                           <div className="grid grid-cols-3 gap-2.5 max-w-md">
-                              {['Rose Gold', 'White Gold', 'Yellow Gold'].map((mat) => (
+                              {colors.map((color) => (
                                   <button
-                                      key={mat}
-                                      onClick={() => setSelectedMaterial(mat)}
-                                      className={`py-2 px-1 text-xs font-semibold rounded-lg border text-center transition-all truncate cursor-pointer ${
-                                          selectedMaterial === mat 
+                                      key={color}
+                                      onClick={() => setSelectedColor(color)}
+                                      className={`py-2 px-1 text-xs font-semibold rounded-lg border text-center transition-all truncate cursor-pointer capitalize ${
+                                          selectedColor === color 
                                               ? 'border-pink-500 text-pink-600 bg-pink-50/20 ring-1 ring-pink-500 font-bold' 
                                               : 'border-zinc-200 text-zinc-700 hover:border-zinc-400'
                                       }`}
                                   >
-                                      {mat}
+                                      {color}
                                   </button>
                               ))}
                           </div>
                       </div>
 
                       {/* STEPPER COUNTER QUANTITY WIDGET */}
-                      <div>
-                          <label className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase block mb-2">Quantity</label>
-                          <div className="flex items-center border border-zinc-200 rounded-lg w-max bg-[#fafafa]">
-                              <button onClick={handleDecrement} className="p-2 text-zinc-500 hover:bg-zinc-100 transition-colors rounded-l-lg cursor-pointer">
-                                  <Minus className="h-3.5 w-3.5" />
-                              </button>
-                              <input 
-                                  type="text" 
-                                  value={quantity} 
-                                  readOnly
-                                  className="w-10 text-center text-xs font-bold text-zinc-800 bg-transparent focus:outline-none border-none"
-                              />
-                              <button onClick={handleIncrement} className="p-2 text-zinc-500 hover:bg-zinc-100 transition-colors rounded-r-lg cursor-pointer">
-                                  <Plus className="h-3.5 w-3.5" />
-                              </button>
+                      <div className="">
+                          <label className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase block mb-1">Quantity</label>
+                          <div className="flex gap-10 items-center">
+                              <div>
+                                  <div className="flex items-center border border-zinc-200 rounded-lg w-max bg-[#fafafa]">
+                                      <button onClick={handleDecrement} className="p-2 text-zinc-500 hover:bg-zinc-100 transition-colors rounded-l-lg cursor-pointer">
+                                          <Minus className="h-3.5 w-3.5" />
+                                      </button>
+                                      <input 
+                                          type="text" 
+                                          value={quantity} 
+                                          onChange={(e) => handleInputChange(e.target.value)}
+                                          onBlur={() => handleInputBlur()}
+                                          // readOnly
+                                          className="w-10 text-center text-xs font-bold text-zinc-800 bg-transparent focus:outline-none border-none"
+                                      />
+                                      <button onClick={handleIncrement} className="p-2 text-zinc-500 hover:bg-zinc-100 transition-colors rounded-r-lg cursor-pointer">
+                                          <Plus className="h-3.5 w-3.5" />
+                                      </button>
+                                  </div>
+                              </div>
+
+                              <div className="">
+                                  <p className={`${isUseMOQSelected ? '':'line-through '} text-xs text-zinc-400 font-mono font-bold mb-1`}>Minimum Order: {minimumOrder}</p>
+
+                                  <div className="flex items-center active:opacity-25"
+                                      onClick={()=>{
+                                        setIsUseMOQSelected(!isUseMOQSelected);
+                                        setQuantity(minimumOrder);
+                                        setProductPrice(!isUseMOQSelected ? price : belowMOQPrice)
+                                      }}
+                                  >
+                                      {isUseMOQSelected ? <Square className="h-4 ml-[-5px] text-zinc-400"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-400"/>}
+                                      <p className="text-xs text-zinc-400 font-mono font-bold">Order less</p>
+                                  </div>
+                              </div>
                           </div>
+                      </div>
+
+                      {/* PRICE SUMMATION ROW */}
+                      <div className="flex justify-between items-end gap-5 border-t-2 border-zinc-300 pt-2">
+                        <p className="text-[12px] font-serif font-bold text-zinc-600 uppercase">subtotal:</p>
+                        <h1 className="text-2xl font-black text-pink-600 tracking-wide font-sans text-zinc-800">₵ {(productPrice * quantity).toLocaleString()}</h1>
                       </div>
 
                       {/* TARGET TRANSACTION STRATEGIC BUTTON STACK */}
                       <div className="space-y-3 max-w-md mt-2">
                           {/* Add to Cart CTA */}
-                          <button className="w-full flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest active:scale-[0.99] transition-all shadow-sm cursor-pointer">
+                          <button className="w-full flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest active:scale-[0.99] transition-all shadow-sm cursor-pointer"
+                          onClick={handleAddToCart}
+                          >
                               <ShoppingBag className="h-4 w-4" /> Add To Cart
                           </button>
                           
                           {/* Express Direct Checkout */}
-                          <button className="w-full bg-black hover:bg-zinc-900 text-white text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest active:scale-[0.99] transition-all shadow-md cursor-pointer">
-                              Buy Now
+                          <button 
+                            onClick={() => {
+                              prepareOrder();
+                              setIsOpenPurchaseOrderSummary(true);
+                            }}
+                            className="w-full max-w-md bg-black hover:bg-zinc-900 text-white text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest active:scale-[0.99] transition-all shadow-md cursor-pointer text-center"
+                          >
+                            Buy Now
                           </button>
                           
                           {/* Regional WhatsApp Order Funnel Anchor Link */}
                           <a 
-                              href={`https://wa.me{selectedSize},%20Material:%20${selectedMaterial},%20Quantity:%20${quantity}.`}
+                              href={`https://wa.me/+233556981498`}
                               target="_blank"
                               rel="noreferrer"
                               className="w-full flex items-center justify-center gap-2 border border-zinc-600 text-zinc-600 hover:bg-pink-50/50 text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest transition-all cursor-pointer"
                           >
-                              <FaWhatsapp className="h-4 w-4 text-zinc-500 fill-current" /> Order On WhatsApp
+                              <FaWhatsapp className="h-4 w-4 text-zinc-600 fill-current" /> Order On WhatsApp
                           </a>
                       </div>
 
                   </div>
               </main>
+              
+              <BestSellers/>
               <WhyShopWithUs/>
               <Footer/>
           </div>
