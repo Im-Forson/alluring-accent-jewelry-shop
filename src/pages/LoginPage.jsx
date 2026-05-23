@@ -43,14 +43,6 @@ function LoginPage() {
           </div>
 
 
-
-          {/* FORGOT PASSWORD */}
-          <div className="forgot-password">
-            <a href="#">Forgot Password?</a>
-          </div>
-
-
-
           {/* LOGIN BUTTON */}
           <button className="login-btn">Login</button>
           

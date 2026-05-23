@@ -1,0 +1,121 @@
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+  margin-top: 150px;
+
+  /* @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  } */
+}
+
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+:root {
+  --bg-color: #fdf5f7;
+  --sidebar-gradient: linear-gradient(160deg, #f08eb0 0%, #eba3b9 100%);
+  --sidebar-hover: rgba(255, 255, 255, 0.2);
+  --primary-pink: #df446e;
+  --text-dark: #2d3748;
+  --text-light: #718096;
+  --card-bg: #ffffff;
+  --border-color: #f0f0f0;
+}
+
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background-color:  #fdf5f7;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: 260px;
+  background-color: #0D0D0D;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  margin-bottom: 40px;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  margin-right: 10px;
+}
+
+.logo-text h2 { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.logo-text span { font-size: 0.85rem; font-weight: 300; opacity: 0.9; }
+
+.sidebar-nav { flex: 1; display: flex; flex-direction: column; gap:10px;}
+
+.nav-item {
+  text-decoration: none;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+
+.nav-item .icon { margin-right: 15px; font-size: 1.2rem; }
+.nav-item:hover { background: var(--sidebar-hover); }
+.nav-item.active { background: var(--primary-pink); font-weight: 600; }
+
+.sidebar-bottom { padding: 20px 30px; display: flex; flex-direction: column; gap: 15px; }
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.user-info strong { font-size: 0.95rem; }
+.dropdown-icon { font-size: 0.8rem; margin-left: auto; }
+
+.ad-logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.ad-logout-btn:hover { background: var(--primary-pink); border-color: var(--primary-pink); }
+
+
