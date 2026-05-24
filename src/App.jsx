@@ -23,6 +23,7 @@ const appRouter = createBrowserRouter([
   {path: '/', element: <HomePage/>},
   {path: '/shop', element: <Shop/>},
   {path: '/contact', element: <Contact/>},
+  {path: '/bestsellers', element: <AllBestSellers/>},
   {path: '/*', element: <NotFound/>},
   {path: '/login', element: <LoginPage/>},
   {path: '/signup', element: <SignupPage/>},
@@ -46,7 +47,6 @@ function App() {
           position="top-right" 
           reverseOrder={false}
           toastOptions={{
-            // Premium custom default styling matching your luxury jewelry branding palette
             style: {
               background: '#18181b', // Dark zinc-900 look matching your footer
               color: '#ffffff',
@@ -60,7 +60,7 @@ function App() {
             },
             success: {
               iconTheme: {
-                primary: '#db2777', // Signature Luvora pink-600 accent color
+                primary: '#db2777', 
                 secondary: '#ffffff',
               },
             },

@@ -5,7 +5,7 @@ import logo from '../assets/logo.png' // Feel free to drop this in where the tex
 export default function Footer() {
     return (
         <footer className="bg-black text-gray-400 font-sans border-t border-zinc-900 pt-16 pb-8">
-            <div className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8 pb-12 border-b border-zinc-900">
+            <div className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 md:pb-12 border-b border-zinc-900">
                 
                 {/* COLUMN 1: BRAND LOGO & STATEMENT */}
                 <div className="flex flex-col gap-4">
@@ -33,7 +33,7 @@ export default function Footer() {
                 </div>
 
                 {/* COLUMN 2: QUICK NAVIGATION LINKS */}
-                <div>
+                {/* <div>
                     <h3 className="text-xs md:text-sm font-bold text-white uppercase tracking-widest mb-4">
                         Quick Links
                     </h3>
@@ -42,7 +42,7 @@ export default function Footer() {
                         <li><Link href="#" className="hover:text-pink-500 transition-colors">Shop Collections</Link></li>
                         <li><Link to={'/contact'} href="#" className="hover:text-pink-500 transition-colors">Contact Us</Link></li>
                     </ul>
-                </div>
+                </div> */}
 
                 {/* COLUMN 3: CUSTOMER CARE PORTAL */}
                 {/* <div>
@@ -63,9 +63,9 @@ export default function Footer() {
                     </h3>
                     <ul className="space-y-3 text-xs md:text-sm">
                         <li>
-                            <a href="tel:+233200000000" className="flex items-center gap-3 hover:text-pink-500 transition-colors group">
+                            <a href="tel:+233556981498" className="flex items-center gap-3 hover:text-pink-500 transition-colors group">
                                 <FaPhone className="text-zinc-600 group-hover:text-pink-500 transition-colors" />
-                                <span className="font-semibold text-zinc-300">+233 20 000 0000</span>
+                                <span className="font-semibold text-zinc-300">+233 55 698 1498</span>
                             </a>
                         </li>
                         <li>

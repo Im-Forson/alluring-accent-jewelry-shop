@@ -25,8 +25,6 @@ export default function ProductPage() {
     const [activeImg, setActiveImg] = useState();
 
     useEffect(() => {
-      console.log('price', price)
-      console.log('isUseMOQ', isUseMOQ)
       setIsOpenPurchaseOrderSummary(false);
       setSelectedColor(preferedColor);
       setIsUseMOQSelected(isUseMOQ);
@@ -75,16 +73,16 @@ export default function ProductPage() {
     }
 
     const handleAddToCart = () => {
-      const foundProduct = cart.find((item) => item.id === productId);
+      const foundProduct = cart.find((item) => item.id === id);
       // console.log("is exist: ",foundProduct)
 
       if (!foundProduct) {
-        const product = allProducts.find((item) => item.id === productId);
+        const product = allProducts.find((item) => item.id === id);
         toast.success('Added to cart', {duration: 2000});
         return addToCart(product);
       }
 
-      removeCartItem(productId);
+      removeCartItem(id);
       foundProduct.purchasingPrice = productPrice;
       foundProduct.purchaseQty = quantity;
       foundProduct.preferedColor = selectedColor;

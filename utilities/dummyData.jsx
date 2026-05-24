@@ -119,7 +119,7 @@ export const allProductsDummy = [
     },
 
     {
-        id: '10',
+        id: '4',
         name: 'rose gold ring',
         description: 'Elegant rose gold ring with embedded crystals.',
         tag: 'new',
@@ -145,7 +145,7 @@ export const allProductsDummy = [
       },
   
     {
-      id: '4',
+      id: '5',
       name: 'classic hoop earrings',
       description: 'Stylish bracelet with customizable charms.',
       tag: 'Best Seller',
@@ -173,7 +173,7 @@ export const allProductsDummy = [
     },
   
     {
-      id: '5',
+      id: '6',
       name: 'heart necklace',
       description: 'Stylish bracelet with customizable charms.',
       tag: '',
@@ -199,7 +199,7 @@ export const allProductsDummy = [
     },
   
     {
-      id: '6',
+      id: '7',
       name: 'tennie bracelet',
       description: 'Stylish bracelet with customizable charms.',
       tag: '',
@@ -225,7 +225,7 @@ export const allProductsDummy = [
     },
   
     {
-      id: '7',
+      id: '8',
       name: 'silver charm bracelet',
       description: 'Stylish bracelet with customizable charms.',
       tag: 'Best Seller',
@@ -251,7 +251,7 @@ export const allProductsDummy = [
     },
   
     {
-      id: '8',
+      id: '9',
       name: 'heart necklace',
       description: 'Stylish bracelet with customizable charms.',
       tag: 'Best Seller',
@@ -277,7 +277,7 @@ export const allProductsDummy = [
     },
   
     {
-      id: '9',
+      id: '10',
       name: 'tennie bracelet',
       description: 'Stylish bracelet with customizable charms.',
       tag: 'Best Seller',
@@ -303,11 +303,11 @@ export const allProductsDummy = [
     },
 
     {
-        id: '19',
+        id: '11',
         name: 'Pink Tourmaline Cushion Ring',
         description: 'Elegant cushion-cut pink tourmaline ring surrounded by a brilliant diamond halo on a pavé rose gold band.',
         tag: 'NEW',
-        image: "https://unsplash.com",
+        image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=500&q=80",
         category: "Rings",
         collection: "Infinity",
         price: 620,
@@ -329,7 +329,7 @@ export const allProductsDummy = [
       },
 
         {
-          id: '20',
+          id: '12',
           name: 'Emerald Halo Statement Ring',
           description: 'A bold emerald centerpiece framed by shimmering diamonds on a polished gold band.',
           tag: 'Best Seller',
@@ -354,7 +354,7 @@ export const allProductsDummy = [
           purchasingPrice: 780
         },
         {
-          id: '21',
+          id: '13',
           name: 'Diamond Drop Earrings',
           description: 'Elegant drop earrings with brilliant-cut diamonds that sparkle with every movement.',
           tag: 'Best Seller',
@@ -379,7 +379,7 @@ export const allProductsDummy = [
           purchasingPrice: 520
         },
         {
-          id: '22',
+          id: '14',
           name: 'Gold Chain Necklace',
           description: 'Minimalist gold chain necklace designed for everyday luxury and layering.',
           tag: 'NEW',
@@ -404,7 +404,7 @@ export const allProductsDummy = [
           purchasingPrice: 390
         },
         {
-          id: '23',
+          id: '15',
           name: 'Silver Charm Bracelet',
           description: 'Stylish charm bracelet crafted in sterling silver with customizable pendants.',
           tag: 'TRENDING',
@@ -429,7 +429,7 @@ export const allProductsDummy = [
           purchasingPrice: 310
         },
         {
-          id: '24',
+          id: '16',
           name: 'Sapphire Engagement Ring',
           description: 'A luxurious sapphire center stone surrounded by diamonds on a platinum band.',
           tag: 'PREMIUM',
@@ -455,7 +455,88 @@ export const allProductsDummy = [
           belowMOQPrice: 1250,
           purchasingPrice: 1150
         }
-      
-      
-  
+  ];
+
+  export const successfullOrdersDummy = [
+    {
+      orderId: 'abcd1234',
+      recipient: 'Afia Adepa',
+      phone: '0243123456',
+      address: 'Lapaz, Abrantie. Accra',
+      isOrderPlaced: true,
+      isProcessing: true,
+      isOutForDelivery: false,
+      isDelivered: false,
+      products: [
+        {
+          productId: 1,
+          name: 'Silver Charm Bracelet',
+          image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80'
+        },
+      ]
+    },
+    {
+      orderId: 'abcd1234',
+      phone: '02123456789',
+      isOrderPlaced: true,
+      isProcessing: true,
+      isOutForDelivery: false,
+      isDelivered: false,
+      products: [
+        {
+          productId: 1,
+          name: 'Silver Charm Bracelet',
+          image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80'
+        },
+      ]
+    },
+    {
+      orderId: 'abcd4321',
+      recipient: 'Akua Joyce',
+      phone: '02123456789',
+      address: 'Omanjor, Drug Store. Accra',
+      isOrderPlaced: true,
+      isProcessing: true,
+      isOutForDelivery: true,
+      isDelivered: false,
+      products: [
+        {
+          productId: 1,
+          name: 'Gold Chain Necklace',
+          image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80'
+        },
+        {
+          productId: 2,
+          name: 'Sapphire Engagement Ring',
+          image: 'https://images.unsplash.com/photo-1602752250015-52934bc45613?w=500&q=80'
+        },
+        {
+          productId: 3,
+          name: 'Silver Charm Bracelet',
+          image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80'
+        },
+      ]
+    },
+    {
+      orderId: 'abcd2345',
+      recipient: 'Amy Brown',
+      phone: '0551236542',
+      address: 'Tech Junction. Kumasi',
+      isOrderPlaced: true,
+      isProcessing: true,
+      isOutForDelivery: true,
+      isDelivered: true,
+      products: [
+        {
+          productId: 1,
+          name: 'Sapphire Engagement Ring',
+          image: 'https://images.unsplash.com/photo-1602752250015-52934bc45613?w=500&q=80'
+        },
+        {
+          productId: 2,
+          name: 'Silver Charm Bracelet',
+          image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80'
+        },
+      ]
+    },
   ];

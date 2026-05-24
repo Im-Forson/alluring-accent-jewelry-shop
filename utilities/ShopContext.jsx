@@ -12,6 +12,8 @@ export function ShopProvider({ children }) {
 
     const [orders, setOrders] = useState([]);
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
+    const [successfulOrders, setSuccessfulOrders] = useState([]);
+    const [trackingOrder, setTrackingOrder] = useState({});
 
     const [cart, setCart] = useState([]);
     const [favorites, setFavorites] = useState([]);
@@ -139,6 +141,15 @@ export function ShopProvider({ children }) {
         setShopAllCategory(category);
     }
 
+    const loadSuccessfulOrder = (successfulOrder) => {
+        setSuccessfulOrders(successfulOrder);
+    }
+
+    // set tracking or for viewing after validating orderId & phone
+    const loadTrackingOrder = (order) => {
+        setTrackingOrder(order);
+    }
+
     return (
         <ShopContext.Provider 
             value={{
@@ -153,6 +164,11 @@ export function ShopProvider({ children }) {
                 clearOrders,
                 isOrderSuccess,
                 updateIsOrderSuccess,
+                trackingOrder,
+                loadTrackingOrder,
+
+                successfulOrders,
+                loadSuccessfulOrder,
 
                 cart, 
                 addToCart,

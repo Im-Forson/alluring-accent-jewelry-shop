@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router" 
 import { Sparkles, UserRound, Heart, ShoppingBag, Menu, X, Trash2, Plus, Minus, CheckSquare, Check, CheckSquare2Icon, Square } from "lucide-react"
+import toast from "react-hot-toast"
 
 import { useShop } from "../../utilities/ShopContext"
 import ProductPage from "../pages/ProductPage"
@@ -23,6 +24,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
     const moveToCart = (item) => {
         removeFavorite(item.id);
         addToCart(item);
+        toast.success('Added to cart', {duration: 2000});
     };
 
     // Cart Modification Logic

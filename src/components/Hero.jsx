@@ -72,7 +72,7 @@ export default function Hero() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 10000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -109,7 +109,7 @@ export default function Hero() {
                     EXPLORE COLLECTION
                   </button> */}
 
-                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 md:px-8 py-3 rounded-md font-bold transition active:scale-95 transition-all"
+                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 md:px-12 py-3 rounded-md font-bold transition active:scale-95 transition-all"
                   onClick={() => {
                     loadShopCategory('All Jewellery')
                     navigate('/shop');

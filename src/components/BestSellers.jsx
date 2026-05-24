@@ -48,7 +48,7 @@ export default function BestSellers() {
     }
 
     return (
-        <section className='px-4 md:px-10 mb-5 md:mb-10'>
+        <section className='px-4 md:px-10 mb-15 md:mb-20'>
             <div className="flex justify-between items-center mb-">
                 <div className="">
                 <h2 className='text-medium md:text-2xl font-bold'>Best <span className='text-pink-600'>Sellers</span></h2>
@@ -66,7 +66,7 @@ export default function BestSellers() {
 
             <div className="relative w-full">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {bestSellers.map((product, index) => (
+                    {(bestSellers.slice(0, 8)).map((product, index) => (
                     <div
                         key={product.id}
                         className="rounded-xl shadow-sm overflow-hidden
@@ -127,7 +127,7 @@ export default function BestSellers() {
                         {/* VIEW PRODUCT */}
                         <button
                         className="w-full text-xs md-text-sm py-[5px] font-bold border-t border-zinc-200 text-zinc-400 active:bg-zinc-600 active:text-white"
-                        onClick={() => viewProduct(product, 'best-sellers')}
+                        onClick={() => viewProduct(product, 'bestsellers')}
                         >
                         View
                         </button>

@@ -11,7 +11,9 @@ import BestSellers from '../components/BestSellers'
 import WhyShopWithUs from '../components/WhyShopWithUs'
 import TrackYourOrder from '../components/TrackYourOrder'
 import Footer from '../components/Footer'
-import { allProductsDummy } from '../../utilities/dummyData'
+import OrderProgress from '../components/OrderProgress'
+import OrderNotFound from '../components/OrderNotFound'
+import { allProductsDummy, successfullOrdersDummy } from '../../utilities/dummyData'
 
 import ring from '../assets/ring-2.png'
 import earring from '../assets/earring.png'
@@ -33,7 +35,7 @@ const categories = [
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, loadShopCategory, } = useShop();
+    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, loadShopCategory, loadSuccessfulOrder } = useShop();
 
     const [favorites, setFavorites] = useState([]);
     const [favoriteCount, setFavoriteCount] = useState(0);
@@ -47,12 +49,12 @@ export default function HomePage() {
 
     // Initialize all products
     loadAllProducts(allProductsDummy);
-    // Initialize best sellers
-    // loadBestSellers(bestSellers);
 
     useEffect(() => {
         const bestSellers = allProductsDummy.filter(product => product.tag === 'Best Seller');
         loadBestSellers(bestSellers);
+        loadSuccessfulOrder(successfullOrdersDummy);
+
     }, [])
 
     const scrollContainerRef = useRef(null);
@@ -67,6 +69,7 @@ export default function HomePage() {
         });
         }
     };
+
 
     return (
         <div>
@@ -130,11 +133,11 @@ export default function HomePage() {
                     ))}
                 </div>
             </section>
-            <OrderSuccessModal/>
             <BestSellers/>
-            <div className="mb-15"></div>
+            {/* <div className="mb-15"></div> */}
             <TrackYourOrder/>
             <WhyShopWithUs/>
+            <OrderSuccessModal/>
             <Footer/>
             
         </div>

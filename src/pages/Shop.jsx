@@ -219,20 +219,21 @@ export default function Shop() {
                 </div>
             </section>
 
-            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px- p-8">
-                <div className="w-full bg-pink-50 border border-stone-200/60 shadow-sm p-6 rounded-lg md:rounded-">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-6 sm:pb-8 md:pt-8 md:pb-10 ">
+                <div className="w-full bg-pink-50 border border-stone-200/60 shadow-sm p-2 sm:p-6 rounded-lg">
+                    {/* ✅ GRID DEFINED AS 2 COLUMNS ON MOBILE, 5 COLUMNS ON DESKTOP */}
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-4 items-end">
                     
                     {/* Category Filter */}
-                    <div className="flex flex-col space-y-1.5 px-2">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                    <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
+                        <label className="text-[9px] md:text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans pl-1">
                         Category
                         </label>
                         <div className="relative">
                         <select 
                             value={selectedCategory} 
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 font-sans transition-all cursor-pointer appearance-none"
+                            className="w-full h-9 sm:h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-3 py-1 text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 font-sans transition-all cursor-pointer appearance-none"
                         >
                             <option>All Jewellery</option>
                             <option>Rings</option>
@@ -241,21 +242,21 @@ export default function Shop() {
                             <option>Bracelets</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                         </div>
                     </div>
 
                     {/* Color Filter */}
-                    <div className="flex flex-col space-y-1.5 px-2">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                    <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
+                        <label className="text-[9px] md:text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans pl-1">
                         Color
                         </label>
                         <div className="relative">
                         <select 
                             value={selectedColor} 
                             onChange={(e) => setSelectedColor(e.target.value)}
-                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
+                            className="w-full h-9 sm:h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-3 py-1 text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
                         >
                             <option>All Colors</option>
                             <option>Rose Gold</option>
@@ -263,21 +264,21 @@ export default function Shop() {
                             <option>Yellow Gold</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                         </div>
                     </div>
 
                     {/* Price Filter */}
-                    <div className="flex flex-col space-y-1.5 px-2">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                    <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
+                        <label className="text-[9px] md:text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans pl-1">
                         Price
                         </label>
                         <div className="relative">
                         <select 
                             value={selectedPrice} 
                             onChange={(e) => setSelectedPrice(e.target.value)}
-                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
+                            className="w-full h-9 sm:h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-3 py-1 text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
                         >
                             <option>All Prices</option>
                             <option>Under GHC 300</option>
@@ -285,21 +286,21 @@ export default function Shop() {
                             <option>Over GHC 500</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                         </div>
                     </div>
 
-                    {/* collection Filter */}
-                    <div className="flex flex-col space-y-1.5 px-2">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                    {/* Collection Filter */}
+                    <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
+                        <label className="text-[9px] md:text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans pl-1">
                         Collection
                         </label>
                         <div className="relative">
                         <select 
                             value={selectedCollection} 
                             onChange={(e) => setSelectedCollection(e.target.value)}
-                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
+                            className="w-full h-9 sm:h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-3 py-1 text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
                         >
                             <option>All Collections</option>
                             <option>Classic</option>
@@ -308,18 +309,19 @@ export default function Shop() {
                             <option>Royal</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                         </div>
                     </div>
 
                     {/* Filter Button */}
-                    <div className="px-2">
-                        <button className="w-full h-11 bg-pink-600 hover:bg-pink-700 active:scale-[0.98] flex items-center justify-center gap-2 rounded-xl md:rounded-full shadow-sm hover:shadow transition-all duration-200 group cursor-pointer"
+                    {/* ✅ SPANS ACROSS BOTH COLUMNS ON MOBILE, RESETS TO 1 COLUMN ON DESKTOP */}
+                    <div className="col-span-2 sm:col-span-1">
+                        <button className="w-full h-9 sm:h-11 bg-pink-600 hover:bg-pink-700 active:scale-[0.98] flex items-center justify-center gap-2 rounded-xl sm:rounded-xl md:rounded-full shadow-sm hover:shadow transition-all duration-200 group cursor-pointer"
                         onClick={filterProducts}
                         >
                         <ListFilter className="w-4 h-4 text-white transition-transform group-hover:scale-110" />
-                        <span className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                        <span className="text-[10px] md:text-xs font-bold text-white uppercase tracking-wider font-sans">
                             Apply Filter
                         </span>
                         </button>
@@ -328,6 +330,7 @@ export default function Shop() {
                     </div>
                 </div>
             </section>
+
 
             
             {/* Display Product */}
