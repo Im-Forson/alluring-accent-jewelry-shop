@@ -101,8 +101,8 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
         <div className="fixed top-0 left-0 w-full bg-white shadow z-50 font-sans">
             {/* ANNOUNCEMENT BAR */}
             <div className="flex flex-row justify-center items-center gap-1 py-[2px] bg-pink-200 text-[10px] md:text-xs font-semibold tracking-wider text-pink-800 uppercase">
-                {/* <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" /> */}
-                {/* <span>Enjoy free insured shipping on premium lines</span> */}
+                <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
+                <span>Enjoy free insured shipping on premium lines</span>
             </div>
             
             {/* MAIN DESKTOP NAVIGATION BAR */}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useLocation } from 'react-router'
 import { Settings, MoveRight, Heart, ChevronLeft, ChevronRight, HeartIcon, Phone, Mail, MessageSquare,  } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 
@@ -35,6 +35,8 @@ const categories = [
 
 export default function HomePage() {
     const navigate = useNavigate();
+    const { pathname } = useLocation();
+
     const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, loadShopCategory, loadSuccessfulOrder } = useShop();
 
     const [favorites, setFavorites] = useState([]);
@@ -49,6 +51,10 @@ export default function HomePage() {
 
     // Initialize all products
     loadAllProducts(allProductsDummy);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+      }, [pathname]); 
 
     useEffect(() => {
         const bestSellers = allProductsDummy.filter(product => product.tag === 'Best Seller');

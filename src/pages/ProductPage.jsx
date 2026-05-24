@@ -13,6 +13,7 @@ import PurchaseOrderSummary from '../components/PurchaseOrderSummary';
 
 export default function ProductPage() {
   const { allProducts, cart, addToCart, removeCartItem, viewingProduct, addOrder } = useShop();
+  const { pathname } = useLocation();
   const location = useLocation();
   const navigationSource = (location.state).source;
   
@@ -23,6 +24,10 @@ export default function ProductPage() {
     const [productPrice, setProductPrice] = useState();
     const [quantity, setQuantity] = useState();
     const [activeImg, setActiveImg] = useState();
+
+    useEffect(() => {
+      window.scrollTo(0, 0);
+    }, [pathname]); 
 
     useEffect(() => {
       setIsOpenPurchaseOrderSummary(false);

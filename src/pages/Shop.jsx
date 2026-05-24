@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, } from 'react'
 import { Filter, Heart, ListFilter, Settings } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useLocation } from 'react-router'
 
 import { useShop } from '../../utilities/ShopContext'
 import { allProductsDummy } from '../../utilities/dummyData'
@@ -19,30 +19,6 @@ import flowernecklace from '../assets/necklace-flower.png'
 import collection1 from '../assets/hero-collection.png'
 import collection2 from '../assets/collection-2.png'
 
-// Mock product data matching the UI exactly
-// const productsData = [
-//   { id: 1, name: "Rose Gold Infinity Ring", price: 450, rating: 5, reviews: 126, image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&q=80", tag: "BEST SELLER", category: "Rings", collection: "Infinity" },
-//   { id: 2, name: "Dainty Heart Necklace", price: 380, rating: 4.5, reviews: 98, image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80", tag: "NEW", category: "Necklaces", collection: "Romance" },
-//   { id: 3, name: "Classic Hoop Earrings", price: 270, originalPrice: 320, rating: 5, reviews: 74, image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&q=80", tag: "-15%", category: "Earrings", collection: "Classics" },
-//   { id: 8, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&q=80", tag: null, category: "Bracelets", collection: "Luxury" },
-//   { id: 4, name: "Tennis Bracelet", price: 520, rating: 4.5, reviews: 113, image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80", tag: "POPULAR", category: "Bracelets", collection: "Classics" },
-//   { id: 5, name: "Luxury Pearl Earrings", price: 410, rating: 5, reviews: 67, image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80", tag: "NEW", category: "Earrings", collection: "Pearls" },
-//   { id: 6, name: "Elegant Gold Necklace", price: 610, rating: 4.5, reviews: 89, image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80", tag: "HOT", category: "Necklaces", collection: "Classics" },
-//   { id: 7, name: "Golden Knot Ring", price: 420, rating: 5, reviews: 55, image: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500&q=80", tag: null, category: "Rings", collection: "Knot" },
-  
-//   { id: 9, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&q=80", tag: null, category: "Bracelets", collection: "Luxury" },
-//   { id: 1, name: "Rose Gold Infinity Ring", price: 450, rating: 5, reviews: 126, image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&q=80", tag: "BEST SELLER", category: "Rings", collection: "Infinity" },
-//   { id: 2, name: "Dainty Heart Necklace", price: 380, rating: 4.5, reviews: 98, image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80", tag: "NEW", category: "Necklaces", collection: "Romance" },
-//   { id: 3, name: "Classic Hoop Earrings", price: 270, originalPrice: 320, rating: 5, reviews: 74, image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&q=80", tag: "-15%", category: "Earrings", collection: "Classics" },
-//   { id: 8, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&q=80", tag: null, category: "Bracelets", collection: "Luxury" },
-//   { id: 4, name: "Tennis Bracelet", price: 520, rating: 4.5, reviews: 113, image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80", tag: "POPULAR", category: "Bracelets", collection: "Classics" },
-//   { id: 5, name: "Luxury Pearl Earrings", price: 410, rating: 5, reviews: 67, image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80", tag: "NEW", category: "Earrings", collection: "Pearls" },
-//   { id: 6, name: "Elegant Gold Necklace", price: 610, rating: 4.5, reviews: 89, image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80", tag: "HOT", category: "Necklaces", collection: "Classics" },
-//   { id: 7, name: "Golden Knot Ring", price: 420, rating: 5, reviews: 55, image: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500&q=80", tag: null, category: "Rings", collection: "Knot" },
-  
-//   { id: 9, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: collection2, tag: null, category: "Bracelets", collection: "Luxury" }
-// ];
-
 import { ArrowUp } from "lucide-react";
 import Footer from '../components/Footer'
 import WhyShopWithUs from '../components/WhyShopWithUs'
@@ -52,6 +28,7 @@ import WhyShopWithUs from '../components/WhyShopWithUs'
 export default function Shop() {
     const { allProducts, loadAllProducts, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice } = useShop();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
 
     const ITEMS_PER_LOAD = 4;
     const [productsData, setProductData] = useState(allProducts);
@@ -59,6 +36,10 @@ export default function Shop() {
     const [showTopBtn, setShowTopBtn] = useState(false);
 
     const loaderRef = useRef(null);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+      }, [pathname]); 
 
     useEffect(() => {
         if (allProducts.length <= 0) {
@@ -193,13 +174,13 @@ export default function Shop() {
         <div>
             <NavBar activePage={'shop'}/>
             {/* Banner */}
-            <section className=" w-full h-[50vh] pt-[60px] bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
+            <section className=" w-full h-[35vh] md:h-[50vh] pt-[60px] bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
                 <div className="relative h-full  overflow-hidden">
                     <div className="absolute inset-0 transition-opacity duration-1000 ease-in-out">
                         <div className="relative w-full h-full md:flex">
                             {/* TEXT */}
                             <div className="
-                                absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20
+                                absolute inset-0 flex flex-col items-center justify-center text-center pt-1 px-6 z-20
                                 md:static md:items-start md:text-left md:justify-center w-full md:w-1/2 md:pl-16
                             ">
                                 <h1 className=" text-sm md:text-lg font-sans uppercase tracking-widest text-pink-600 font-bold mb-1">

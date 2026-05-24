@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, } from 'react'
 import { Filter, Heart, ListFilter, Settings } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useLocation } from 'react-router'
 
 import { useShop } from '../../utilities/ShopContext'
 import { allProductsDummy } from '../../utilities/dummyData'
@@ -28,6 +28,7 @@ import WhyShopWithUs from '../components/WhyShopWithUs'
 export default function AllBestSellers() {
     const { allProducts, loadAllProducts, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, bestSellers } = useShop();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
 
     const ITEMS_PER_LOAD = 4;
     const [productsData, setProductData] = useState(allProducts);
@@ -35,6 +36,10 @@ export default function AllBestSellers() {
     const [showTopBtn, setShowTopBtn] = useState(false);
 
     const loaderRef = useRef(null);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+      }, [pathname]); 
 
     useEffect(() => {
         if (allProducts.length <= 0) {
