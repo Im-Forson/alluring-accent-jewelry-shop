@@ -64,7 +64,7 @@ export default function WhyShopWithUs() {
   }, [isPaused, currentSlide]); 
 
   return (
-    <section className="mb-10">
+    <section className="mb-20">
         <div className="">
             <div className="max-w-xl mx-auto text-center ">
                 

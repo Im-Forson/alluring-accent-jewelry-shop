@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { useShop } from "../../utilities/ShopContext";
+
 import lady from '../assets/hero-lady.png'
 import heroLady from '../assets/hero-lady-2.png'
 import lady2 from '../assets/hero-image-2.png'
@@ -60,6 +63,9 @@ const slides = [
 ];
 
 export default function Hero() {
+  const { loadShopCategory } = useShop();
+  const navigate = useNavigate();
+
   const [current, setCurrent] = useState(0);
 
   // Auto slide
@@ -99,11 +105,16 @@ export default function Hero() {
                 <h2 className="text-base md:text-lg capitalize mb-15 md:mb-8 w-[70%] md:w-[90%] text-[rgba(0,0,0,0.6)] font-medium font-mono">Discover stunning jewellery pieces designed to make every moment special</h2>
 
                 <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
-                  <button className="md:flex text-[rgba(0,0,0,0.6)] border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition active:scale-95 transition-all">
+                  {/* <button className="md:flex text-[rgba(0,0,0,0.6)] border border-[rgba(0,0,0,0.2)] px-6 py-3 rounded-md hover:bg-gray-100 transition active:scale-95 transition-all">
                     EXPLORE COLLECTION
-                  </button>
+                  </button> */}
 
-                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 md:px-8 py-3 rounded-md font-bold transition active:scale-95 transition-all">
+                  <button className="bg-pink-500 hover:bg-pink-600 text-white px-6 md:px-8 py-3 rounded-md font-bold transition active:scale-95 transition-all"
+                  onClick={() => {
+                    loadShopCategory('All Jewellery')
+                    navigate('/shop');
+                  }}
+                  >
                     SHOP NOW
                   </button>
                 </div>

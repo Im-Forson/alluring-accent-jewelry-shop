@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle, Square, CheckSquare } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -12,19 +12,29 @@ import BestSellers from '../components/BestSellers';
 import PurchaseOrderSummary from '../components/PurchaseOrderSummary';
 
 export default function ProductPage() {
-  const location = useLocation();
   const { allProducts, cart, addToCart, removeCartItem, viewingProduct, addOrder } = useShop();
+  const location = useLocation();
+  const navigationSource = (location.state).source;
   
-  const { productId, title, description, price, oldPrice, colors, preferedColor, minimumOrder, purchaseQty, images, isUseMOQ, belowMOQPrice, } = viewingProduct
+  const { id, name, description, price, oldPrice, colors, preferedColor, minimumOrder, purchaseQty, images, isUseMOQ, belowMOQPrice, } = viewingProduct
     const [isOpenPurchaseOrderSummary, setIsOpenPurchaseOrderSummary] = useState(false);
-    const [selectedColor, setSelectedColor] = useState(preferedColor);
-    const [isUseMOQSelected, setIsUseMOQSelected] = useState(isUseMOQ);
-    const [productPrice, setProductPrice] = useState(isUseMOQ ? price : belowMOQPrice);
+    const [selectedColor, setSelectedColor] = useState();
+    const [isUseMOQSelected, setIsUseMOQSelected] = useState();
+    const [productPrice, setProductPrice] = useState();
+    const [quantity, setQuantity] = useState();
+    const [activeImg, setActiveImg] = useState();
 
-    const [quantity, setQuantity] = useState(purchaseQty);
-    
-    
-    const [activeImg, setActiveImg] = useState(images[0]);
+    useEffect(() => {
+      console.log('price', price)
+      console.log('isUseMOQ', isUseMOQ)
+      setIsOpenPurchaseOrderSummary(false);
+      setSelectedColor(preferedColor);
+      setIsUseMOQSelected(isUseMOQ);
+      setProductPrice(isUseMOQ ? price : belowMOQPrice);
+      setQuantity(purchaseQty);
+      setActiveImg(images[0]);
+
+    }, [viewingProduct])
 
     // Quantity modifiers
     const handleIncrement = () => setQuantity(prev => prev + 1);
@@ -93,18 +103,12 @@ export default function ProductPage() {
         totalPrice: quantity * productPrice,
       }];
 
-      // order.purchasingPrice = productPrice;
-      // order.purchaseQty = quantity;
-      // order.preferedColor = selectedColor;
-      // order.isUseMOQ = isUseMOQSelected;
-
       addOrder(order);
-      // console.log(order)
     }
 
     return (
         <div className="">
-          <NavBar/>
+          <NavBar activePage={'product'}/>
           <PurchaseOrderSummary
             isOpen={isOpenPurchaseOrderSummary}
             setIsOpen={setIsOpenPurchaseOrderSummary}
@@ -112,7 +116,6 @@ export default function ProductPage() {
 
           <div className="min-h-screen bg-white text-zinc-800 font-sans pt-20 pb-16">
               <div className="px-8 mb-5">
-                  <h2 className='text-lg md:text-2xl font-bold'>Product <span className='text-pink-600'>Details</span></h2>
                   {/* <h3 className="hidden md:flex text-sm">Explore our most loved pieces</h3> */}
               </div>
               {/* MAIN CORE HERO GRID */}
@@ -153,13 +156,12 @@ export default function ProductPage() {
 
                   {/* RIGHT ELEMENT: INLINE INFORMATION PURCHASE BOX */}
                   <div className="flex flex-col gap-6">
-                      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 font-serif capitalize">{title}</h1>
-
+                      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 font-serif capitalize">{name}</h1>
                       <div className="text-2xl font-black text-pink-600 tracking-wide font-sans">
                           GH₵ {productPrice}
                       </div>
 
-                      <p className="text-xs md:text-sm text-zinc-500 font-serif leading-relaxed max-w-md">{description}</p>
+                      <p className="text-sm md:text-sm text-zinc-500 font-serif leading-relaxed max-w-md">{description}</p>
 
                       {/* COMPONENT FILTER A: ATOMIZED SIZES TRACKER */}
                       <div>
@@ -253,11 +255,15 @@ export default function ProductPage() {
                       {/* TARGET TRANSACTION STRATEGIC BUTTON STACK */}
                       <div className="space-y-3 max-w-md mt-2">
                           {/* Add to Cart CTA */}
-                          <button className="w-full flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest active:scale-[0.99] transition-all shadow-sm cursor-pointer"
-                          onClick={handleAddToCart}
-                          >
-                              <ShoppingBag className="h-4 w-4" /> Add To Cart
-                          </button>
+                          {
+                            navigationSource !== 'cart' && (
+                              <button className="w-full flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest active:scale-[0.99] transition-all shadow-sm cursor-pointer"
+                              onClick={handleAddToCart}
+                              >
+                                  <ShoppingBag className="h-4 w-4" /> Add To Cart
+                              </button>
+                            )
+                          }
                           
                           {/* Express Direct Checkout */}
                           <button 

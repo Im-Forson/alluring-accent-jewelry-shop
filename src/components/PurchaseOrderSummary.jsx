@@ -56,11 +56,10 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       totalPaid: totalCost
     };
     
-    // alert(`Thank you ${formData.fullName}! Your purchase order has been logged. Our dispatch desk will reach out via ${formData.phoneNumber} shortly.`);
     handleRemoveOrdersFromCart();
     setIsOpen(false);
     updateIsOrderSuccess(true); // show upon transaction onsuccess
-    navigate('/');
+    navigate(-1);
   };
 
   const handleRemoveOrdersFromCart = (e) => {
@@ -234,11 +233,6 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   >
                     Place Purchase Order
                   </button>
-
-                  <div className="flex items-center justify-center gap-1 text-[9px] text-zinc-400 font-semibold tracking-wide pt-3">
-                    <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
-                    <span>Luvora Verified Courier Dispatch Fulfillment</span>
-                  </div>
                 </div>
 
               </div>

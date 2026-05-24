@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import '../App.css'
+import { useNavigate } from 'react-router'
 import { Settings, MoveRight, Heart, ChevronLeft, ChevronRight, HeartIcon, Phone, Mail, MessageSquare,  } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 
@@ -11,6 +11,7 @@ import BestSellers from '../components/BestSellers'
 import WhyShopWithUs from '../components/WhyShopWithUs'
 import TrackYourOrder from '../components/TrackYourOrder'
 import Footer from '../components/Footer'
+import { allProductsDummy } from '../../utilities/dummyData'
 
 import ring from '../assets/ring-2.png'
 import earring from '../assets/earring.png'
@@ -23,39 +24,20 @@ import collection2 from '../assets/collection-2.png'
 import OrderSuccessModal from '../components/OrderSuccessModal'
 
 const categories = [
-    {title: 'rings', image: ring},
-    {title: 'necklaces', image: flowernecklace},
-    {title: 'earrings', image: earring},
-    {title: 'bracelets', image: bracelet},
-    {title: 'bracelets', image: bracelet},
-    {title: 'rings', image: ring},
-    {title: 'necklaces', image: flowernecklace},
-    {title: 'earrings', image: earring},
+    {title: 'Rings', image: ring},
+    {title: 'Necklaces', image: flowernecklace},
+    {title: 'Earrings', image: earring},
+    {title: 'Bracelets', image: bracelet},
     // {title: 'bracelets', image: necklace},
 ];
 
-const bestSellers = [
-    {id: '0', title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: ring, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 6, purchaseQty: 6,  orderQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 550, purchasingPrice: 450},
-
-    {id: '2',title: 'classic hoop earrings', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-15%',  image: earring, price: 270.00, oldPrice: 330, isFavorite: false, colors: ['white', 'silver', 'black'], preferedColor: 'white', minimumOrder: 30,  purchaseQty: 30, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 335.00, purchasingPrice: 270},
-
-    {id: '1',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new', image: flowernecklace, price: 380.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 5, purchaseQty: 5, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 425, purchasingPrice: 380},
-
-    {id: '3',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: bracelet, price: 520.00, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'gold', minimumOrder: 12, purchaseQty: 12, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 585, purchasingPrice: 520},
-
-    {id: '4',title: 'rose gold ring', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: 'new',  image: bracelet, price: 450, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 1, purchaseQty: 1, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 493, purchasingPrice: 450},
-
-    {id: '5',title: 'heart necklace', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '-5%',  image: ring, price: 380, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'black', minimumOrder: 6, purchaseQty: 6, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 415, purchasingPrice: 380},
-
-    {id: '6',title: 'tennie bracelet', description: 'A symbol of endless love and elegance. Crafted in premium rose gold with sparkling stones.', status: '',  image: flowernecklace, price: 270, oldPrice: 0, isFavorite: false, colors: ['gold', 'silver', 'black',], preferedColor: 'silver', minimumOrder: 24, purchaseQty: 24, isAllowBelowMOQ: false, isUseMOQ: true, images: [ring, necklacegold, earring, bracelet], belowMOQPrice: 290, purchasingPrice: 270},
-];
-
 export default function HomePage() {
-    const { loadBestSellers } = useShop();
+    const navigate = useNavigate();
+    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, loadShopCategory, } = useShop();
 
     const [favorites, setFavorites] = useState([]);
     const [favoriteCount, setFavoriteCount] = useState(0);
-    const [bestSellersCopy, setBestSellersCopy] = useState(bestSellers);
+    const [bestSellersCopy, setBestSellersCopy] = useState();
     const [bestSellerFavoriteIndex, setBestSellerFavoriteIndex] = useState();
 
     const [cartCount, setCartCount] = useState(0);
@@ -63,8 +45,15 @@ export default function HomePage() {
 
     const [] = useState(false);
 
+    // Initialize all products
+    loadAllProducts(allProductsDummy);
     // Initialize best sellers
-    loadBestSellers(bestSellers);
+    // loadBestSellers(bestSellers);
+
+    useEffect(() => {
+        const bestSellers = allProductsDummy.filter(product => product.tag === 'Best Seller');
+        loadBestSellers(bestSellers);
+    }, [])
 
     const scrollContainerRef = useRef(null);
 
@@ -102,13 +91,23 @@ export default function HomePage() {
                         <h2 className='text-medium md:text-2xl font-bold'>Shop <span className='text-pink-600'>Category</span></h2>
                         {/* <h3 className="hidden md:flex text-sm">Explore our most loved pieces</h3> */}
                     </div>
-                    <button className="text-[12px] text-pink-500 md:text-black md:text-sm font-bold capitalize cursor-pointer hover:text-pink-500 active:opacity-25">view all</button>
+                    <button className="text-[12px] text-pink-500 md:text-black md:text-sm font-bold capitalize cursor-pointer hover:text-pink-500 active:opacity-25"
+                    onClick={() => {
+                        loadShopCategory('All Jewellery');
+                        navigate('/shop');
+                    }}
+                    >view all</button>
                 </div>
                 <div className="flex flex-wrap justify-between">
                     {categories.map((category, index) => (
                         <div key={index}  className="w-[24%] mb-5">
                             <div 
                                 className="group relative h-[70px] md:h-[200px] w-full rounded-full md:rounded-xl bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)] cursor-pointer overflow-hidden active:opacity-25"
+
+                                onClick={() => {
+                                    loadShopCategory(category.title)
+                                    navigate('/shop')
+                                }}
                             >
                                 {/* Dark overlay that activates when parent (group) is hovered */}
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
@@ -133,6 +132,7 @@ export default function HomePage() {
             </section>
             <OrderSuccessModal/>
             <BestSellers/>
+            <div className="mb-15"></div>
             <TrackYourOrder/>
             <WhyShopWithUs/>
             <Footer/>

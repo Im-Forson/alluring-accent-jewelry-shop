@@ -1,21 +1,468 @@
-import '../App.css'
+import { useState, useEffect, useRef, } from 'react'
+import { Filter, Heart, ListFilter, Settings } from 'lucide-react'
+import { useNavigate } from 'react-router'
+
+import { useShop } from '../../utilities/ShopContext'
+import { allProductsDummy } from '../../utilities/dummyData'
+
+import Hero from '../components/Hero'
 import NavBar from '../components/NavBar'
-import { Settings } from 'lucide-react'
+
+import collection from '../assets/hero-collection.png'
+import ring from '../assets/ring-2.png'
+import silverCharmBracelet from '../assets/silver-charm-bracelet.png'
+import earring from '../assets/earring.png'
+import bracelet from '../assets/bracelet.png'
+import necklacegold from '../assets/necklace-gold.png'
+import necklacesilver from '../assets/silver-necklace.png'
+import flowernecklace from '../assets/necklace-flower.png'
+import collection1 from '../assets/hero-collection.png'
+import collection2 from '../assets/collection-2.png'
+
+// Mock product data matching the UI exactly
+// const productsData = [
+//   { id: 1, name: "Rose Gold Infinity Ring", price: 450, rating: 5, reviews: 126, image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&q=80", tag: "BEST SELLER", category: "Rings", collection: "Infinity" },
+//   { id: 2, name: "Dainty Heart Necklace", price: 380, rating: 4.5, reviews: 98, image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80", tag: "NEW", category: "Necklaces", collection: "Romance" },
+//   { id: 3, name: "Classic Hoop Earrings", price: 270, originalPrice: 320, rating: 5, reviews: 74, image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&q=80", tag: "-15%", category: "Earrings", collection: "Classics" },
+//   { id: 8, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&q=80", tag: null, category: "Bracelets", collection: "Luxury" },
+//   { id: 4, name: "Tennis Bracelet", price: 520, rating: 4.5, reviews: 113, image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80", tag: "POPULAR", category: "Bracelets", collection: "Classics" },
+//   { id: 5, name: "Luxury Pearl Earrings", price: 410, rating: 5, reviews: 67, image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80", tag: "NEW", category: "Earrings", collection: "Pearls" },
+//   { id: 6, name: "Elegant Gold Necklace", price: 610, rating: 4.5, reviews: 89, image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80", tag: "HOT", category: "Necklaces", collection: "Classics" },
+//   { id: 7, name: "Golden Knot Ring", price: 420, rating: 5, reviews: 55, image: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500&q=80", tag: null, category: "Rings", collection: "Knot" },
+  
+//   { id: 9, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&q=80", tag: null, category: "Bracelets", collection: "Luxury" },
+//   { id: 1, name: "Rose Gold Infinity Ring", price: 450, rating: 5, reviews: 126, image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&q=80", tag: "BEST SELLER", category: "Rings", collection: "Infinity" },
+//   { id: 2, name: "Dainty Heart Necklace", price: 380, rating: 4.5, reviews: 98, image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80", tag: "NEW", category: "Necklaces", collection: "Romance" },
+//   { id: 3, name: "Classic Hoop Earrings", price: 270, originalPrice: 320, rating: 5, reviews: 74, image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=500&q=80", tag: "-15%", category: "Earrings", collection: "Classics" },
+//   { id: 8, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500&q=80", tag: null, category: "Bracelets", collection: "Luxury" },
+//   { id: 4, name: "Tennis Bracelet", price: 520, rating: 4.5, reviews: 113, image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80", tag: "POPULAR", category: "Bracelets", collection: "Classics" },
+//   { id: 5, name: "Luxury Pearl Earrings", price: 410, rating: 5, reviews: 67, image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80", tag: "NEW", category: "Earrings", collection: "Pearls" },
+//   { id: 6, name: "Elegant Gold Necklace", price: 610, rating: 4.5, reviews: 89, image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80", tag: "HOT", category: "Necklaces", collection: "Classics" },
+//   { id: 7, name: "Golden Knot Ring", price: 420, rating: 5, reviews: 55, image: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500&q=80", tag: null, category: "Rings", collection: "Knot" },
+  
+//   { id: 9, name: "Baguette Bracelet", price: 480, rating: 4.5, reviews: 72, image: collection2, tag: null, category: "Bracelets", collection: "Luxury" }
+// ];
+
+import { ArrowUp } from "lucide-react";
+import Footer from '../components/Footer'
+import WhyShopWithUs from '../components/WhyShopWithUs'
+
+
 
 export default function Shop() {
+    const { allProducts, loadAllProducts, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice } = useShop();
+    const navigate = useNavigate();
+
+    const ITEMS_PER_LOAD = 4;
+    const [productsData, setProductData] = useState(allProducts);
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_LOAD);
+    const [showTopBtn, setShowTopBtn] = useState(false);
+
+    const loaderRef = useRef(null);
+
+    useEffect(() => {
+        if (allProducts.length <= 0) {
+            loadAllProducts(allProductsDummy); 
+            setProductData(allProducts);
+        }
+        else{
+            setProductData(allProducts);
+        }
+    }, [allProducts])
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            if (entries[0].isIntersecting) {
+              setVisibleCount((prev) => prev + ITEMS_PER_LOAD);
+            }
+          },
+          { threshold: 1 }
+        );
+      
+        if (loaderRef.current) observer.observe(loaderRef.current);
+      
+        return () => observer.disconnect();
+      }, []);
+
+      useEffect(() => {
+        const handleScroll = () => {
+          setShowTopBtn(window.scrollY > 300);
+        };
+      
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+      }, []);
+      
+      const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+    //  /////////////////////////////////////////////
+
+
+    // ACTIVE (applied filters)
+    const [activeCategory, setActiveCategory] = useState(shopCategory);
+    const [activeColor, setActiveColor] = useState(shopColor);
+    const [activePrice, setActivePrice] = useState(shopPrice);
+    const [activeCollection, setActiveCollection] = useState(shopCollection);
+
+    // TEMP (user selecting before apply)
+    const [selectedCategory, setSelectedCategory] = useState(shopCategory);
+    const [selectedColor, setSelectedColor] = useState(shopColor);
+    const [selectedPrice, setSelectedPrice] = useState(shopPrice);
+    const [selectedCollection, setSelectedCollection] = useState(shopCollection);
+
+    const [cartCount, setCartCount] = useState(2);
+
+    // Filter Logic
+    // const filteredProducts = productsData.filter(product => {
+    //   const matchCat = selectedCategory === "All Jewellery" || product.category === selectedCategory;
+    //   const matchColl = selectedCollection === "All Collections" || product.collection === selectedCollection;
+    //   return matchCat && matchColl;
+    // });
+
+    const filteredProducts = productsData.filter(product => {
+        const matchCat =
+          activeCategory === "All Jewellery" || product.category === activeCategory;
+      
+        const matchColl =
+          activeCollection === "All Collections" || product.collection === activeCollection;
+      
+        const matchMaterial =
+          activeColor === "All Colors" ||
+          product.colors?.some(c => c.toLowerCase() === activeColor.toLowerCase());
+      
+        const matchPrice =
+          activePrice === "All Prices" ||
+          (activePrice === "Under GHC 300" && product.price < 300) ||
+          (activePrice === "GHC 300 - GHC 500" && product.price >= 300 && product.price <= 500) ||
+          (activePrice === "Over GHC 500" && product.price > 500);
+      
+        return matchCat && matchColl && matchMaterial && matchPrice;
+      });
+
+    // function viewProduct(product) {
+    //     const details = {
+    //         productId: product.id,
+    //         title: product.title, 
+    //         description: product.description, 
+    //         images: product.images,
+    //         price: product.price,
+    //         oldPrice: product.oldPrice,
+    //         colors: product.colors,
+    //         preferedColor: product.preferedColor,
+    //         minimumOrder: product.minimumOrder,
+    //         purchaseQty: product.purchaseQty,
+    //         isUseMOQ: product.isUseMOQ,
+    //         belowMOQPrice: product.belowMOQPrice,
+    //         // price: product.price,
+    //     }
+
+    //     setViewingProductDetails(details);
+    //     navigate('/product'); 
+    // }
+
+    function viewProduct(product, source) {
+        setViewingProductDetails(product);
+        navigate('/product', {state: {source: source}}); 
+    }
+
+    const filterProducts = () => {
+        setActiveCategory(selectedCategory);
+        setActiveColor(selectedColor);
+        setActivePrice(selectedPrice);
+        setActiveCollection(selectedCollection);
+        setVisibleCount(ITEMS_PER_LOAD); // reset pagination
+        // window.scrollTo({ top: 0, behavior: "smooth" }); // optional UX
+    }
+
+    const resetFilter = () => {
+        setSelectedCategory("All Jewellery");
+        setSelectedColor("All Colors");
+        setSelectedPrice("All Prices");
+        setSelectedCollection("All Collections");
+    
+        setActiveCategory("All Jewellery");
+        setActiveColor("All Colors");
+        setActivePrice("All Prices");
+        setActiveCollection("All Collections");
+    }
+
     return (
         <div>
             <NavBar activePage={'shop'}/>
+            {/* Banner */}
+            <section className=" w-full h-[50vh] pt-[60px] bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
+                <div className="relative h-full  overflow-hidden">
+                    <div className="absolute inset-0 transition-opacity duration-1000 ease-in-out">
+                        <div className="relative w-full h-full md:flex">
+                            {/* TEXT */}
+                            <div className="
+                                absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20
+                                md:static md:items-start md:text-left md:justify-center w-full md:w-1/2 md:pl-16
+                            ">
+                                <h1 className=" text-sm md:text-lg font-sans uppercase tracking-widest text-pink-600 font-bold mb-1">
+                                    timeless beauty 
+                                </h1>
+                                <h2 className="text-2xl md:text-3xl capitalize mb-15 md:mb-8 w-[70%] md:w-[90%] text-zinc-800 font-bold font-serif">Discover Luxury Jewellery</h2>
+                            </div>
+                            <div className="w-full md:w-1/2 h-full">
+                                <img
+                                src={silverCharmBracelet}
+                                alt="Jewellery"
+                                className="absolute inset-0 w-full h-full  md:static md:h-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            <section id="center">
-                {/* <h1 class='text-3xl md:text-3xl font-bold uppercase'>shop <span  class="text-pink-500">page</span></h1> */}
-                
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px- p-8">
+                <div className="w-full bg-pink-50 border border-stone-200/60 shadow-sm p-6 rounded-lg md:rounded-">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+                    
+                    {/* Category Filter */}
+                    <div className="flex flex-col space-y-1.5 px-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                        Category
+                        </label>
+                        <div className="relative">
+                        <select 
+                            value={selectedCategory} 
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 font-sans transition-all cursor-pointer appearance-none"
+                        >
+                            <option>All Jewellery</option>
+                            <option>Rings</option>
+                            <option>Necklaces</option>
+                            <option>Earrings</option>
+                            <option>Bracelets</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                        </div>
+                    </div>
+
+                    {/* Color Filter */}
+                    <div className="flex flex-col space-y-1.5 px-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                        Color
+                        </label>
+                        <div className="relative">
+                        <select 
+                            value={selectedColor} 
+                            onChange={(e) => setSelectedColor(e.target.value)}
+                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
+                        >
+                            <option>All Colors</option>
+                            <option>Rose Gold</option>
+                            <option>White Gold</option>
+                            <option>Yellow Gold</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                        </div>
+                    </div>
+
+                    {/* Price Filter */}
+                    <div className="flex flex-col space-y-1.5 px-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                        Price
+                        </label>
+                        <div className="relative">
+                        <select 
+                            value={selectedPrice} 
+                            onChange={(e) => setSelectedPrice(e.target.value)}
+                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
+                        >
+                            <option>All Prices</option>
+                            <option>Under GHC 300</option>
+                            <option>GHC 300 - GHC 500</option>
+                            <option>Over GHC 500</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                        </div>
+                    </div>
+
+                    {/* collection Filter */}
+                    <div className="flex flex-col space-y-1.5 px-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans">
+                        Collection
+                        </label>
+                        <div className="relative">
+                        <select 
+                            value={selectedCollection} 
+                            onChange={(e) => setSelectedCollection(e.target.value)}
+                            className="w-full h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
+                        >
+                            <option>All Collections</option>
+                            <option>Classic</option>
+                            <option>Elegance</option>
+                            <option>Luxury</option>
+                            <option>Royal</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                        </div>
+                    </div>
+
+                    {/* Filter Button */}
+                    <div className="px-2">
+                        <button className="w-full h-11 bg-pink-600 hover:bg-pink-700 active:scale-[0.98] flex items-center justify-center gap-2 rounded-xl md:rounded-full shadow-sm hover:shadow transition-all duration-200 group cursor-pointer"
+                        onClick={filterProducts}
+                        >
+                        <ListFilter className="w-4 h-4 text-white transition-transform group-hover:scale-110" />
+                        <span className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                            Apply Filter
+                        </span>
+                        </button>
+                    </div>
+
+                    </div>
+                </div>
+            </section>
+
+            
+            {/* Display Product */}
+            <section className="px-4 md:px-6 pb-20">
+                <h2 className="text-lg md:text-2xl font-bold mb-">
+                    {activeCategory}
+                </h2>
+
+                {/* GRID */}
+                {/* GRID OR EMPTY STATE */}
+                {filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {filteredProducts.slice(0, visibleCount).map((product, index) => (
+                    <div
+                        key={product.id}
+                        className="rounded-xl shadow-sm overflow-hidden
+                        transform transition-all duration-500 opacity-0 translate-y-6 animate-fadeIn"
+                        style={{ animationDelay: `${index * 100}ms`, animationFillMode: "forwards" }}
+                    >
+                        {/* IMAGE */}
+                        <div className="relative h-[140px] md:h-[200px] overflow-hidden">
+                        <img
+                            src={product.image}
+                            className="w-full h-full object-cover hover:scale-110 transition duration-500"
+                        />
+
+                        <div className="absolute top-2 inset-x-0 px-2 flex items-center justify-between pointer-events-none">
+                            <div>
+                            {product.tag ? (
+                                <span className="bg-pink-600 text-white text-[11px] px-2 py-1 rounded shadow-sm pointer-events-auto">
+                                {product.tag}
+                                </span>
+                            ) : (
+                                <div />
+                            )}
+                            </div>
+
+                            <button
+                            className="p-1 md-p-1.5 bg-white/80 backdrop-blur-xs hover:bg-white text-stone-800 hover:text-pink-600 rounded-full shadow-xs transition-all pointer-events-auto active:scale-90 cursor-pointer"
+                            onClick={() => manageFavorite(product.id)}
+                            >
+                            <Heart
+                                className={`w-4 h-4 md:w-5 md:h-5 ${
+                                product.isFavorite
+                                    ? "fill-pink-600 text-pink-600"
+                                    : "text-stone-700"
+                                }`}
+                            />
+                            </button>
+                        </div>
+                        </div>
+
+                        {/* INFO */}
+                        <div className="p-3">
+                        <h3 className="text-xs md:text-sm font-bold capitalize">
+                            {product.name}
+                        </h3>
+
+                        <div className="flex gap-3">
+                            {product.oldPrice > product.price && (
+                            <p className="text-xs md:text-sm font-semibold mt-1 line-through text-[grey]">
+                                Gh₵ {product.oldPrice}
+                            </p>
+                            )}
+                            <p className="text-xs md:text-sm font-semibold mt-1">
+                            Gh₵ {product.price}
+                            </p>
+                        </div>
+                        </div>
+
+                        {/* VIEW PRODUCT */}
+                        <button
+                        className="w-full text-xs md-text-sm py-[5px] font-bold border-t border-zinc-200 text-zinc-400 active:bg-zinc-600 active:text-white"
+                        onClick={() => viewProduct(product, 'shop')}
+                        >
+                        View
+                        </button>
+                    </div>
+                    ))}
+                </div>
+                ) : (
+                /* EMPTY STATE */
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                    
+                    {/* ICON */}
+                    <div className="bg-pink-100 text-pink-600 p-4 rounded-full mb-4">
+                    <Filter className="w-8 h-8" />
+                    </div>
+
+                    {/* MESSAGE */}
+                    <h3 className="text-lg font-semibold text-zinc-800 mb-2">
+                    No Products Found
+                    </h3>
+                    
+                    <p className="text-sm text-zinc-500 max-w-sm">
+                    Try adjusting your filters or selecting a different category to find what you're looking for.
+                    </p>
+
+                    {/* ACTION */}
+                    <button
+                    onClick={resetFilter}
+                    className="mt-5 px-5 py-2 bg-pink-600 text-white text-sm rounded-full hover:bg-pink-700 transition"
+                    >
+                    Reset Filters
+                    </button>
+                </div>
+                )}
+
+                {/* EMPTY PRODUCT */}
+                <div className="flex justify-center h-[200px0"></div>
+
+                {/* LOAD TRIGGER */}
+                <div ref={loaderRef} className="h-10"></div>
+            </section>
+
+            <WhyShopWithUs/>
+            <Footer/>
+
+            {/* Scroll to top */}
+            {showTopBtn && (
+                <button
+                    onClick={scrollToTop}
+                    className="fixed bottom-6 right-6 z-50 bg-black text-white p-3 rounded-full shadow-lg hover:scale-110 transition"
+                >
+                    <ArrowUp className="w-5 h-5" />
+                </button>
+            )}
+
+
+            {/* <section id="center">
                 <div class="flex flex-row items-center justify-cennter gap-2">
                     <p class=" md:text-[14px] text-center text-[grey] font-bold">Shop Page Under Development</p>
                     <Settings class="w-4 h-4 animate-spin text-[grey] font-bold"/>
                 </div>
-                
-            </section>
+            </section> */}
         </div>
     )
 }

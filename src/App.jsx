@@ -10,7 +10,8 @@ import NotFound from './pages/NotFound';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProductPage from './pages/ProductPage';
-
+import AllProducts from './pages/AllProducts';
+import AllBestSellers from './pages/AllBestSellers';
 
 const appRouter = createBrowserRouter([
   {path: '/', element: <HomePage/>},
@@ -19,7 +20,9 @@ const appRouter = createBrowserRouter([
   {path: '/*', element: <NotFound/>},
   {path: '/login', element: <LoginPage/>},
   {path: '/signup', element: <SignupPage/>},
-  {path: '/product', element: <ProductPage/>} 
+  {path: '/product', element: <ProductPage/>} ,
+  {path: '/products', element: <AllProducts/>} ,
+  {path: '/bestsellers', element: <AllBestSellers/>} ,
 
 ])
 

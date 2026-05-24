@@ -10,7 +10,7 @@ import logo from '../assets/logo.png'
 const colors= []
 
 export default function NavBar({ activePage, favoriteCount, cartCount, setFavorites, bestSellers, setBestSellers }) {
-    const { cart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails } = useShop();
+    const { allProducts, cart, addToCart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage } = useShop();
     const navigate = useNavigate();
 
     // Drawer Interface Visibility States
@@ -21,25 +21,8 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
     const totalCartCost = cart.reduce((acc, curr) => acc + (curr.purchasingPrice * curr.purchaseQty), 0);
 
     const moveToCart = (item) => {
-        // Remove item from wishlist array
-        setFavorites(favorites.filter(fav => fav.id !== item.id));
-
-        // Remove favorite in best seller
-        bestSellers.map((bestSeller, index) => {
-            if (bestSeller.id === item.id) {
-                const updated = bestSellers;
-                updated[index].isFavorite = false
-                setBestSellers(updated);
-            }
-        });
-        
-        // Add to shopping cart array (or increment if item duplicate checks match)
-        const existingItem = cart.find(cartItem => cartItem.id === item.id);
-        if (existingItem) {
-            setCart(cart.map(cartItem => cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem));
-        } else {
-            setCart([...cart, { ...item, quantity: 1 }]);
-        }
+        removeFavorite(item.id);
+        addToCart(item);
     };
 
     // Cart Modification Logic
@@ -84,33 +67,24 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
     }
 
     function homeHandler() { navigate('/'); closeAllDrawers(); }
-    function shopHandler() { navigate('/shop'); closeAllDrawers(); }
+
+    function shopHandler() { loadShopCategory('All Jewellery'); navigate('/shop'); closeAllDrawers(); }
+
     function contactHandler() { navigate('/contact'); closeAllDrawers(); }
+
     function loginHandler() { navigate('/login'); closeAllDrawers(); };
 
-    function viewProduct(product) {
-        if (activePage === 'product' && product.id === viewingProduct.productId) {
-           return;
-        }
+    function viewProduct(product, source) {
+        setViewingProductDetails(product);
+        navigate('/product', {state: {source: source}}); 
+    }
 
-        const details = {
-            productId: product.id,
-            title: product.title, 
-            description: product.description, 
-            images: product.images,
-            price: product.price,
-            oldPrice: product.oldPrice,
-            colors: product.colors,
-            preferedColor: product.preferedColor,
-            minimumOrder: product.minimumOrder,
-            purchaseQty: product.purchaseQty,
-            isUseMOQ: product.isUseMOQ,
-            belowMOQPrice: product.belowMOQPrice,
-            // price: product.price,
-        }
+    function handleRemoveCartItem(product) {
+        if (activePage === 'product' && product.id === viewingProduct.id) {
+            return;
+         }
 
-        setViewingProductDetails(details);
-        navigate('/product'); 
+         removeCartItem(product.id);
     }
 
     // UseMOQ Modification Logic
@@ -203,7 +177,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                     </div>
                     <div className="flex flex-col gap-6 mt-8">
                         <span onClick={homeHandler} className={`text-base font-semibold transition-colors ${activePage === 'home' ? 'text-pink-600' : 'text-gray-800'}`}>Home</span>
-                        <span onClick={shopHandler} className={`text-base font-semibold transition-colors ${activePage === 'shop' ? 'text-pink-600' : 'text-gray-800'}`}>Shop Collection</span>
+                        <span onClick={shopHandler} className={`text-base font-semibold transition-colors ${activePage === 'shop' ? 'text-pink-600' : 'text-gray-800'}`}>Shop</span>
                         <span onClick={contactHandler} className={`text-base font-semibold transition-colors ${activePage === 'contact' ? 'text-pink-600' : 'text-gray-800'}`}>Contact Us</span>
                     </div>
                     <div className="mt-auto pt-6 border-t border-gray-100">
@@ -237,20 +211,21 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                         ) : (
                             favorites.map(item => (
                                 <div key={item.id} className="flex gap-3 bg-pink-50 p-3 items-center">
-                                    <img src={item.image} alt={item.title} className="w-16 h-16 rounded-lg object-cover  shrink-0" />
+                                    <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover  shrink-0" />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
-                                            <h4 className="text-sm font-bold font-sans text-zinc-800 truncate capitalize font-mono mb-1">{item.title}</h4>
+                                            <h4 className="text-sm font-bold font-sans text-zinc-800 truncate capitalize font-mono mb-1">{item.name}</h4>
                                             <button onClick={() => removeFavorite(item.id)} className="text-xs font-mono text-[grey] hover:text-[maroon] p-0.5 transition-colors flex items-center gap-1 cursor-pointer active:text-red-500">
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
                                         <p className="text-sm text-pink-600 font-sans font-bold mt-0.5">Gh₵ {item.price.toLocaleString()}</p>
-                                        <div className="flex justify-between gap-5 items-center mt-2">
+                                        <div className="flex gap-3 items-center mt-2">
                                             <button onClick={() => moveToCart(item)} className="bg-zinc-800 text-white text-[10px] font-bold px-3 py-1 rounded-md hover:bg-pink-500 transition-colors cursor-pointer active:opacity-25">
                                                 Add To Cart
                                             </button>
-                                            {/* <button onClick={() => viewProduct(item)} className="active:opacity-25"><p className="text-[12px] font-bold font-mono text-[#0B3954]">Details{`>`}</p></button> */}
+
+                                            <button onClick={() => viewProduct(item, 'favorite')} className="active:opacity-25"><p className="text-[12px] font-bold text-zinc-400 px-3 py-[1px] rounded-md hover:bg-pink-500 border-1 border-zinc-400">View</p></button>
                                         </div>
                                     </div>
                                 </div>
@@ -275,7 +250,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                     </div>
 
                     {/* SCROLLABLE CART LIST */}
-                    <div className="flex-1 overflow-y-auto mt-4 space-y-4 pr-1 no-scrollbar">
+                    <div className="flex-1 overflow-y-auto my-4 space-y-4 pr-1 no-scrollbar">
                         {cart.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-center pb-12">
                                 <ShoppingBag className="w-10 h-10 text-zinc-200 mb-2" />
@@ -283,12 +258,12 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                             </div>
                         ) : (
                             cart.map((item, index) => (
-                                <div key={index} className={`flex gap-3  p-3 items-center ${activePage === 'product' && item.id === viewingProduct.productId ? ' bg-pink-0' : ' bg-pink-50'}`}>
-                                    <img src={item.image} alt={item.title} className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                                <div key={index} className={`flex gap-3  p-3 ${activePage === 'product' && item.id === viewingProduct.id ? ' bg-pink-0' : ' bg-pink-50'}`}>
+                                    <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover shrink-0" />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start mb-1">
-                                            <h5 className="text-sm font-bold text-zinc-800 font-sans truncate pr-2 capitalize mb-">{item.title}</h5>
-                                            <button onClick={() => removeCartItem(item.id)} className="text-[gray] hover:text-[maroon] p-0.5 transition-colors cursor-pointer">
+                                            <h5 className="text-sm font-bold text-zinc-800 font-sans truncate pr-2 capitalize mb-">{item.name}</h5>
+                                            <button onClick={() => handleRemoveCartItem(item)} className="text-[gray] hover:text-[maroon] p-0.5 active:text-red-500 transition-colors cursor-pointer">
                                                 <Trash2 className="w-3 h-3" />
                                             </button>
                                         </div>
@@ -301,7 +276,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                             {item.colors.map((color, colorIndex) => (
                                             <div key={colorIndex} className={`${item.preferedColor === color ? 'bg-zinc-100':'bg-zinc-0'} mr-2 px-[5px] py-[2px] rounded mb-1 cursor-pointer`}
                                                 onClick={() => {
-                                                    if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                    if (activePage === 'product') {
                                                         return;
                                                      }
 
@@ -319,7 +294,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                                 <p className="text-xs font-sans">Quantity</p>
                                                 <div className="flex items-center shadow borde border-zinc-500 bg-white rounded-md">
                                                     <button onClick={() => {
-                                                        if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                        if (activePage === 'product') {
                                                             return;
                                                          }
 
@@ -340,10 +315,10 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                                         value={item.purchaseQty} 
                                                         onChange={(e) => handleInputChange(item.id, e.target.value)}
                                                         onBlur={() => handleInputBlur(item.id)}
-                                                        readOnly={activePage === 'product' && item.id === viewingProduct.productId}
+                                                        readOnly={activePage === 'product'}
                                                     />
                                                     <button onClick={() => {
-                                                        if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                        if (activePage === 'product') {
                                                             return;
                                                          }
                                                         updateCartItemQty(item.id, 1)
@@ -358,14 +333,14 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
 
                                                 <div 
                                                     onClick={() => {
-                                                        if (activePage === 'product' && item.id === viewingProduct.productId) {
+                                                        if (activePage === 'product') {
                                                             return;
                                                          }
 
                                                         updateCartItemUseMOQ(index);
                                                     }}
 
-                                                    className={`flex items-center cursor-pointer ${activePage === 'product' && item.id === viewingProduct.productId ? 'active:opacity-100' : 'active:opacity-25'}`}
+                                                    className={`flex items-center cursor-pointer ${activePage === 'product' ? 'active:opacity-100' : 'active:opacity-25'}`}
                                                 >
                                                     {item.isUseMOQ ? <Square className="h-3 ml-[-5px]"/>:<CheckSquare className="h-3 ml-[-5px]"/>}
                                                     <p className="text-xs text-zinc-500 font-mono font-old">order less</p>
@@ -375,9 +350,14 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                         
                                         {/* Dynamic Quantity Controller & Price Summation Row */}
                                         <div className="flex items-center justify-between mt-3">
-                                            <button onClick={() => viewProduct(item)} className={`${activePage === 'product' && item.id === viewingProduct.productId ? 'active:opacity-100' : 'active:opacity-25'} px-[5px] py-[3px] bg-zinc-800 rounded-[5px] cursor-pointer`}>
-                                                <p className="text-xs font-bold font-sans text-white">Details</p>
-                                            </button>
+                                            {
+                                                !(activePage === 'product' && item.id === viewingProduct.id) && (
+                                                    <button onClick={() => viewProduct(item, 'cart')} className='px-[8px] py-[3px] bg-zinc-800 rounded-[5px] cursor-pointer'>
+                                                        <p className="text-xs font-bold font-sans text-white">View</p>
+                                                    </button>
+                                                )
+                                            }
+                                            <div className=""></div>
                                             <p className="text-sm text-zinc-800 font-bold">₵{(item.purchasingPrice * item.purchaseQty).toLocaleString()}</p>
                                         </div>
                                     </div>
@@ -390,10 +370,10 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                     {cart.length > 0 && (
                         <div className="pt-4 border-t border-gray-150 mt-auto bg-white">
                             <div className="flex justify-between items-baseline mb-4">
-                                <span className="text-sm font-bold font-mono text-zinc-500 uppercase tracking-wider">Subtotal:</span>
-                                <span className="text-xl font-bold  font-mono text-pink-600">₵{totalCartCost.toLocaleString()}</span>
+                                <span className="text-[13px] md:text-sm font-bold text-zinc-500 uppercase tracking-wider">Subtotal:</span>
+                                <span className="text-lg md:text-xl font-bold  font-mono text-pink-600">₵{totalCartCost.toLocaleString()}</span>
                             </div>
-                            <button className="w-full font-mono bg-zinc-900 text-white text-sm font-bold py-3.5 rounded-xl uppercase tracking-widest hover:bg-pink-600 active:scale-[0.99] transition-all shadow-md cursor-pointer">
+                            <button className="w-full bg-zinc-900 text-white text-xs md:text-sm font-bold py-3.5 rounded-xl uppercase tracking-widest hover:bg-pink-600 active:scale-[0.99] transition-all shadow-md cursor-pointer">
                                 Proceed To Checkout
                             </button>
                         </div>

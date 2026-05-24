@@ -8,16 +8,33 @@ export function ShopProvider({ children }) {
     const [allProducts, setAllProducts] = useState([]);
     const [viewingProduct, setViewingProduct] = useState({});
 
+    const [] = useState([]);
+
     const [orders, setOrders] = useState([]);
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
 
     const [cart, setCart] = useState([]);
     const [favorites, setFavorites] = useState([]);
-    const [bestSellersData, setBestSellersData] = useState([]);
-    const [bestSellerFavoriteIndex, setBestSellerFavoriteIndex] = useState();
+    
+    const [bestSellers, setBestSellers] = useState([]);
+
+    const [activePage, setActivePage] = useState('home');
+
+    const [shopCategory, setShopAllCategory] = useState("All Jewellery");
+    const [shopColor, setShopColor] = useState("All Colors");
+    const [shopPrice, setShopPrice] = useState("All Prices");
+    const [shopCollection, setShopCollection] = useState("All Collections");
+
+    const activatePage = (page) => {
+        setActivePage(page);
+    }
 
     const loadAllProducts = (products) => {
         setAllProducts(products);
+    }
+
+    const loadAllBestSellers = (products) => {
+        setBestSellers(products);
     }
 
     const addOrder = (newOrder) => {
@@ -72,51 +89,64 @@ export function ShopProvider({ children }) {
         setCart(cart.filter(item => item.id !== id));
     };
 
-    const manageFavorite = (index) => {
-        const updated = [...bestSellersData];
-                                    
+    const manageFavorite = (id) => {
+        const updatedAllProduct = [...allProducts];
+        let productIndex = -1;
+
         // toggle favorite
-        updated[index].isFavorite = !updated[index].isFavorite;
-        setBestSellersData(updated);
+        updatedAllProduct.map((product, index) => {
+            if (product.id === id) {
+                product.isFavorite = !product.isFavorite;
+                productIndex = index
+            }
+        })
+        
+        setAllProducts(updatedAllProduct);
 
         // update favorites list
-        if (updated[index].isFavorite) {
-            setFavorites((prev) => [updated[index], ...prev]);
-            // setFavoriteCount((prev) => prev + 1);
+        if (updatedAllProduct[productIndex].isFavorite) {
+            setFavorites((prev) => [updatedAllProduct[productIndex], ...prev]);
         } else {
             const newFavorites = favorites.filter(
-                (item) => item.id !== updated[index].id
+                (item) => item.id !== updatedAllProduct[id].id
             );
             setFavorites(newFavorites);
-            // setFavoriteCount(newFavorites.length);
         }
     };
 
     const removeFavorite = (id) => {
         setFavorites(favorites.filter(item => item.id !== id));
 
-        // Remove favorite in best seller
-        bestSellersData.map((item, index) => {
+        // Remove favorite in all products
+        allProducts.map((item, index) => {
             if (item.id === id) {
-                const updated = bestSellersData;
+                const updated = allProducts;
                 updated[index].isFavorite = false
-                setBestSellersData(updated);
+                setAllProducts(updated);
             }
         });
     };
 
     const loadBestSellers = (products) => {
-        setBestSellersData(products);
+        setBestSellers(products);
     }
 
     const setViewingProductDetails = (productDetail) => {
         setViewingProduct(productDetail);
     }
 
+    const loadShopCategory = (category) => {
+        setShopAllCategory(category);
+    }
+
     return (
         <ShopContext.Provider 
             value={{
                 allProducts,
+                loadAllProducts,
+
+                activePage,
+                activatePage,
                 
                 orders,
                 addOrder,
@@ -135,11 +165,17 @@ export function ShopProvider({ children }) {
                 manageFavorite,
                 removeFavorite,
 
-                bestSellersData,
+                bestSellers,
                 loadBestSellers,
 
                 viewingProduct,
                 setViewingProductDetails,
+
+                shopCategory,
+                shopColor,
+                shopCollection,
+                shopPrice,
+                loadShopCategory,
             }}
         >
         {children}
