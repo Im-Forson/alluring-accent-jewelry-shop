@@ -1,0 +1,389 @@
+
+/* Layout Wrapper */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  background-color: #fafbfc;
+  color: #333c48;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Sidebar Styling matching the updated light pastel tone */
+.sidebar-menu{
+ background-color: #000;
+}
+
+.admin-sidebar {
+  width: 260px;
+  border-right: 1px solid #f3dbe4;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 0;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  margin-bottom: 35px;
+  gap: 12px;
+ 
+}
+
+.admin-logo-mark {
+  width: 36px;
+  height: 36px;
+  background-color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(230, 92, 132, 0.2);
+}
+
+.check-heart {
+  color: #000;
+  font-size: 1.2rem;
+  font-weight: bolder;
+
+}
+
+.sidebar-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* Navigation Links */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 24px;
+  text-decoration: none;
+  color: #4a5568;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  font-size: 1.15rem;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.menu-item.active {
+  background-color: #fcced7;
+  color: #d6336c;
+  font-weight: 600;
+  border-left: 4px solid #d6336c;
+  padding-left: 20px;
+}
+
+/* Sidebar User Section */
+.sidebar-footer {
+  padding: 20px 24px 0;
+  border-top: 1px solid #f3dbe4;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.admin-meta strong {
+  font-size: 0.9rem;
+  color: #2d3748;
+}
+
+.logout-text {
+  font-size: 0.75rem;
+  color: #718096;
+  cursor: pointer;
+}
+
+.arrow-down {
+  color: #718096;
+  display: flex;
+  align-items: center;
+}
+
+/* Main Content Layout */
+.form-content-area {
+  flex: 1;
+  padding: 40px 50px;
+  overflow-y: auto;
+}
+
+.content-header h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #232b35;
+  margin-bottom: 25px;
+}
+
+.product-form {
+  background: #ffffff;
+  border: 1px solid #eaedf1;
+  border-radius: 8px;
+  padding: 35px;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+}
+
+/* Image Upload Border Container */
+.image-upload-dashed {
+  border: 2px dashed #cbd5e1;
+  border-radius: 6px;
+  background-color: #fafafa;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.image-upload-dashed:hover {
+  border-color: #e65c84;
+}
+
+.upload-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+}
+
+.camera-icon {
+  font-size: 3rem;
+  stroke-width: 1.2;
+}
+
+.upload-trigger p {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Standard Inputs styling */
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #334155;
+  background-color: #fff;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: #e65c84;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Select Box custom layout override */
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 16px;
+  pointer-events: none;
+  color: #64748b;
+}
+
+/* Toggle Switches */
+.status-toggles-row, .promo-control-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-top: 5px;
+}
+
+.toggle-container, .promo-toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.switch-pill {
+  width: 46px;
+  height: 24px;
+  background-color: #cbd5e1;
+  border-radius: 12px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.switch-circle {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
+
+/* State shifts for custom switches */
+.active-green { background-color: #5ccb96; justify-content: flex-end; }
+.active-gray { background-color: #94a3b8; justify-content: flex-end; }
+.active-pink { background-color: #e65c84; justify-content: flex-end; }
+
+.toggle-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Segmented Options button cluster */
+.segmented-button-group {
+  display: flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.segment-btn {
+  border: none;
+  background: none;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-right: 1px solid #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.segment-btn:last-child {
+  border-right: none;
+}
+
+.segment-btn.active {
+  background-color: #64748b;
+  color: #ffffff;
+}
+
+/* Bottom Action Layout */
+.form-actions-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 15px;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 14px 28px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-secondary {
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+.btn-secondary:hover {
+  background-color: #cbd5e1;
+}
+
+.btn-primary {
+  background-color: #e65c84;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #d6436e;
+}
+
+
+/* COLOR LIST CSS */
+
+.color-input-wrapper{
+  display:flex;
+  gap:10px;
+}
+
+.add-color-btn{
+  padding: 10px;
+  border:none;
+  border-radius:8px;
+  background:#323232;
+  color:white;
+  cursor:pointer;
+}
+
+.color-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+}
+
+.color-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 12px;
+  background:#f8d9e3;
+  border-radius:20px;
+  color:#b04f74;
+  font-size:14px;
+}
+
+.remove-btn{
+  border:none;
+  background:none;
+  color:#b04f74;
+  font-size:16px;
+  cursor:pointer;
+  font-weight:bold;
+}

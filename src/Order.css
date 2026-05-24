@@ -1,0 +1,380 @@
+                          /* ORDRER CSS */
+
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fdf5f7;
+}
+
+.main-content-window {
+  flex: 1;
+  overflow-y: auto;
+  /* Keeps layout configurations synchronized across pages */
+}
+
+/* Structural Base Variables & Reset Overrides */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fdf5f7;
+  color: #333c48;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+
+/* Main Working Canvas Structure */
+.orders-main-area {
+  flex: 1;
+  padding: 30px 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Dashboard Action Header layout strip definitions */
+.orders-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orders-header-bar h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: #64748b;
+}
+
+.header-icon { font-size: 1.25rem; cursor: pointer; }
+.badge-wrapper { position: relative; }
+.notif-badge {
+  position: absolute; top: -5px; right: -5px; background-color: #df446e;
+  color: white; font-size: 0.65rem; padding: 2px 5px; border-radius: 10px; font-weight: bold;
+}
+.top-profile-img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+
+/* Upper Count Cards row grid specifications */
+.counters-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 13%;
+}
+
+.counter-card {
+  background-color: #ffffff;
+  border: 1px solid #eaedf1 ;
+  border-radius: 6px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 150%;
+  
+}
+
+.counter-icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  margin-left:20px ;
+}
+
+/* Accent state shifts for analytical metadata counts */
+.card-pink .counter-icon-box { background-color: #e65c84; }
+.card-yellow .counter-icon-box { background-color: #f59e0b; }
+.card-green .counter-icon-box { background-color: #10b981; }
+.card-red .counter-icon-box { background-color: #f43f5e; }
+
+.counter-data span {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.counter-data h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 2px;
+}
+
+/* Functional Filter Search Row Actions Strip layout */
+.orders-toolbar-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.toolbar-search-input-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+}
+
+.search-embedded-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+}
+
+.toolbar-search-input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.9rem;
+  background-color: white;
+}
+
+.toolbar-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-dropdown {
+  appearance: none;
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  padding: 11px 36px 11px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  outline: none;
+}
+
+.dropdown-arrow-embedded {
+  position: absolute;
+  right: 12px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.btn-export-trigger {
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  padding: 11px 36px 11px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-wrapper {
+  margin-left: auto; /* Aligns export button to the right side of the strip */
+}
+
+/* Master Grid Database Data Ledger Panel styling configuration definitions */
+.ledger-table-panel {
+  background-color: white;
+  border: 1px solid #eaedf1;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+}
+
+.table-responsive-wrapper {
+  overflow-x: auto;
+}
+
+.orders-dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.orders-dashboard-table th {
+  padding: 14px 20px;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #fafbfc;
+}
+
+.orders-dashboard-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.order-id-bold {
+  font-weight: 600;
+  color: #475569;
+}
+
+/* User identity thumbnail profile structures definitions configuration */
+.customer-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.customer-thumb-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.customer-name-text {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.item-count-text { color: #64748b; }
+.total-price-text { font-weight: 700; color: #1e293b; }
+
+/* Status Badges contextual highlighting color mappings overlays configuration */
+.status-badge-pill {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.pill-completed { background-color: #e6f7ed; color: #10b981; }
+.pill-pending { background-color: #fffbeb; color: #f59e0b; }
+.pill-shipped { background-color: #eff6ff; color: #3b82f6; }
+.pill-cancelled { background-color: #fff1f2; color: #f43f5e; }
+
+.date-cell-text {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Rows manipulation clusters items configurations overrides actions */
+.actions-column-header { text-align: center; }
+.row-action-buttons-cluster {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-row-main, .btn-row-alt, .btn-row-dropdown-trigger {
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  background: white;
+}
+
+.btn-row-main { color: #475569; }
+
+.alt-delete { color: #df446e; border-color: #fcced7; background-color: #fff5f7; }
+.alt-cancel { color: #f59e0b; border-color: #fef3c7; background-color: #fffbeb; }
+.alt-track { color: #3b82f6; border-color: #dbeafe; background-color: #eff6ff; }
+
+.btn-row-dropdown-trigger {
+  padding: 6px 8px;
+  color: #64748b;
+  display: flex;
+}
+
+/* Master Data Ledger Pagination footers layouts definitions systems templates */
+.ledger-pagination-footer {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  background-color: #fafbfc;
+  border-radius: 0 0 8px 8px;
+}
+
+.entries-counter-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pagination-action-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prev-dropdown-btn-wrapper, .next-dropdown-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.btn-prev-page, .btn-next-page {
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  padding: 7px 28px 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.prev-dropdown-arrow, .next-dropdown-arrow {
+  position: absolute;
+  right: 10px;
+  font-size: 0.8rem;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.page-index-btn {
+  border: 1px solid #cbd5e1;
+  background: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+}
+
+.page-index-btn.active-idx {
+  background-color: #df446e;
+  color: white;
+  border-color: #df446e;
+  font-weight: 600;
+}
+
+.pagination-gap-ellipsis {
+  color: #94a3b8;
+  padding: 0 4px;
+  font-size: 0.85rem;
+}
+
+
+
+
+ 

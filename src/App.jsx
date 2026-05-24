@@ -10,6 +10,12 @@ import NotFound from './pages/NotFound';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProductPage from './pages/ProductPage';
+import DashBoard from './pages/DashBoard';
+import Inventory from './pages/Inventory';
+import Order from './pages/Order';
+import AddProduct from './pages/AddProduct';
+import Promotion from './pages/Promotion';
+import ManageProduct from './pages/ManageProduct';
 import AllProducts from './pages/AllProducts';
 import AllBestSellers from './pages/AllBestSellers';
 
@@ -20,9 +26,16 @@ const appRouter = createBrowserRouter([
   {path: '/*', element: <NotFound/>},
   {path: '/login', element: <LoginPage/>},
   {path: '/signup', element: <SignupPage/>},
-  {path: '/product', element: <ProductPage/>} ,
-  {path: '/products', element: <AllProducts/>} ,
-  {path: '/bestsellers', element: <AllBestSellers/>} ,
+  {path: '/product', element: <ProductPage/>},
+  {path: '/dash', element: <DashBoard/>},
+  {path: '/inventory', element: <Inventory/>},
+  {path: '/order', element: <Order/>},
+  {path: '/addproduct', element: <AddProduct/>},
+  {path: '/promotion', element: <Promotion/>},
+  {path: '/manageproduct', element: <ManageProduct/>}
+
+
+
 
 ])
 
