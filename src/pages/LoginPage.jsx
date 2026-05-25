@@ -63,7 +63,7 @@ function Login() {
       <form onSubmit={handleLogin}>
 
         <h1 className="login-title">
-          Admin Panel
+          Admin Login
         </h1>
 
         <p className="login-subtitle">
