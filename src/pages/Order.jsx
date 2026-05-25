@@ -261,7 +261,7 @@ function Order() {
               className="mobile-hamburger-btn"
               onClick={() => setSidebarOpen(true)}
             >
-              <FiMenu size={24} />
+             
             </button>
             <h1>Orders Overview</h1>
           </div>

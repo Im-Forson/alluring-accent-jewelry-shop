@@ -225,7 +225,7 @@ function AddProduct() {
               className="hamburger-menu-btn" 
               onClick={() => setSidebarOpen(true)}
             >
-              <FiMenu />
+             
             </button>
             <h1>Add New Product</h1>
           </div>
