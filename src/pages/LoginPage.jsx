@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "../LoginPage.css";
+import toast from "react-hot-toast";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -40,11 +41,36 @@ function Login() {
 
         localStorage.setItem("adminLoggedIn", "true");
 
+        toast.success("Welcome Admin!", {
+          duration: 2000,
+          style: {
+            borderRadius: "14px",
+            background: "rgba(20,20,20,0.9)",
+            color: "#fff",
+            backdropFilter: "blur(10px)",
+            padding: "14px 18px",
+          },
+        });
+
         navigate("/dashboard");
 
       } else {
 
-        alert("Wrong Credentials");
+        toast.error("Wrong Credentials", {
+          duration: 2000,
+          style: {
+            borderRadius: "14px",
+            background: "rgba(20,20,20,0.9)",
+            color: "#fff",
+            backdropFilter: "blur(10px)",
+            padding: "14px 18px",
+            border: "1px solid rgba(255,255,255,0.1)",
+          },
+          iconTheme: {
+            primary: "#ff4b4b",
+            secondary: "#fff",
+          },
+        });
 
       }
 
@@ -118,7 +144,7 @@ function Login() {
             />
 
             <FontAwesomeIcon
-              icon={showPassword ?faEye : faEyeSlash  }
+              icon={showPassword ? faEye : faEyeSlash}
               className="right-icon"
               onClick={() =>
                 setShowPassword(!showPassword)

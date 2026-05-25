@@ -13,6 +13,9 @@ function AddProduct() {
   const [mainIndex, setMainIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // --- New state for sub-MOQ permission checkbox ---
+  const [allowBelowMoq, setAllowBelowMoq] = useState(false);
+
   // --- Dynamic Option Catalogs ---
   const [availableTags, setAvailableTags] = useState([
     "Best Seller", "New", "Hot", "Popular", "Trending",
@@ -126,6 +129,7 @@ function AddProduct() {
         price: formData.get("price"),
         category: categoryInput.trim(),
         moq: formData.get("moq"),
+        allowBelowMoq: allowBelowMoq, // <-- Saved cleanly here to your db file
         stock: formData.get("stock"),
         tag: tagInput.trim(),
         colors: [...colors],
@@ -145,6 +149,7 @@ function AddProduct() {
       setTagInput("");
       setCategoryInput("");
       setMainIndex(0);
+      setAllowBelowMoq(false); // Reset checkout condition toggle
 
       if (e.target && typeof e.target.reset === 'function') {
         e.target.reset();
@@ -282,6 +287,7 @@ function AddProduct() {
 
           <input
             type="file"
+            name="image"
             id="productMedia"
             hidden
             multiple
@@ -340,7 +346,7 @@ function AddProduct() {
           )}
 
           <div className="input-group">
-            <input type="text" name="productName" placeholder="Product Name" className="form-input" required />
+            <input type="text" name="name" placeholder="Product Name" className="form-input" required />
           </div>
 
           <div className="input-group">
@@ -355,6 +361,7 @@ function AddProduct() {
           <div className="input-group select-wrapper" ref={categoryDropdownRef}>
             <input
               type="text"
+              name="category"
               placeholder="Select category or type to create a new one..."
               className="form-input"
               value={categoryInput}
@@ -407,6 +414,7 @@ function AddProduct() {
             <div className="color-input-wrapper">
               <input
                 type="text"
+                name="colors"
                 placeholder="Color Options (e.g. Gold, Rose Gold)"
                 className="form-input"
                 value={color}
@@ -425,8 +433,23 @@ function AddProduct() {
             </div>
           </div>
 
-          <div className="input-group">
-            <input type="number" name="moq" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
+          {/* MOQ INPUT GROUP EXTENDED WITH INLINE STYLED OVERRIDE CHECKBOX BELOW */}
+          <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <input type="number" name="minimumOrder" min="1" name="moq" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px' }}>
+              <input 
+                type="checkbox" 
+                name="isUseMOQ"
+                id="allowBelowMoq" 
+                checked={allowBelowMoq}
+                onChange={(e) => setAllowBelowMoq(e.target.checked)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#e11d48', margin: 0 }} 
+              />
+              <label htmlFor="allowBelowMoq" style={{ fontSize: '13px', color: '#64748b', cursor: 'pointer', userSelect: 'none', fontWeight: '500' }}>
+                Allow orders below minimum quantity threshold
+              </label>
+            </div>
           </div>
 
           <div className="input-group">
@@ -438,6 +461,7 @@ function AddProduct() {
             <input
               type="text"
               placeholder="Type to create or select a tag..."
+              name="tag"
               className="form-input"
               value={tagInput}
               onChange={(e) => {
@@ -486,7 +510,6 @@ function AddProduct() {
           </div>
 
           <div className="form-actions-row">
-            <button type="button" className="btn-secondary">Save Draft</button>
             <button type="submit" className="btn-primary">Publish Product</button>
           </div>
         </form>
@@ -526,7 +549,9 @@ function AddProduct() {
                   <p className="meta-info"><strong>Colors:</strong> {product.colors.join(", ")}</p>
                 )}
 
-                <p className="meta-info"><strong>MOQ:</strong> {product.moq} | <strong>Stock:</strong> {product.stock}</p>
+                <p className="meta-info">
+                  <strong>MOQ:</strong> {product.moq} {product.allowBelowMoq ? "(Flexible)" : "(Strict)"} | <strong>Stock:</strong> {product.stock}
+                </p>
                 {product.tag && <p className="product-card-tag"><strong>Tag:</strong> {product.tag}</p>}
               </div>
             ))}

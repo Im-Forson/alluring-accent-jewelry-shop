@@ -20,7 +20,9 @@ export default function SideBar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
 
-    toast.success("Logged out successfully");
+    toast.success("Logged out", {
+      duration: 2000,
+    });
 
     navigate("/login");
   };
