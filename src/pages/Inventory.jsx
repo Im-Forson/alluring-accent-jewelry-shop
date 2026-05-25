@@ -6,7 +6,7 @@ import {
   FiCopy, FiCheck, FiPlus, FiTrash2, FiTag, FiLayers, FiInfo, FiSliders
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 function Inventory() {
   const navigate = useNavigate();
