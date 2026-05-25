@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../AddProduct.css';
 import { FiCamera, FiChevronDown, FiX, FiMenu } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
+import toast from 'react-hot-toast'; 
 
 function AddProduct() {
   const [color, setColor] = useState("");
@@ -90,12 +91,12 @@ function AddProduct() {
     e.preventDefault();
 
     if (!categoryInput.trim()) {
-      alert("Please choose or type a product category designation.");
+      toast.error("Please choose or type a product category designation."); // <-- Native alert fixed
       return;
     }
 
     if (mediaFiles.length === 0) {
-      alert("Please upload or capture at least one image or video.");
+      toast.error("Please upload or capture at least one image or video."); // <-- Native alert fixed
       return;
     }
 
@@ -124,12 +125,12 @@ function AddProduct() {
 
       const newProduct = {
         id: `prod_${Date.now()}`,
-        name: formData.get("productName"),
+        name: formData.get("name"),
         description: formData.get("description"),
         price: formData.get("price"),
         category: categoryInput.trim(),
         moq: formData.get("moq"),
-        allowBelowMoq: allowBelowMoq, // <-- Saved cleanly here to your db file
+        allowBelowMoq: allowBelowMoq,
         stock: formData.get("stock"),
         tag: tagInput.trim(),
         colors: [...colors],
@@ -141,7 +142,7 @@ function AddProduct() {
       const updatedInventory = [...existingProducts, newProduct];
       localStorage.setItem("inventoryProducts", JSON.stringify(updatedInventory));
 
-      alert("Product published successfully!");
+      toast.success("Product published successfully!"); // <-- Native alert fixed
 
       setProductsArray(prev => [...prev, { ...newProduct, media: mediaFiles }]);
       setMediaFiles([]);
@@ -149,7 +150,7 @@ function AddProduct() {
       setTagInput("");
       setCategoryInput("");
       setMainIndex(0);
-      setAllowBelowMoq(false); // Reset checkout condition toggle
+      setAllowBelowMoq(false);
 
       if (e.target && typeof e.target.reset === 'function') {
         e.target.reset();
@@ -157,7 +158,7 @@ function AddProduct() {
 
     } catch (error) {
       console.error("Error processing media strings:", error);
-      alert("An error occurred while saving product media.");
+      toast.error("An error occurred while saving product media."); // <-- Native alert fixed
     }
   };
 
@@ -176,7 +177,7 @@ function AddProduct() {
       }, 100);
     } catch (err) {
       console.error("Camera access error:", err);
-      alert("Camera permissions were denied or are currently unavailable.");
+      toast.error("Camera permissions were denied or are currently unavailable."); // <-- Native alert fixed
     }
   };
 
@@ -435,7 +436,7 @@ function AddProduct() {
 
           {/* MOQ INPUT GROUP EXTENDED WITH INLINE STYLED OVERRIDE CHECKBOX BELOW */}
           <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <input type="number" name="minimumOrder" min="1" name="moq" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
+            <input type="number" min="1" name="moq" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px' }}>
               <input 
@@ -513,50 +514,6 @@ function AddProduct() {
             <button type="submit" className="btn-primary">Publish Product</button>
           </div>
         </form>
-
-        <div className="submitted-products">
-          {productsArray.length > 0 && <h2 className="section-title">Published Inventory Array</h2>}
-          <div className="products-grid-layout">
-            {productsArray.map((product, index) => (
-              <div key={index} className="product-output-card">
-                {product.media && product.media.length > 0 && (
-                  <div className="product-media-preview-grid">
-                    {product.media.map((file, i) => {
-                      const displayUrl = URL.createObjectURL(file);
-                      const isImage = file.type.startsWith("image");
-                      const isMainItem = product.mainIndex === i;
-
-                      return (
-                        <div key={i} className={`product-card-media-item ${isMainItem ? 'hero' : ''}`}>
-                          {isMainItem && <div className="card-main-badge">Main</div>}
-                          {isImage ? (
-                            <img src={displayUrl} alt="Inventory state" className="product-preview" />
-                          ) : (
-                            <video src={displayUrl} controls className="product-preview" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <h2>{product.name}</h2>
-                <p className="product-card-desc">{product.description}</p>
-                <p className="product-card-price">₵ {product.price}</p>
-                <p className="meta-info"><strong>Category:</strong> {product.category}</p>
-
-                {product.colors.length > 0 && (
-                  <p className="meta-info"><strong>Colors:</strong> {product.colors.join(", ")}</p>
-                )}
-
-                <p className="meta-info">
-                  <strong>MOQ:</strong> {product.moq} {product.allowBelowMoq ? "(Flexible)" : "(Strict)"} | <strong>Stock:</strong> {product.stock}
-                </p>
-                {product.tag && <p className="product-card-tag"><strong>Tag:</strong> {product.tag}</p>}
-              </div>
-            ))}
-          </div>
-        </div>
       </main>
 
       {selectedPreview && (

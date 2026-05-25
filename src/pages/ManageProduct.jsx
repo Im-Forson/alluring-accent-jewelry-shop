@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useNavigate } from "react-router";
+import toast from 'react-hot-toast'; // Imported react-hot-toast
 
 function ManageProduct() {
   const navigate = useNavigate();
@@ -129,7 +130,7 @@ function ManageProduct() {
 
   const handleExportToCSV = () => {
     if (filteredProducts.length === 0) {
-      alert("No data available to export.");
+      toast.error("No data available to export."); // Replaced alert with toast.error
       return;
     }
 
@@ -153,10 +154,13 @@ function ManageProduct() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success("Inventory exported successfully!"); // Added a success toast message
   };
 
   const handleDeleteProduct = (id) => {
     setActiveDropdownId(null);
+    
+    // Kept native window.confirm for safety, but customized the reactions with toasts
     const confirmed = window.confirm("Are you sure you want to permanently remove this product from inventory?");
     if (!confirmed) return;
 
@@ -164,6 +168,7 @@ function ManageProduct() {
     const filteredItems = storedItems.filter(item => item.id !== id);
     localStorage.setItem("inventoryProducts", JSON.stringify(filteredItems));
     loadProducts();
+    toast.success("Product successfully removed from inventory."); // Replaced alert with toast.success
   };
 
   const handleOpenEditModal = (product) => {
@@ -193,6 +198,7 @@ function ManageProduct() {
     setIsModalOpen(false);
     setEditingProduct(null);
     loadProducts();
+    toast.success("Product configurations saved successfully."); // Added a success toast message
   };
 
   const toggleDropdown = (id, e) => {
@@ -203,16 +209,26 @@ function ManageProduct() {
   const toggleProductStatus = (id) => {
     setActiveDropdownId(null);
     const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
+    let isNowActive = false;
+
     const updatedItems = storedItems.map(item => {
       if (item.id === id) {
         const currentStock = parseInt(item.stock) || 0;
         const targetStock = currentStock === 0 ? '10' : '0';
+        isNowActive = targetStock !== '0';
         return { ...item, stock: targetStock };
       }
       return item;
     });
     localStorage.setItem("inventoryProducts", JSON.stringify(updatedItems));
     loadProducts();
+    
+    // Added situational toast reminders for convenience
+    if (isNowActive) {
+      toast.success("Product is now Active (Defaulted to 10 units).");
+    } else {
+      toast.error("Product is now Inactive (Stock set to 0).");
+    }
   };
 
   const duplicateProduct = (product) => {
@@ -228,6 +244,9 @@ function ManageProduct() {
       };
       localStorage.setItem("inventoryProducts", JSON.stringify([...storedItems, clone]));
       loadProducts();
+      toast.success(`Duplicated Template: "${baseItem.name} (Copy)"`); // Replaced native alerts with a neat success toast
+    } else {
+      toast.error("Failed to duplicate product workspace.");
     }
   };
 

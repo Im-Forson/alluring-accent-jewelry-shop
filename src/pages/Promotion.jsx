@@ -4,6 +4,7 @@ import {
   FiSearch, FiShoppingBag, FiChevronDown, FiCalendar, FiX, FiClock, FiPercent, FiDollarSign 
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
+import toast from 'react-hot-toast';
 
 function Promotion() {
   // ==========================================
@@ -52,7 +53,7 @@ function Promotion() {
   const handleSavePromotion = (e) => {
     e.preventDefault();
     if (!promoTitle || !discountValue || !targetCategory) {
-      alert("Please fill out all primary promotion fields.");
+      toast.error("Please fill out all primary promotion fields.");
       return;
     }
 
@@ -79,6 +80,7 @@ function Promotion() {
         return p;
       });
       setEditingId(null);
+      toast.success("Campaign updated successfully!");
     } else {
       const newPromo = {
         id: Date.now(),
@@ -95,6 +97,7 @@ function Promotion() {
         banner: displayBanner
       };
       updatedPromos = [newPromo, ...promos];
+      toast.success("New promotional campaign launched!");
     }
 
     setPromos(updatedPromos);
@@ -111,18 +114,28 @@ function Promotion() {
     setStartDate(promo.start);
     setEndDate(promo.end);
     setDisplayBanner(promo.banner);
+    toast.loading("Editing promotion campaign...", { id: "edit-load", duration: 1000 });
   };
 
   const handleTogglePause = (id) => {
+    let currentStatus = "";
     const updated = promos.map(p => {
       if (p.id === id) {
         const nextStatus = p.status === 'active' ? 'expired' : 'active';
+        currentStatus = nextStatus;
         return { ...p, status: nextStatus };
       }
       return p;
     });
+
     setPromos(updated);
     localStorage.setItem("storePromotions", JSON.stringify(updated));
+
+    if (currentStatus === 'active') {
+      toast.success("Campaign reactivated live!");
+    } else {
+      toast.error("Campaign paused and set to inactive.");
+    }
   };
 
   const handleDeleteClick = (id) => {
@@ -130,6 +143,7 @@ function Promotion() {
     const updated = promos.filter(p => p.id !== id);
     setPromos(updated);
     localStorage.setItem("storePromotions", JSON.stringify(updated));
+    toast.success("Promotion successfully purged.");
   };
 
   const handleLaunchFlashSale = () => {
@@ -157,7 +171,10 @@ function Promotion() {
     localStorage.setItem("activeFlashSaleCampaign", JSON.stringify(newFlashPromo));
     
     setIsFlashSaleModalOpen(false);
-    alert(`Flash sale deployed successfully! Urgency counters pushed to customer storefront interfaces.`);
+    toast.success("Flash sale deployed! Storefront urgency counters active.", {
+      icon: '⚡',
+      duration: 4000
+    });
   };
 
   const clearFormFields = () => {
@@ -363,7 +380,7 @@ function Promotion() {
                 <label>Campaign Settings Preview</label>
                 <div className="preview-card-box">
                   <strong>Type:</strong> {discountType.toUpperCase()}<br/>
-                  <strong>Targeting:</strong> {targetCategory || 'None chosen yet'}<br/>
+                  return <strong>Targeting:</strong> {targetCategory || 'None chosen yet'}<br/>
                   <strong>Status:</strong> {editingId ? '⚠️ Editing' : '✨ New Entry'}
                 </div>
               </div>

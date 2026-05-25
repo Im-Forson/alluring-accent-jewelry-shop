@@ -3,6 +3,7 @@ import '../Order.css';
 import {
   FiSearch, FiBell, FiChevronDown, FiDownload, FiX, FiAlertTriangle, FiMenu
 } from 'react-icons/fi';
+import { toast } from 'react-hot-toast';
 import SideBar from '../components/SideBar';
 
 function Order() {
@@ -160,23 +161,80 @@ function Order() {
       const liveOrder = updated.find(o => o.id === id);
       setSelectedOrder(liveOrder);
     }
-  };
 
-  const handleDeleteOrder = (id) => {
-    const confirmed = window.confirm(`Permanently remove entry ${id} from ledger?`);
-    if (!confirmed) return;
-
-    const updated = orders.filter(order => order.id !== id);
-    localStorage.setItem("customerOrders", JSON.stringify(updated));
-    setOrders(updated);
-
-    if (selectedOrder && selectedOrder.id === id) {
-      setSelectedOrder(null);
+    // Trigger visual toast confirmation
+    if (newStatus === 'Completed') {
+      toast.success(`Transaction Approved for ${id}!`);
+    } else if (newStatus === 'Cancelled') {
+      toast.error(`Order ${id} has been cancelled.`);
+    } else {
+      toast.success(`Order ${id} updated to ${newStatus}`);
     }
   };
 
+  const handleDeleteOrder = (id) => {
+    // Elegant custom confirmation toast with action buttons
+    toast((t) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <span style={{ fontSize: '13px', color: '#1e293b' }}>
+          Permanently remove entry <strong>{id}</strong> from ledger?
+        </span>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              padding: '4px 8px',
+              background: '#cbd5e1',
+              color: '#334155',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '12px',
+              cursor: 'pointer'
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              const updated = orders.filter(order => order.id !== id);
+              localStorage.setItem("customerOrders", JSON.stringify(updated));
+              setOrders(updated);
+
+              if (selectedOrder && selectedOrder.id === id) {
+                setSelectedOrder(null);
+              }
+              toast.success(`Entry ${id} cleared successfully.`);
+            }}
+            style={{
+              padding: '4px 8px',
+              background: '#ef4444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '12px',
+              cursor: 'pointer'
+            }}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    ), { duration: 5000 });
+  };
+
   const handleTrackOrder = (order) => {
-    alert(`Tracking Package for ${order.id}\nCourier Status: In Transit\nDestination: ${order.customerDetails.address}`);
+    toast(`📦 Courier Tracking: In Transit\n📍 Destination: ${order.customerDetails.address}`, {
+      duration: 4000,
+      icon: '🚚',
+      style: {
+        fontSize: '13px',
+        color: '#1e293b',
+        whiteSpace: 'pre-line'
+      }
+    });
   };
 
   const handleExportData = () => {
@@ -187,6 +245,8 @@ function Order() {
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+    
+    toast.success("Ledger logs exported successfully!");
   };
 
   return (
@@ -347,7 +407,6 @@ function Order() {
                       <td className="date-cell-text">{order.date}</td>
                       <td>
                         <div className="row-action-buttons-cluster">
-                          {/* FIXED: Pending orders now get both Approve and View layouts seamlessly */}
                           {order.status === 'Pending' && (
                             <button
                               className="btn-row-main approve-highlight"
@@ -404,7 +463,7 @@ function Order() {
         </section>
       </main>
 
-      {/* INSPECTION DIALOG OVERLAY (MODAL) - Classes added for global responsive CSS syncing */}
+      {/* INSPECTION DIALOG OVERLAY (MODAL) */}
       {selectedOrder && (
         <div className="modal-overlay-container" style={modalOverlayStyle} onClick={() => setSelectedOrder(null)}>
           <div className="modal-content-card" style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
