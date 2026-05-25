@@ -1,5 +1,5 @@
 import '../SideBar.css';
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate} from 'react-router';
 import {
   FiBox,
   FiClipboard,
