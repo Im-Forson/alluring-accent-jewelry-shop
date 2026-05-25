@@ -1,41 +1,7 @@
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-  margin-top: 150px;
-
-  /* @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  } */
-}
-
-
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
 :root {
   --bg-color: #fdf5f7;
   --sidebar-gradient: linear-gradient(160deg, #f08eb0 0%, #eba3b9 100%);
-  --sidebar-hover: rgba(255, 255, 255, 0.2);
+  --sidebar-hover: rgba(255, 255, 255, 0.12);
   --primary-pink: #df446e;
   --text-dark: #2d3748;
   --text-light: #718096;
@@ -43,79 +9,214 @@
   --border-color: #f0f0f0;
 }
 
+/* ==========================================================================
+   1. SHARED BASE STYLES & DESKTOP VIEWPORT LAYOUT
+   ========================================================================== */
 .dashboard-container {
   display: flex;
   height: 100vh;
-  background-color:  #fdf5f7;
+  background-color: #fdf5f7;
+  overflow: hidden; /* Keeps parent view structurally contained */
 }
 
-/* --- Sidebar --- */
 .sidebar {
   width: 260px;
+  height: 100vh;
   background-color: #0D0D0D;
   color: white;
   display: flex;
   flex-direction: column;
-  padding: 0;
+  justify-content: space-between;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  position: sticky;
+  top: 0;
 }
 
-.sidebar-brand {
+.sidebar-nav {
   display: flex;
-  align-items: center;
-  padding: 0 30px;
-  margin-bottom: 40px;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 30px;
 }
-
-.logo-icon {
-  font-size: 2rem;
-  margin-right: 10px;
-}
-
-.logo-text h2 { font-size: 1.5rem; font-weight: 700; line-height: 1; }
-.logo-text span { font-size: 0.85rem; font-weight: 300; opacity: 0.9; }
-
-.sidebar-nav { flex: 1; display: flex; flex-direction: column; gap:10px;}
 
 .nav-item {
   text-decoration: none;
   color: white;
-  padding: 15px 30px;
+  padding: 15px 25px;
   display: flex;
   align-items: center;
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 500;
-  transition: background 0.3s;
+  transition: 0.3s ease;
 }
 
+.nav-item .icon {
+  margin-right: 15px;
+  font-size: 1.2rem;
+}
 
-.nav-item .icon { margin-right: 15px; font-size: 1.2rem; }
-.nav-item:hover { background: var(--sidebar-hover); }
-.nav-item.active { background: var(--primary-pink); font-weight: 600; }
+.nav-item:hover {
+  background: var(--sidebar-hover);
+}
 
-.sidebar-bottom { padding: 20px 30px; display: flex; flex-direction: column; gap: 15px; }
+.nav-item.active {
+  background: var(--primary-pink);
+  font-weight: 600;
+}
+
+.sidebar-bottom {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 10px;
-  cursor: pointer;
+  gap: 12px;
 }
 
-.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-.user-info strong { font-size: 0.95rem; }
-.dropdown-icon { font-size: 0.8rem; margin-left: auto; }
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info strong {
+  font-size: 0.95rem;
+}
 
 .ad-logout-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: white;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
-  transition: background 0.3s;
+  transition: 0.3s ease;
+  text-align: center;
 }
 
-.ad-logout-btn:hover { background: var(--primary-pink); border-color: var(--primary-pink); }
+.ad-logout-btn:hover {
+  background: var(--primary-pink);
+  border-color: var(--primary-pink);
+}
+
+/* Hidden elements on Desktop layout engine by default */
+.mobile-topbar,
+.sidebar-overlay {
+  display: none;
+}
 
 
+/* ==========================================================================
+   2. MOBILE & TABLET RESPONSIVE ENGINE (768px and down)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column; /* Stack workspace elements down dynamically */
+  }
+
+  /* Reveal Top Bar with active menu triggers */
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0D0D0D;
+    color: white;
+    padding: 16px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 1200;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mobile-logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .menu-toggle {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Structural Transformation into Completely Hidden Off-Canvas Drawer */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    overflow-y: auto;
+    transform: translateX(-100%); /* Reliably completely covers visibility out of frame */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1500; /* Assures stacking precedence over form widgets */
+  }
+
+  /* Trigger state injected when admin clicks hamburger */
+  .sidebar.show-sidebar {
+    transform: translateX(0); /* Slides cleanly into view frame */
+  }
+
+  /* Active Translucent Backdrop Mask Layer */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 1400; /* Anchored explicitly below sidebar, above active content cards */
+  }
+
+  .sidebar-nav {
+    padding-top: 40px; /* Aligned spacing without clipping brand names */
+  }
+
+  .nav-item {
+    padding: 16px 22px;
+    font-size: 0.95rem;
+  }
+
+  .sidebar-bottom {
+    padding-bottom: 30px;
+  }
+}
+
+/* ==========================================================================
+   3. EXTRA SMALL PHONES (480px and down)
+   ========================================================================== */
+@media (max-width: 480px) {
+  .mobile-topbar {
+    padding: 14px 15px;
+  }
+
+  .mobile-logo {
+    font-size: 1rem;
+  }
+
+  .sidebar {
+    width: 80%; /* Fluidly scales across compact devices to keep context view visible */
+  }
+
+  .nav-item {
+    font-size: 0.92rem;
+    padding: 15px 20px;
+  }
+
+  .ad-logout-btn {
+    padding: 11px;
+    font-size: 0.9rem;
+  }
+}

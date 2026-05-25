@@ -1,6 +1,4 @@
-                           /* PROMOTION CSS */
-
- 
+/* PROMOTION CSS */
 
 /* Core Layout Grid System */
 .admin-layout {
@@ -267,6 +265,7 @@
   font-size: 0.9rem;
   outline: none;
   background-color: #fff;
+  box-sizing: border-box;
 }
 
 .panel-input::placeholder { color: #94a3b8; }
@@ -345,7 +344,7 @@
   align-items: center;
 }
 
-.panel-select { appearance: none; cursor: pointer; color: #334155; }
+.panel-select { appearance: none; cursor: pointer; color: #334155; width: 100%; }
 .field-select-arrow { position: absolute; right: 14px; pointer-events: none; color: #64748b; }
 
 /* In-line mini date format fields layout */
@@ -387,17 +386,13 @@
   color: #475569;
 }
 
-.picker-box {
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  padding: 12px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f8fafc;
-  color: #64748b;
-  font-size: 0.9rem;
-  cursor: pointer;
+.preview-card-box {
+  padding: 12px; 
+  border: 1px solid #cbd5e1; 
+  border-radius: 6px; 
+  font-size: 13px; 
+  background-color: #fff; 
+  color: #475569;
 }
 
 /* Row spanning footer operations control grid items */
@@ -463,15 +458,248 @@
 
 .btn-save-promo:hover { background-color: #d6436e; }
 
-.btn-flash-sale {
-  background-color: transparent;
-  color: #e65c84;
-  border: 1px solid #fcced7;
+.deploy-trigger-btn {
+  background-color: #e11d48 !important;
+  color: #fff !important;
+  font-weight: bold;
 }
 
-.btn-flash-sale:hover { background-color: #fbeaf0; }
+.cancel-btn {
+  background-color: #64748b !important;
+}
+
+/* ==========================================================================
+   RECONSTRUCTED MODERN CLASS MODAL BASE
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 16px; /* Prevents viewport bleeding */
+  box-sizing: border-box;
+}
+
+.modal-container {
+  background-color: #fff;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+
+.modal-close-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-description {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.modal-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.modal-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.modal-action-buttons {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.modal-submit-btn, .modal-cancel-btn {
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.modal-submit-btn {
+  flex: 1;
+  border: none;
+  background-color: #e11d48;
+  color: #fff;
+}
+
+.modal-cancel-btn {
+  border: 1px solid #cbd5e1;
+  background-color: #fff;
+  color: #64748b;
+}
 
 
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE OVERRIDES (BREAKPOINTS)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .admin-layout {
+    flex-direction: column;
+  }
 
+  .admin-sidebar {
+    width: 100%;
+    padding: 15px 0;
+    border-right: none;
+    border-bottom: 1px solid #f3dbe4;
+  }
 
-          
+  .sidebar-header {
+    margin-bottom: 15px;
+  }
+
+  .sidebar-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .menu-item {
+    padding: 8px 16px;
+    border-radius: 4px;
+  }
+
+  .menu-item.active {
+    border-left: none;
+    border-bottom: 3px solid #d6336c;
+    padding-left: 16px;
+  }
+
+  .sidebar-footer {
+    display: none; 
+  }
+
+  .main-content-area {
+    padding: 20px 16px;
+    gap: 20px;
+  }
+
+  .promo-metrics {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .promo-card {
+    flex: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .create-promo-form {
+    grid-template-columns: 1fr; 
+    gap: 20px;
+  }
+
+  .form-footer-actions {
+    grid-column: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .submit-buttons {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-save-promo, .btn-flash-sale {
+    width: 100%;
+    text-align: center;
+    padding: 14px; 
+    margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .date-range-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .radio-options {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .header-search-icons {
+    padding-left: 0;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  /* Smooth stacking for inner modal trigger actions buttons on tiny panels */
+  .modal-action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-submit-btn, .modal-cancel-btn {
+    width: 100%;
+  }
+}

@@ -28,7 +28,7 @@ const appRouter = createBrowserRouter([
   {path: '/login', element: <LoginPage/>},
   {path: '/signup', element: <SignupPage/>},
   {path: '/product', element: <ProductPage/>},
-  {path: '/dash', element: <DashBoard/>},
+  {path: '/dashboard', element: <DashBoard/>},
   {path: '/inventory', element: <Inventory/>},
   {path: '/order', element: <Order/>},
   {path: '/addproduct', element: <AddProduct/>},

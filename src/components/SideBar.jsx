@@ -1,48 +1,149 @@
 import '../SideBar.css';
-import { Link } from "react-router";
-import { FiGrid, FiPlusSquare, FiCheckSquare, FiClock, FiBox, FiCamera, FiChevronDown } from 'react-icons/fi';
-import { FiSearch, FiBell, FiTag, FiAlertTriangle, FiClipboard, FiArchive } from 'react-icons/fi';
-import { BiHomeAlt, BiLogOut } from 'react-icons/bi';
-import { MdOutlineDiamond } from 'react-icons/md';
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  FiBox,
+  FiClipboard,
+  FiTag,
+  FiMenu,
+  FiX
+} from 'react-icons/fi';
+import { BiHomeAlt } from 'react-icons/bi';
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-export default function SideBar () {
-    return (
+export default function SideBar() {
 
-         <aside className="sidebar">
-                 
-        
-                <nav className="sidebar-nav " >
-                  <a href="#" className="nav-item active">
-                    <span className="icon"><BiHomeAlt /></span> Dashboard
-                  </a>
-                  <a href="#" className="nav-item">
-                    <span className="icon"><FiBox /></span> Products
-                  </a>
-                  <a href="#" className="nav-item">
-                    <span className="icon"><FiClipboard /></span> Orders
-                  </a>
-                  <a href="#" className="nav-item">
-                    <span className="icon"><FiTag /></span> Promotions
-                  </a>
-                  <a href="#" className="nav-item">
-                    <span className="icon"><FiArchive /></span> Inventory
-                  </a>
-                </nav>
-        
-                <div className="sidebar-bottom">
-                  <div className="user-profile">
-                    <img src="https://i.pravatar.cc/150?img=47" alt="Admin" className="avatar" />
-                    <div className="user-info">
-                      <strong>Admin</strong>
-                    </div>
-                  </div>
-                  <button className="ad-logout-btn">
-                    Log Out
-                  </button>
-                </div>
-              </aside>
+  const navigate = useNavigate();
 
+  const [menuOpen, setMenuOpen] = useState(false);
 
-    
-    );
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    toast.success("Logged out successfully");
+
+    navigate("/login");
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  return (
+    <>
+
+      {/* Mobile Topbar */}
+      <div className="mobile-topbar">
+
+        <h2 className="mobile-logo">
+          Admin Panel
+        </h2>
+
+        <button
+          className="menu-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <FiX /> : <FiMenu />}
+        </button>
+
+      </div>
+
+      {/* Overlay */}
+      {menuOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={closeMenu}
+        ></div>
+      )}
+
+      <aside className={`sidebar ${menuOpen ? "show-sidebar" : ""}`}>
+
+        <nav className="sidebar-nav">
+
+          <NavLink
+            to="/dashboard"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><BiHomeAlt /></span>
+            Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/addproduct"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><FiBox /></span>
+            Add Products
+          </NavLink>
+
+          <NavLink
+            to="/order"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><FiClipboard /></span>
+            Orders
+          </NavLink>
+
+          <NavLink
+            to="/manageproduct"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><FiClipboard /></span>
+            Manage Products
+          </NavLink>
+
+          <NavLink
+            to="/promotion"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><FiTag /></span>
+            Promotions
+          </NavLink>
+
+        </nav>
+
+        <div className="sidebar-bottom">
+
+          <div className="user-profile">
+
+            <img
+              src="https://i.pravatar.cc/150?img=47"
+              alt="Admin"
+              className="avatar"
+            />
+
+            <div className="user-info">
+              <strong>Admin</strong>
+            </div>
+
+          </div>
+
+          <button
+            className="ad-logout-btn"
+            onClick={handleLogout}
+          >
+            Log Out
+          </button>
+
+        </div>
+
+      </aside>
+
+    </>
+  );
 }

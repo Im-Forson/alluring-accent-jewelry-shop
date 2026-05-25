@@ -1,94 +1,280 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../DashBoard.css';
+import { NavLink } from "react-router-dom";
 
 // Import the specific icons we need
-import { FiSearch, FiBell, FiTag, FiAlertTriangle, FiBox, FiClipboard, FiArchive } from 'react-icons/fi';
-import { BiHomeAlt, BiLogOut, BiSidebar } from 'react-icons/bi';
-import { MdOutlineDiamond } from 'react-icons/md';
+import {
+  FiSearch, FiBell, FiTag, FiAlertTriangle, FiBox,
+  FiArchive, FiUser, FiActivity, FiDollarSign, FiX
+} from 'react-icons/fi';
+
 import SideBar from '../components/SideBar';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+// ==========================================================================
+// STATIC INLINE STYLES MOVED TO TOP TO PREVENT INITIALIZATION HOP RUNTIME ERRORS
+// ==========================================================================
+const notifPanelStyle = {
+  position: 'absolute',
+  top: '50px',
+  backgroundColor: '#ffffff',
+  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+  borderRadius: '8px',
+  zIndex: 1600,
+  border: '1px solid #e2e8f0',
+  display: 'flex',
+  flexDirection: 'column'
+};
+
+const notifHeaderStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  padding: '12px 16px',
+  borderBottom: '1px solid #f1f5f9',
+  fontSize: '14px'
+};
+
+const notifItemStyle = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '10px',
+  padding: '12px 16px',
+  borderBottom: '1px solid #f8fafc',
+  transition: 'background-color 0.2s',
+  lineHeight: '1.3'
+};
+
+const statusIndicatorStyle = {
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  marginTop: '4px',
+  flexShrink: 0
+};
 
 function DashBoard() {
-  const recentOrders = [
-    { id: 1, name: 'Emma White', amount: '280.00', time: 'Just Now', color: '#fce3b3' },
-    { id: 2, name: 'Michael Brown', amount: '750.00', time: 'Today', color: '#fce3b3' },
-    { id: 3, name: 'Olivia Wilson', amount: '320.00', time: 'Today', color: '#fce3b3' },
-    { id: 4, name: 'William Davis', amount: '610.00', time: 'Yesterday', color: '#f4f4f4' },
-    { id: 5, name: 'Sophia Johnson', amount: '450.00', time: '2 Days Ago', color: '#f4f4f4' },
-  ];
+  // --- STATE SYSTEM FOR DYNAMIC REAL-TIME MONITORING ---
+  const [productMetrics, setProductMetrics] = useState({
+    totalProducts: 0,
+    outOfStockCount: 0,
+    lowStockCount: 0,
+    lowStockItems: [],
+    outOfStockItems: []
+  });
+
+  const [orderMetrics, setOrderMetrics] = useState({
+    todaysSales: "0.00",
+    totalOrdersCount: 0,
+    pendingOrdersCount: 0,
+    newCustomersCount: 0
+  });
+
+  const [liveOrdersList, setLiveOrdersList] = useState([]);
+
+  // --- NOTIFICATION BELL INTERACTIVE UI STATES ---
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifRef = useRef(null);
+
+  // Window width tracking to adjust inline styles dynamically for mobile viewports
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    // Click outside handler to dismiss notification dropdown
+    const handleOutsideClick = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  useEffect(() => {
+    // ==========================================================
+    // EXTRA CLEANUP: FLUSH PREVIOUS MOCK ENTRIES IF THEY EXIST
+    // ==========================================================
+    const currentOrders = JSON.parse(localStorage.getItem("inventoryOrders")) || [];
+    const containsMockData = currentOrders.some(order => order.id && order.id.startsWith('ORD-99'));
+
+    if (containsMockData) {
+      localStorage.setItem("inventoryOrders", JSON.stringify([]));
+    }
+
+    // ==========================================================
+    // 1. EVALUATE REAL INVENTORY PRODUCTS DATA
+    // ==========================================================
+    const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
+
+    const outOfStock = storedItems.filter(item => (parseInt(item.stock) || 0) === 0);
+    const lowStock = storedItems.filter(item => {
+      const stockVal = parseInt(item.stock) || 0;
+      return stockVal < 50 && stockVal > 0;
+    });
+
+    setProductMetrics({
+      totalProducts: storedItems.length,
+      outOfStockCount: outOfStock.length,
+      lowStockCount: lowStock.length,
+      lowStockItems: lowStock,
+      outOfStockItems: outOfStock
+    });
+
+    // ==========================================================
+    // 2. EVALUATE REAL ORDERS TRANSACTIONAL DATA
+    // ==========================================================
+    const storedOrders = JSON.parse(localStorage.getItem("inventoryOrders")) || [];
+    const todayDateKey = new Date().toISOString().slice(0, 10);
+
+    const ordersToday = storedOrders.filter(order => order.date === todayDateKey);
+
+    const salesSumToday = ordersToday
+      .filter(order => order.status !== 'Cancelled')
+      .reduce((sum, order) => sum + parseFloat(order.amount || 0), 0);
+
+    const pendingCount = storedOrders.filter(order => order.status === 'Pending' || order.status === 'Processing').length;
+    const newCustomersToday = ordersToday.filter(order => order.isNewCustomer === true).length;
+
+    setOrderMetrics({
+      todaysSales: salesSumToday.toFixed(2),
+      totalOrdersCount: storedOrders.length,
+      pendingOrdersCount: pendingCount,
+      newCustomersCount: newCustomersToday
+    });
+
+    const sortedFeed = [...storedOrders].reverse().slice(0, 5);
+    setLiveOrdersList(sortedFeed);
+
+  }, []);
+
+  // Total alert notifications combining out of stock and low stock warnings
+  const totalAlertNotificationsCount = productMetrics.outOfStockCount + productMetrics.lowStockCount;
+
+  // Responsive adjusted style configurations
+  const dynamicNotifPanelStyle = {
+    ...notifPanelStyle,
+    right: windowWidth <= 768 ? '10px' : '40px',
+    width: windowWidth <= 480 ? 'calc(100vw - 20px)' : '290px'
+  };
 
   return (
     <div className="dashboard-container">
-
-
       <SideBar />
 
-
-
-      {/* Main Content */}
+      {/* Main Content Workspace */}
       <main className="main-content">
 
         {/* Top Header */}
-        <header className="top-header">
+        <header className="top-header" style={{ overflow: 'visible' }}>
           <h1>Welcome back, Admin!</h1>
-          <div className="header-actions">
-            <button className="icon-btn"><FiSearch /></button>
-            <button className="icon-btn badge-btn">
-              <FiBell /> <span className="badge">7</span>
+          <div className="header-actions" style={{ position: 'relative' }} ref={notifRef}>
+
+            {/* Functional Notification Trigger Button */}
+            <button
+              className={`icon-btn badge-btn ${isNotifOpen ? 'active-bell' : ''}`}
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              style={{ position: 'relative', cursor: 'pointer' }}
+            >
+              <FiBell />
+              {totalAlertNotificationsCount > 0 && (
+                <span className="badge" style={{ backgroundColor: '#e11d48', color: '#fff' }}>
+                  {totalAlertNotificationsCount}
+                </span>
+              )}
             </button>
+
+            {/* Dynamic Notification Dropdown Drawer Panel */}
+            {isNotifOpen && (
+              <div className="notification-dropdown-panel" style={dynamicNotifPanelStyle}>
+                <div style={notifHeaderStyle}>
+                  <span style={{ fontWeight: '600', color: '#1e293b' }}>Inventory Stock Alerts</span>
+                  <button onClick={() => setIsNotifOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><FiX /></button>
+                </div>
+
+                {/* Fixed "maxHeight" typo fix below */}
+                <div className="notification-scroll-container" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                  {totalAlertNotificationsCount === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '13px', fontStyle: 'italic' }}>
+                      All items have healthy stock configurations.
+                    </div>
+                  ) : (
+                    <>
+                      {/* Out of stock notifications block */}
+                      {productMetrics.outOfStockItems.map(item => (
+                        <div key={`out-${item.id}`} style={notifItemStyle}>
+                          <div style={{ ...statusIndicatorStyle, backgroundColor: '#ef4444' }}></div>
+                          <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                            <span style={{ fontSize: '13px', color: '#0f172a', fontWeight: '500' }}>{item.name} is empty!</span>
+                            <small style={{ fontSize: '11px', color: '#64748b' }}>Stock dropped to absolute 0 units.</small>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Low stock notifications block */}
+                      {productMetrics.lowStockItems.map(item => (
+                        <div key={`low-${item.id}`} style={notifItemStyle}>
+                          <div style={{ ...statusIndicatorStyle, backgroundColor: '#f97316' }}></div>
+                          <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                            <span style={{ fontSize: '13px', color: '#0f172a', fontWeight: '500' }}>{item.name} running low</span>
+                            <small style={{ fontSize: '11px', color: '#64748b' }}>Critical Level: {item.stock} items left in store.</small>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             <img src="https://i.pravatar.cc/150?img=47" alt="Admin" className="header-avatar" />
           </div>
         </header>
 
-        {/* Top Metric Cards */}
+        {/* Top Metric Cards Grid */}
         <section className="metrics-grid">
           <div className="metric-card">
             <div className="icon-wrapper yellow"><FiBox /></div>
             <div className="metric-data">
               <span className="label">Total Products</span>
-              <h3>128</h3>
+              <h3>{productMetrics.totalProducts}</h3>
             </div>
           </div>
           <div className="metric-card">
-            <div className="icon-wrapper pink"><FiBell /></div>
+            <div className="icon-wrapper pink"><FiArchive /></div>
             <div className="metric-data">
               <span className="label">Out of Stock</span>
-              <h3>6</h3>
+              <h3>{productMetrics.outOfStockCount}</h3>
             </div>
           </div>
           <div className="metric-card">
             <div className="icon-wrapper orange"><FiAlertTriangle /></div>
             <div className="metric-data">
               <span className="label">Low Stock</span>
-              <h3>4</h3>
+              <h3>{productMetrics.lowStockCount}</h3>
             </div>
           </div>
-
         </section>
 
-        {/* ... The rest of the App.jsx code for Stats & Orders remains exactly the same ... */}
-
         {/* Middle Section: Stats & Orders */}
-
         <section className="dashboard-row">
           <div className="dashboard-card">
             <h3 className="card-title">Today's Stats</h3>
             <div className="stats-list">
               <div className="stat-item">
                 <span>Today's Sales</span>
-                <strong>GHC 2,450.00</strong>
+                <strong>GHC {orderMetrics.todaysSales}</strong>
               </div>
               <div className="stat-item">
                 <span>Total Orders</span>
-                <strong>32</strong>
-              </div>
-              <div className="stat-item">
-                <span>Pending Orders</span>
-                <strong>5</strong>
+                <strong>{orderMetrics.totalOrdersCount}</strong>
               </div>
               <div className="stat-item">
                 <span>New Customers</span>
-                <strong>8</strong>
+                <strong>{orderMetrics.newCustomersCount}</strong>
               </div>
             </div>
           </div>
@@ -96,18 +282,29 @@ function DashBoard() {
           <div className="dashboard-card recent-orders">
             <h3 className="card-title">Recent Orders</h3>
             <div className="orders-list">
-              {recentOrders.map(order => (
-                <div className="order-item" key={order.id}>
-                  <i class="fa-solid fa-user"></i>
-                  <div className="order-user">
-                    <span>{order.name}</span>
-                  </div>
-                  <strong>GHC {order.amount}</strong>
-                  <span className="status-badge" style={{ backgroundColor: order.color }}>
-                    {order.time}
-                  </span>
+              {liveOrdersList.length === 0 ? (
+                <div style={{ padding: '30px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', width: '100%' }}>
+                  No active user orders found. Waiting for incoming data...
                 </div>
-              ))}
+              ) : (
+                liveOrdersList.map(order => (
+                  <div className="order-item" key={order.id}>
+                    <div className="order-user-wrapper">
+                      <FiUser className="order-user-icon" />
+                      <div className="order-user">
+                        <span className="order-name">{order.name}</span>
+                        <small className="order-id-label">{order.id}</small>
+                      </div>
+                    </div>
+                    <div className="order-financials">
+                      <strong className="order-amount-label">GHC {parseFloat(order.amount).toFixed(2)}</strong>
+                      <span className="status-badge" style={{ backgroundColor: order.color || '#f1f5f9' }}>
+                        {order.time || order.date}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>
@@ -117,19 +314,52 @@ function DashBoard() {
           <div className="dashboard-card alerts-card">
             <h3 className="card-title">Low Stock Alerts</h3>
             <ul className="simple-list">
-              <li><span className="bullet orange"></span> Gold Hoop Earrings - Only 3 Left!</li>
-              <li><span className="bullet orange"></span> Pearl Pendant Necklace - Almost Sold Out!</li>
+              {productMetrics.lowStockItems.length === 0 ? (
+                <li style={{ color: '#64748b', fontStyle: 'italic', fontSize: '13px', border: 'none' }}>
+                  All catalog stock allocations running smoothly.
+                </li>
+              ) : (
+                productMetrics.lowStockItems.slice(0, 3).map((item) => (
+                  <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 0' }}>
+                    <span className="bullet orange"></span>
+                    <span style={{ textAlign: 'left' }}>{item.name}</span>
+                    <strong style={{ color: '#e11d48', marginLeft: 'auto', fontSize: '13px', flexShrink: 0 }}>{item.stock} left</strong>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
 
           <div className="dashboard-card promos-card">
             <h3 className="card-title">Active Promotions</h3>
             <ul className="simple-list">
-              <li><span className="bullet yellow"></span> Spring Sale – 20% Off All Jewelry <span className="arrow">›</span></li>
-              <li><span className="bullet yellow"></span> Flash Deal – 30% Off Diamond Rings <span className="arrow">›</span></li>
+              <li>
+                <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
+                  <span className="bullet yellow"></span>
+                  <span>Spring Sale – 20% Off All Jewelry</span>
+                </div>
+                <span className="arrow">›</span>
+              </li>
+              <li>
+                <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
+                  <span className="bullet yellow"></span>
+                  <span>Flash Deal – 30% Off Diamond Rings</span>
+                </div>
+                <span className="arrow">›</span>
+              </li>
             </ul>
             <div className="card-action-right">
-              <button className="manage-btn">Manage Promotions</button>
+              <NavLink
+                to="/promotion"
+                className="manage-btn"
+                style={({ isActive }) => ({
+                  display: "inline-block",
+                  textDecoration: "none",
+                  textAlign: "center"
+                })}
+              >
+                Manage Promotions
+              </NavLink>
             </div>
           </div>
         </section>
