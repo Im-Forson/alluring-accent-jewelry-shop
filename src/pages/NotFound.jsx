@@ -10,9 +10,8 @@ function NotFound() {
         <h3 class="nfp-h3">the page you're looking for doesn't exist or has been moved.</h3>
 
         <div class="btns-nfp"> 
-          <button class="btn-nfp1">BACK TO HOME</button>
-          <button class="btn-nfp2">SHOP NOW</button>
-
+         <a href="/"><button class="btn-nfp1">BACK TO HOME</button></a>
+         <a href="/shop"><button class="btn-nfp2">SHOP NOW</button></a>
         </div>
 
         </div>
