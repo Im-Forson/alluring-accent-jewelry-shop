@@ -115,6 +115,17 @@ export default function SideBar() {
             Promotions
           </NavLink>
 
+           {/* <NavLink
+            to="/inventory"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><FiTag /></span>
+            Inventory
+          </NavLink> */}
+
         </nav>
 
         <div className="sidebar-bottom">

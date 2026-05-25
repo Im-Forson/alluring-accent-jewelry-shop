@@ -1,196 +1,257 @@
-                               /* INVENTORY CSS */
+/* ==========================================================================
+   UNIFIED INVENTORY DASHBOARD WORKSPACE SCROLLBARS & STRUCTURES
+   ========================================================================== */
 
-/* Core View Container & Scaffolding Layer */
-.inventory-view-container {
-  padding: 20px 30px;
+.inventory-workspace-split {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  background-color: #fdf5f7;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
 }
 
-/* Header Utilities Nav Alignment Strip */
-.inventory-top-navbar {
+.pane-left {
+  flex: 1.1;
+  max-width: 480px;
+  padding: 24px;
+}
+
+.pane-right-workspace-stack {
+  flex: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0; /* Prevents nested flex text tables from expanding layouts */
+}
+
+.sub-panel-card {
+  padding: 24px;
+}
+
+.panel-heading {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 20px 0;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.header-no-margin {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border: none;
+}
+
+/* --- ADD NEW PRODUCT SHIELD ELEMENT LAYOUTS --- */
+.media-uploader-box {
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  background-color: #fafbfc;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+  margin-bottom: 20px;
+}
+
+.media-uploader-box:hover {
+  background-color: #fff5f7;
+  border-color: #d6336c;
+  color: #d6336c;
+}
+
+.uploader-camera-icon {
+  font-size: 2rem;
+}
+
+.uploader-main-prompt {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.product-creation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-field-control {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #1e293b;
+  outline: none;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.form-field-control:focus {
+  border-color: #d6336c;
+  box-shadow: 0 0 0 1px rgba(214, 51, 108, 0.1);
+}
+
+.text-area-control {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.mini-prod-meta-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mini-prod-sku-subtitle {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* --- INTERACTIVE BRAND PROMOTION ITEM LINES --- */
+.promotions-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promotion-row-item-bar {
+  border: 1px solid #eaedf1;
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background-color: #fafbfc;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.promotion-row-item-bar:hover {
+  background-color: #f8fafc;
+}
+
+.promo-index-num {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.text-pink {
+  color: #d6336c;
+}
+
+.promo-description-details {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #334155;
+  flex: 1;
+}
+
+.promo-item-arrow {
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.select-promo-btn {
+  align-self: center;
+  margin-top: 4px;
+  padding: 10px 24px !important;
+}
+
+/* --- MONITORED LOW STOCK THREAT MODULE PANELS --- */
+.low-stock-header-strip {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-.navbar-spacer { flex: 1; }
-.navbar-utility-icons {
+.alerts-list-stacked-rows {
   display: flex;
+  flex-direction: column;
+}
+
+.alert-stock-item-row {
+  padding: 12px 4px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.alert-stock-item-row:last-child {
+  border-bottom: none;
+}
+
+.alert-product-title-text {
+  font-size: 0.95rem;
+  font-weight: 500;
   color: #475569;
 }
 
-.nav-util-icon { font-size: 1.25rem; cursor: pointer; transition: color 0.2s; }
-.nav-util-icon:hover { color: #df446e; }
+/* ==========================================================================
+   RESPONSIVE LAYOUT CONTEXT BREAKPOINT TRANSLATIONS
+   ========================================================================== */
 
-.nav-bag-wrapper { position: relative; display: flex; }
-.nav-bag-count {
-  position: absolute; top: -6px; right: -8px; background-color: #df446e;
-  color: white; font-size: 0.65rem; font-weight: bold; padding: 1px 5px; border-radius: 10px;
+@media (max-width: 992px) {
+  .inventory-workspace-split {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pane-left {
+    max-width: 100%;
+  }
 }
 
-/* Top Dashboard Statistics Grid Counters Layout Structure */
-.inventory-stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+@media (max-width: 768px) {
+  .orders-main-area {
+    padding: 20px 16px;
+  }
+
+  .mobile-hamburger-btn {
+    display: block;
+  }
+
+  .counters-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .row-action-buttons-cluster {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .promotion-row-item-bar {
+    padding: 12px;
+  }
+  
+  .select-promo-btn {
+    width: 100%;
+  }
+
+  /* Structural slide layout sidebars for mobile drawers */
+  .admin-layout .admin-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .admin-layout.sidebar-active .admin-sidebar {
+    left: 0 !important;
+  }
 }
-
-.stat-summary-card {
-  background-color: white; border: 1px solid #f0f2f5; border-radius: 8px;
-  padding: 16px 20px; display: flex; align-items: center; gap: 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.01);
-}
-
-.stat-card-icon-box {
-  width: 44px; height: 44px; border-radius: 8px; display: flex;
-  align-items: center; justify-content: center; font-size: 1.25rem;
-}
-
-.box-beige { background-color: #f7ede2; }
-.box-soft-pink { background-color: #ffe5ec; }
-.box-translucent { background-color: rgba(255,255,255,0.25); }
-
-/* Standout Color Block configuration override styling for Promotions metric card */
-.promotion-accent-card {
-  background: linear-gradient(135deg, #e65c84 0%, #df446e 100%);
-  color: white; border: none;
-}
-
-.stat-card-info span { font-size: 0.85rem; color: #64748b; font-weight: 500; }
-.promotion-accent-card .stat-card-info span { color: rgba(255,255,255,0.8); }
-
-.stat-card-info h3 { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 2px; }
-.promotion-accent-card .stat-card-info h3 { color: white; }
-.text-danger { color: #f43f5e !important; }
-
-/* Main Dynamic Dashboard Workspace Layout Split Panels Container Structure */
-.inventory-workspace-split {
-  display: flex; gap: 24px; align-items: flex-start;
-}
-
-.workspace-panel {
-  background-color: white; border: 1px solid #eaedf1; border-radius: 8px; padding: 24px;
-}
-
-.pane-left { flex: 1.1; max-width: 520px; }
-.pane-right-workspace-stack { flex: 1.3; display: flex; flex-direction: column; gap: 20px; }
-
-.panel-heading {
-  font-size: 1.15rem; font-weight: 700; color: #334155; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 12px;
-}
-.header-no-margin { margin-bottom: 0; padding-bottom: 0; border: none; }
-
-/* Left Column Form Framework & Image Input Elements Layout Structure */
-.media-uploader-box {
-  border: 2px dashed #cbd5e1; border-radius: 6px; background-color: #fafbfc;
-  height: 180px; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 10px; cursor: pointer; color: #64748b; transition: all 0.2s;
-  margin-bottom: 24px;
-}
-.media-uploader-box:hover { background-color: #f1f5f9; border-color: #df446e; color: #df446e; }
-.uploader-camera-icon { font-size: 2.2rem; opacity: 0.6; }
-.uploader-main-prompt { font-size: 0.95rem; font-weight: 500; }
-
-.product-creation-form { display: flex; flex-direction: column; gap: 14px; }
-.form-field-control {
-  width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #cbd5e1;
-  border-radius: 6px; font-size: 0.9rem; outline: none; transition: border-color 0.2s;
-}
-.form-field-control:focus { border-color: #df446e; }
-.text-area-control { resize: vertical; font-family: inherit; }
-
-.select-field-wrapper { position: relative; }
-.dropdown-control { appearance: none; background-color: white; cursor: pointer; }
-
-/* Primary Submit Buttons Block Framework Alignment Grid Row configuration overrides */
-.form-action-row-buttons { display: flex; gap: 14px; margin-top: 10px; }
-.btn-form-action {
-  flex: 1; padding: 12px; font-size: 0.95rem; font-weight: 600; border: none;
-  border-radius: 6px; cursor: pointer; transition: opacity 0.2s;
-}
-
-.btn-action-save { background-color: #e2e8f0; color: #475569; }
-.btn-action-publish { background-color: #df446e; color: white; }
-.btn-form-action:hover { opacity: 0.9; }
-
-/* Right Column Table Dashboard Card Lists Layout Structure Rules */
-.mini-table-container { overflow-x: auto; }
-.mini-ledger-table { width: 100%; border-collapse: collapse; text-align: left; }
-.mini-ledger-table th {
-  padding: 10px 14px; font-size: 0.8rem; font-weight: 600; color: #64748b;
-  text-transform: uppercase; border-bottom: 1px solid #f1f5f9; background-color: #fafbfc;
-}
-.mini-ledger-table td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-
-.mini-product-identity { display: flex; align-items: center; gap: 12px; }
-.mini-prod-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background-color: #f1f5f9; }
-
-.mini-prod-meta-labels { display: flex; flex-direction: column; }
-.mini-prod-title-name { font-size: 0.9rem; font-weight: 600; color: #1e293b; }
-.mini-prod-sku-subtitle { font-size: 0.75rem; color: #94a3b8; margin-top: 1px; }
-
-.mini-prod-price-label { font-size: 0.9rem; font-weight: 700; color: #1e293b; }
-.mini-prod-stock-label { font-size: 0.85rem; color: #475569; font-weight: 500; }
-
-.mini-status-tag {
-  background-color: #ecfdf5; color: #10b981; padding: 4px 10px; border-radius: 4px;
-  font-size: 0.8rem; font-weight: 600; display: inline-block;
-}
-.tag-out-stock { background-color: #fff1f2; color: #f43f5e; }
-
-.actions-header-cell { text-align: center; }
-.mini-action-row-buttons { display: flex; gap: 4px; justify-content: center; }
-.mini-action-btn {
-  background: white; border: 1px solid #cbd5e1; padding: 5px 10px; font-size: 0.8rem;
-  font-weight: 600; border-radius: 4px; cursor: pointer; color: #475569;
-}
-.btn-mini-delete { color: #df446e; border-color: #fcced7; background-color: #fff5f7; }
-
-/* Right Column Promotion Module List alignment properties specifications rules */
-.promotions-list-wrapper { display: flex; flex-direction: column; gap: 10px; }
-.promotion-row-item-bar {
-  border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; display: flex;
-  align-items: center; gap: 14px; background-color: #fafbfc; cursor: pointer;
-}
-.promo-index-num { font-weight: 700; font-size: 0.95rem; }
-.text-pink { color: #df446e; }
-.promo-description-details { font-size: 0.9rem; font-weight: 500; color: #334155; flex: 1; }
-.promo-item-arrow { color: #94a3b8; font-size: 1.1rem; }
-
-.btn-update-promotions-action {
-  margin-top: 6px; border: 1px solid #cbd5e1; background-color: white; color: #475569;
-  padding: 10px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
-  align-self: center; width: 160px; text-align: center;
-}
-
-/* Low Stock Alert Status Modules Blocks layout structural definitions specifications */
-.low-stock-header-strip {
-  display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px;
-}
-.badge-alert-label-danger {
-  background-color: #fff1f2; color: #f43f5e; padding: 4px 10px; border-radius: 4px;
-  font-size: 0.8rem; font-weight: 600; border: 1px solid #ffe4e6;
-}
-
-.alerts-list-stacked-rows { display: flex; flex-direction: column; gap: 2px; }
-.alert-stock-item-row {
-  padding: 12px 4px; display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 1px solid #f8fafc;
-}
-.alert-stock-item-row:last-child { border: none; }
-.alert-product-title-text { font-size: 0.9rem; font-weight: 500; color: #475569; }
-.alert-badge-status-pill { font-size: 0.8rem; font-weight: 600; color: #f43f5e; }
-
-
-
-
-
- 
