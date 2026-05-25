@@ -416,6 +416,7 @@ function AddProduct() {
               <input
                 type="text"
                 name="colors"
+                multiple
                 placeholder="Color Options (e.g. Gold, Rose Gold)"
                 className="form-input"
                 value={color}
@@ -441,7 +442,7 @@ function AddProduct() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px' }}>
               <input 
                 type="checkbox" 
-                name="isUseMOQ"
+                name="isAllowBelowMOQ"
                 id="allowBelowMoq" 
                 checked={allowBelowMoq}
                 onChange={(e) => setAllowBelowMoq(e.target.checked)}

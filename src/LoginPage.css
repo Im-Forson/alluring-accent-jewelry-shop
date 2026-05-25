@@ -1,10 +1,3 @@
-/* RESET */
-/* *{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-} */
-
 
 /* PAGE */
 .login-page{
@@ -14,11 +7,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-
-  
-
   font-family: "Segoe UI", sans-serif;
-
   overflow: hidden;
   position: relative;
 }
@@ -46,6 +35,27 @@
   bottom: -150px;
   right: -150px;
 }
+
+
+.signup-link{
+  color: #000;
+  text-align: center;
+  font-size: 14px;
+  margin-top: -10px;
+} 
+
+
+.signup-link a{
+  color: #B76E79;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.signup-link a:hover{
+  text-decoration: underline;
+  color: #F4C2C2;
+}
+
 
 
 /* GLASS CARD */
@@ -110,7 +120,7 @@
 
 
 /* INPUT GROUP */
-.input-group{
+.lg-input-group{
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -118,7 +128,7 @@
 
 
 /* LABEL */
-.input-group label{
+.lg-input-group label{
   color: #cbd5e1;
   font-size: 13px;
   font-weight: 600;
@@ -126,7 +136,7 @@
 
 
 /* INPUT BOX */
-.input-box{
+.lg-input-box{
   position: relative;
   display: flex;
   align-items: center;
@@ -134,7 +144,7 @@
 
 
 /* INPUT FIELD */
-.input-box input{
+.lg-input-box input{
   width: 100%;
   height: 55px;
 
@@ -157,13 +167,13 @@
 
 
 /* PLACEHOLDER */
-.input-box input::placeholder{
+.lg-input-box input::placeholder{
   color: #64748b;
 }
 
 
 /* INPUT FOCUS */
-.input-box input:focus{
+.lg-input-box input:focus{
   border-color: #B76E79;
 
   background: rgba(255,255,255,0.06);
@@ -174,7 +184,7 @@
 
 
 /* LEFT ICON */
-.left-icon{
+.lg-input-box .lg-left-icon{
   position: absolute;
   left: 15px;
 
@@ -185,7 +195,7 @@
 
 
 /* RIGHT ICON */
-.right-icon{
+.lg-right-icon{
   position: absolute;
   right: 15px;
 

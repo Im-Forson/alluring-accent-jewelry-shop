@@ -93,25 +93,32 @@ function Login() {
         </h1>
 
         <p className="login-subtitle">
-          Login to continue
+          Don't have an account?{" "}
+          <span
+            className="signup-link"
+            onClick={() => navigate("/signup")}
+          >
+            <a href="/signup">Sign up</a>
+          </span>
         </p>
 
 
         {/* EMAIL */}
 
-        <div className="input-group">
+        <div className="lg-input-group">
 
           <label> <strong>Username</strong> </label>
 
-          <div className="input-box">
+          <div className="lg-input-box">
 
             <FontAwesomeIcon
               icon={faUser}
-              className="left-icon"
+              className="lg-left-icon"
             />
 
             <input
               type="email"
+              name="email"
               placeholder="Enter admin email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -125,19 +132,20 @@ function Login() {
 
         {/* PASSWORD */}
 
-        <div className="input-group">
+        <div className="lg-input-group">
 
           <label> <strong>Password</strong> </label>
 
-          <div className="input-box">
+          <div className="lg-input-box">
 
             <FontAwesomeIcon
               icon={faLock}
-              className="left-icon"
+              className="lg-left-icon"
             />
 
             <input
               type={showPassword ? "text" : "password"}
+              name="password"
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -145,7 +153,7 @@ function Login() {
 
             <FontAwesomeIcon
               icon={showPassword ? faEye : faEyeSlash}
-              className="right-icon"
+              className="lg-right-icon"
               onClick={() =>
                 setShowPassword(!showPassword)
               }
