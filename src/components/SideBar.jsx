@@ -1,5 +1,5 @@
 import '../SideBar.css';
-import { NavLink, useNavigate} from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import {
   FiBox,
   FiClipboard,
@@ -7,23 +7,41 @@ import {
   FiMenu,
   FiX
 } from 'react-icons/fi';
-import { BiHomeAlt } from 'react-icons/bi';
-import { useState } from "react";
+// import { BiHomeAlt } from 'react-index';
+import { BiHomeAlt as HomeIcon } from 'react-icons/bi';
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 export default function SideBar() {
-
   const navigate = useNavigate();
-
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // 1. Mobile viewport height calculation and background scroll lock fix
+  useEffect(() => {
+    const calculateViewportHeight = () => {
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    calculateViewportHeight();
+    window.addEventListener('resize', calculateViewportHeight);
+
+    // Stop background dashboard scrolling entirely while drawer is expanded
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      window.removeEventListener('resize', calculateViewportHeight);
+      document.body.style.overflow = "unset";
+    };
+  }, [menuOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-
-    toast.success("Logged out", {
-      duration: 2000,
-    });
-
+    toast.success("Logged out", { duration: 2000 });
     navigate("/login");
   };
 
@@ -33,21 +51,16 @@ export default function SideBar() {
 
   return (
     <>
-
       {/* Mobile Topbar */}
       <div className="mobile-topbar">
-
-        <h2 className="mobile-logo">
-          Admin Panel
-        </h2>
-
+        <h2 className="mobile-logo">Admin Panel</h2>
         <button
           className="menu-toggle"
+          aria-label="Toggle Side Navigation"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? <FiX /> : <FiMenu />}
         </button>
-
       </div>
 
       {/* Overlay */}
@@ -59,9 +72,7 @@ export default function SideBar() {
       )}
 
       <aside className={`sidebar ${menuOpen ? "show-sidebar" : ""}`}>
-
         <nav className="sidebar-nav">
-
           <NavLink
             to="/dashboard"
             onClick={closeMenu}
@@ -69,7 +80,7 @@ export default function SideBar() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="icon"><BiHomeAlt /></span>
+            <span className="icon"><HomeIcon /></span>
             Dashboard
           </NavLink>
 
@@ -116,34 +127,18 @@ export default function SideBar() {
             <span className="icon"><FiTag /></span>
             Promotions
           </NavLink>
-
-           {/* <NavLink
-            to="/inventory"
-            onClick={closeMenu}
-            className={({ isActive }) =>
-              isActive ? "nav-item active" : "nav-item"
-            }
-          >
-            <span className="icon"><FiTag /></span>
-            Inventory
-          </NavLink> */}
-
         </nav>
 
         <div className="sidebar-bottom">
-
           <div className="user-profile">
-
             <img
               src="https://i.pravatar.cc/150?img=47"
-              alt="Admin"
+              alt="Admin Profile Avatar"
               className="avatar"
             />
-
             <div className="user-info">
               <strong>Admin</strong>
             </div>
-
           </div>
 
           <button
@@ -152,11 +147,8 @@ export default function SideBar() {
           >
             Log Out
           </button>
-
         </div>
-
       </aside>
-
     </>
   );
 }

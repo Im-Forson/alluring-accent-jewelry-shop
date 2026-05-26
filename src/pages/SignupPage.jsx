@@ -59,7 +59,7 @@ function SignupPage() {
 
       <div className="singup-cont">
         <div className="signup-card">
-          <h1 className="signup-title">ADMIN SIGN UP</h1>
+          <h1 className="signup-title">Admin Sign Up</h1>
           <p className='p-text'>Please fill in the details below to create an admin account.</p>
 
           <form onSubmit={handleSignupSubmit} noValidate>
