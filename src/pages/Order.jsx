@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../Order.css';
 import {
-  FiSearch, FiBell, FiChevronDown, FiDownload, FiX, FiAlertTriangle, FiMenu
+  FiSearch, FiBell, FiChevronDown, FiDownload, FiX, FiAlertTriangle
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import SideBar from '../components/SideBar';
@@ -76,7 +76,7 @@ function Order() {
         date: 'May 21, 2026',
         avatar: 'https://i.pravatar.cc/150?img=43',
         mainAction: 'View',
-        altAction: 'Track',
+        altAction: 'Delete',
         customerDetails: { phone: '+233 20 555 0192', email: 'olivia.w@example.com', address: '77 Kwashieman Road, Accra' },
         paymentMethod: 'Mobile Money (Telecel)',
         itemBreakdown: [
@@ -140,10 +140,8 @@ function Order() {
     const updated = orders.map(order => {
       if (order.id === id) {
         let derivedAltAction = order.altAction;
-        if (newStatus === 'Completed' || newStatus === 'Cancelled') {
+        if (newStatus === 'Completed' || newStatus === 'Cancelled' || newStatus === 'Shipped') {
           derivedAltAction = 'Delete';
-        } else if (newStatus === 'Shipped') {
-          derivedAltAction = 'Track';
         }
 
         return {
@@ -225,18 +223,6 @@ function Order() {
     ), { duration: 5000 });
   };
 
-  const handleTrackOrder = (order) => {
-    toast(`📦 Courier Tracking: In Transit\n📍 Destination: ${order.customerDetails.address}`, {
-      duration: 4000,
-      icon: '🚚',
-      style: {
-        fontSize: '13px',
-        color: '#1e293b',
-        whiteSpace: 'pre-line'
-      }
-    });
-  };
-
   const handleExportData = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orders, null, 2));
     const downloadAnchor = document.createElement('a');
@@ -261,7 +247,6 @@ function Order() {
               className="mobile-hamburger-btn"
               onClick={() => setSidebarOpen(true)}
             >
-             
             </button>
             <h1>Orders Overview</h1>
           </div>
@@ -430,13 +415,6 @@ function Order() {
                             >
                               Delete
                             </button>
-                          ) : order.altAction === 'Track' ? (
-                            <button
-                              className="btn-row-alt alt-track"
-                              onClick={() => handleTrackOrder(order)}
-                            >
-                              Track
-                            </button>
                           ) : (
                             <button
                               className="btn-row-alt alt-cancel"
@@ -558,7 +536,6 @@ const dropdownHeaderStyle = { padding: '10px 12px', borderBottom: '1px solid #f1
 const dropdownItemStyle = { display: 'flex', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid #f8fafc', fontSize: '12px', color: '#334155', cursor: 'pointer' };
 const clearSearchBtnStyle = { border: 'none', background: 'none', position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' };
 
-// Fixed overlay initialization values
 const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'flex-end', zIndex: 1000 };
 const modalContentStyle = { width: '100%', maxWidth: '460px', height: '100%', backgroundColor: '#fff', boxShadow: '-4px 0 25px -5px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column' };
 const modalHeaderStyle = { padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' };

@@ -70,8 +70,8 @@ function SignupPage() {
                 <FontAwesomeIcon icon={faUser} className="sup-left-icon" />
                 <input 
                   type="text" 
-                  id="username"
                   name="username"
+                  id="username"
                   placeholder="Enter Your Username" 
                   value={formData.username}
                   onChange={handleInputChange}
@@ -148,7 +148,7 @@ function SignupPage() {
           </form>
 
           <div className="login-redirect-text" style={{ marginTop: '16px', fontSize: '13px', textAlign: 'center' }}>
-            ALREADY HAVE AN ACCOUNT? <a href="/login" className="login-link">LOGIN</a>
+            Already have an account? <a href="/login" className="login-link">Login</a>
           </div>
         </div>
       </div>

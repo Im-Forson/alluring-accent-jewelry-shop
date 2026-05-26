@@ -5,6 +5,10 @@
   overflow-y: auto;
   box-sizing: border-box;
   width: 100%;
+  /* Added mobile scroll physics and momentum optimizations */
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Header */
@@ -295,6 +299,8 @@
     display: block !important;        /* Ensures content items stack naturally downward */
     width: 100% !important;
     box-sizing: border-box !important;
+    /* Clean fluid physics tracking */
+    -webkit-overflow-scrolling: touch;
   }
   .top-header {
     margin-bottom: 20px;
