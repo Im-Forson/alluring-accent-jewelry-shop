@@ -13,11 +13,8 @@ function AddProduct() {
   const [selectedPreview, setSelectedPreview] = useState(null);
   const [mainIndex, setMainIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // --- New state for sub-MOQ permission checkbox ---
   const [allowBelowMoq, setAllowBelowMoq] = useState(false);
 
-  // --- Dynamic Option Catalogs ---
   const [availableTags, setAvailableTags] = useState([
     "Best Seller", "New", "Hot", "Popular", "Trending",
     "Sale", "Featured", "Coming Soon", "Limited Offer", "Pre Order",
@@ -28,7 +25,6 @@ function AddProduct() {
     "Rings", "Necklaces", "Earrings", "Bracelets", "Anklets", "Pendants"
   ]);
 
-  // --- Searchable Input States ---
   const [tagInput, setTagInput] = useState("");
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const tagDropdownRef = useRef(null);
@@ -37,13 +33,11 @@ function AddProduct() {
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const categoryDropdownRef = useRef(null);
 
-  // Live Camera Refs & State
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState("environment");
   const [isCameraOpen, setIsCameraOpen] = useState(false);
 
-  // Filter Logic matching live keywords
   const filteredTags = availableTags.filter((tag) =>
     tag.toLowerCase().includes(tagInput.toLowerCase())
   );
@@ -52,11 +46,9 @@ function AddProduct() {
     cat.toLowerCase().includes(categoryInput.toLowerCase())
   );
 
-  // Detect if the exact typed phrase exists anywhere in the collections
   const tagExactExists = availableTags.some(t => t.toLowerCase() === tagInput.trim().toLowerCase());
   const categoryExactExists = availableCategories.some(c => c.toLowerCase() === categoryInput.trim().toLowerCase());
 
-  // Handle closing searchable options if clicking outside target boundaries
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target)) {
@@ -91,12 +83,12 @@ function AddProduct() {
     e.preventDefault();
 
     if (!categoryInput.trim()) {
-      toast.error("Please choose or type a product category designation."); // <-- Native alert fixed
+      toast.error("Please choose or type a product category designation.");
       return;
     }
 
     if (mediaFiles.length === 0) {
-      toast.error("Please upload or capture at least one image or video."); // <-- Native alert fixed
+      toast.error("Please upload or capture at least one image or video.");
       return;
     }
 
@@ -142,7 +134,7 @@ function AddProduct() {
       const updatedInventory = [...existingProducts, newProduct];
       localStorage.setItem("inventoryProducts", JSON.stringify(updatedInventory));
 
-      toast.success("Product published successfully!"); // <-- Native alert fixed
+      toast.success("Product published successfully!");
 
       setProductsArray(prev => [...prev, { ...newProduct, media: mediaFiles }]);
       setMediaFiles([]);
@@ -158,7 +150,7 @@ function AddProduct() {
 
     } catch (error) {
       console.error("Error processing media strings:", error);
-      toast.error("An error occurred while saving product media."); // <-- Native alert fixed
+      toast.error("An error occurred while saving product media.");
     }
   };
 
@@ -177,7 +169,7 @@ function AddProduct() {
       }, 100);
     } catch (err) {
       console.error("Camera access error:", err);
-      toast.error("Camera permissions were denied or are currently unavailable."); // <-- Native alert fixed
+      toast.error("Camera permissions were denied or are currently unavailable.");
     }
   };
 
@@ -225,14 +217,13 @@ function AddProduct() {
               className="hamburger-menu-btn" 
               onClick={() => setSidebarOpen(true)}
             >
-             
+
             </button>
             <h1>Add New Product</h1>
           </div>
         </header>
 
         <form className="product-form" onSubmit={handleSubmit}>
-
           <div className="media-upload-card">
             <div className="media-upload-header">
               <h3>Product Media</h3>
@@ -358,7 +349,6 @@ function AddProduct() {
             <input type="number" name="price" placeholder="Price (₵)" className="form-input" required />
           </div>
 
-          {/* --- CATEGORY COMBOBOX --- */}
           <div className="input-group select-wrapper" ref={categoryDropdownRef}>
             <input
               type="text"
@@ -435,7 +425,6 @@ function AddProduct() {
             </div>
           </div>
 
-          {/* MOQ INPUT GROUP EXTENDED WITH INLINE STYLED OVERRIDE CHECKBOX BELOW */}
           <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <input type="number" min="1" name="moq" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
             
@@ -458,7 +447,6 @@ function AddProduct() {
             <input type="number" name="stock" placeholder="Stock Quantity" className="form-input" required />
           </div>
 
-          {/* --- TAG COMBOBOX --- */}
           <div className="input-group tag-wrapper" ref={tagDropdownRef}>
             <input
               type="text"
