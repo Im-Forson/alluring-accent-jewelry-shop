@@ -79,9 +79,6 @@ export default function HomePage() {
             loadBestSellers(bestSellers);
             // loadSuccessfulOrder(successfullOrdersDummy);
             
-            console.log('products:', products[0]);
-
-
           } catch (error) {
             setDataError(true);
 
