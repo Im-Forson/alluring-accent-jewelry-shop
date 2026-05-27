@@ -3,17 +3,20 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faLock, faEyeSlash, faEye, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-hot-toast';
+import axios from 'axios'; 
+import { useNavigate } from "react-router";
 
 function SignupPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 2. Loading state to disable button during request
   
   // Unified form state management
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
     password: "",
-    confirmPassword: ""
+    confirmedPassword: ""
   });
 
   const handleInputChange = (e) => {
@@ -24,31 +27,69 @@ function SignupPage() {
     }));
   };
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => { // 3. Made function async
     e.preventDefault();
-    const { username, email, password, confirmPassword } = formData;
+    const { username, password, confirmedPassword } = formData;
 
     // Basic frontend verification fields
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !password || !confirmedPassword) {
       toast.error("Please fill in all layout credentials.");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (password !== confirmedPassword) {
       toast.error("Passwords do not match!");
       return;
     }
 
-    // Mock successful database creation action
-    toast.success(`Admin account for ${username} created successfully!`);
-    
-    // Clear form entries on success
-    setFormData({
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: ""
-    });
+    try {
+      setIsSubmitting(true);
+
+      // 4. Send the payload to your live Render backend
+      const response = await axios.post(
+        'https://alluring-accent-backend.onrender.com/api/admin/signup', 
+        {
+          username: username.trim(),
+          password: password,
+          confirmedPassword: confirmedPassword
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log("Signup response:", response);
+
+      // 5. Handle successful creation based on standard HTTP success statuses
+      if (response.status === 200 || response.status === 201) {
+        toast.success(`Admin account for ${username} created successfully!`);
+        
+        // Clear form entries on success
+        setFormData({
+          username: "",
+          password: "",
+          confirmedPassword: ""
+        });
+      }
+
+      //navigate("/login"); // Optionally redirect to login after successful signup
+       setTimeout(() => {
+        navigate("/login");
+      }, 2000); // Redirect after a short delay to allow users to see the success message
+
+      
+
+    } catch (error) {
+      console.error("Signup network error:", error);
+      
+      // 6. Capture whatever custom message your backend developer sends back (like "Email already in use")
+      const backendMessage = error.response?.data?.message || "Could not connect to the authentication host.";
+      toast.error(backendMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -75,27 +116,11 @@ function SignupPage() {
                   placeholder="Enter Your Username" 
                   value={formData.username}
                   onChange={handleInputChange}
+                  disabled={isSubmitting} // Lock input during submission
                   required
                 />
               </div>
-            </div>
-
-            {/* EMAIL */}
-            <div className="sup-input-group">
-              <label className='signup-label' htmlFor="email">EMAIL</label>
-              <div className="sup-input-box">
-                <FontAwesomeIcon icon={faEnvelope} className="sup-left-icon" />
-                <input 
-                  type="email" 
-                  id="email"
-                  name="email"
-                  placeholder="Enter Your Email" 
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
+            </div> 
 
             {/* PASSWORD */}
             <div className="sup-input-group">
@@ -109,6 +134,7 @@ function SignupPage() {
                   placeholder='Enter Your Password' 
                   value={formData.password}
                   onChange={handleInputChange}
+                  disabled={isSubmitting} // Lock input during submission
                   required
                 />
                 <FontAwesomeIcon 
@@ -122,16 +148,17 @@ function SignupPage() {
 
             {/* CONFIRM PASSWORD */}
             <div className="sup-input-group">
-              <label className='signup-label' htmlFor="confirmPassword">CONFIRM PASSWORD</label>
+              <label className='signup-label' htmlFor="confirmedPassword">CONFIRM PASSWORD</label>
               <div className="sup-input-box">
                 <FontAwesomeIcon icon={faLock} className="sup-left-icon" />
                 <input 
                   type={showConfirmPassword ? "text" : "password"} 
-                  id="confirmPassword"
-                  name="confirmPassword"
+                  id="confirmedPassword"
+                  name="confirmedPassword"
                   placeholder='Confirm Your Password' 
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
+                  disabled={isSubmitting} // Lock input during submission
                   required
                 />
                 <FontAwesomeIcon 
@@ -144,7 +171,14 @@ function SignupPage() {
             </div>
 
             {/* SIGN UP BUTTON */}
-            <button type="submit" className="signup-btn">Sign Up</button>
+            <button 
+              type="submit" 
+              className="signup-btn"
+              disabled={isSubmitting} // Prevent multi-clicks
+              style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+            >
+              {isSubmitting ? "Creating Account..." : "Sign Up"}
+            </button>
           </form>
 
           <div className="login-redirect-text" style={{ marginTop: '16px', fontSize: '13px', textAlign: 'center' }}>

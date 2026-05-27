@@ -3,6 +3,7 @@ import '../AddProduct.css';
 import { FiCamera, FiChevronDown, FiX, FiMenu } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import toast from 'react-hot-toast'; 
+import axios from 'axios'; // Linked: Added axios import for backend communication
 
 function AddProduct() {
   const [color, setColor] = useState("");
@@ -13,16 +14,17 @@ function AddProduct() {
   const [selectedPreview, setSelectedPreview] = useState(null);
   const [mainIndex, setMainIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [allowBelowMoq, setAllowBelowMoq] = useState(false);
+  const [isAllowBelowMoq, setAllowBelowMoq] = useState(false);
 
   const [availableTags, setAvailableTags] = useState([
     "Best Seller", "New", "Hot", "Popular", "Trending",
     "Sale", "Featured", "Coming Soon", "Limited Offer", "Pre Order",
-    "Classic", "Wedding", "Mother's Day"
+    "Classic", "Wedding", "Mother's Day", "Father's Day", "Anniversary", "Birthstone", 
+    "Customizable", "Handmade", "Luxury", "Minimalist"
   ]);
 
   const [availableCategories, setAvailableCategories] = useState([
-    "Rings", "Necklaces", "Earrings", "Bracelets", "Anklets", "Pendants"
+    "Rings", "Necklaces", "Earrings", "Bracelets", "Anklets", "Brooches", "Cufflinks","Body Jewelry", "Watches"
   ]);
 
   const [tagInput, setTagInput] = useState("");
@@ -103,10 +105,13 @@ function AddProduct() {
       });
     };
 
+    // Trigger a processing loader toast to keep the user informed while media transfers
+    const loadId = toast.loading("Processing and uploading product configurations...");
+
     try {
-      const base64MediaStrings = await Promise.all(
-        mediaFiles.map((file) => convertToBase64(file))
-      );
+      // const base64MediaStrings = await Promise.all(
+      //   mediaFiles.map((file) => convertToBase64(file))
+      // );
 
       if (tagInput.trim() && !tagExactExists) {
         setAvailableTags(prev => [...prev, tagInput.trim()]);
@@ -115,25 +120,46 @@ function AddProduct() {
         setAvailableCategories(prev => [...prev, categoryInput.trim()]);
       }
 
-      const newProduct = {
-        id: `prod_${Date.now()}`,
+      // Build out data object payload according to your endpoint's field configurations
+      const payload = {
         name: formData.get("name"),
         description: formData.get("description"),
-        price: formData.get("price"),
+        price: parseFloat(formData.get("price")),
         category: categoryInput.trim(),
-        moq: formData.get("moq"),
-        allowBelowMoq: allowBelowMoq,
-        stock: formData.get("stock"),
+        minimumOrder: parseInt(formData.get("minimumOrder"), 10),
+        isAllowBelowMOQ: isAllowBelowMoq,
+        stock: parseInt(formData.get("stock"), 10),
         tag: tagInput.trim(),
         colors: [...colors],
-        mainIndex: mainIndex,
-        media: base64MediaStrings,
+        images: mediaFiles,
+      };
+
+      console.log(localStorage.getItem("ACCESS_TOKEN"))
+
+      // Linked: Dispatching to live cloud backend endpoint
+      const response = await axios.post(
+        'https://alluring-accent-backend.onrender.com/api/product/create', 
+        payload,
+
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
+          }
+        }
+      );
+
+      // Keep your existing client fallback state updates matching current system flows
+      const newProduct = {
+        id: response.data?.product?._id || `prod_${Date.now()}`,
+        ...payload
       };
 
       const existingProducts = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
       const updatedInventory = [...existingProducts, newProduct];
       localStorage.setItem("inventoryProducts", JSON.stringify(updatedInventory));
 
+      toast.dismiss(loadId);
       toast.success("Product published successfully!");
 
       setProductsArray(prev => [...prev, { ...newProduct, media: mediaFiles }]);
@@ -149,8 +175,11 @@ function AddProduct() {
       }
 
     } catch (error) {
-      console.error("Error processing media strings:", error);
-      toast.error("An error occurred while saving product media.");
+      console.error("Network upload execution error:", error);
+      toast.dismiss(loadId);
+      
+      const errMsg = error.response?.data?.message || "An error occurred while saving product media.";
+      toast.error(errMsg);
     }
   };
 
@@ -217,7 +246,7 @@ function AddProduct() {
               className="hamburger-menu-btn" 
               onClick={() => setSidebarOpen(true)}
             >
-
+              <FiMenu />
             </button>
             <h1>Add New Product</h1>
           </div>
@@ -279,7 +308,7 @@ function AddProduct() {
 
           <input
             type="file"
-            name="image"
+            name="images"
             id="productMedia"
             hidden
             multiple
@@ -426,14 +455,14 @@ function AddProduct() {
           </div>
 
           <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <input type="number" min="1" name="moq" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
+            <input type="number" min="1" name="minimumOrder" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px' }}>
               <input 
                 type="checkbox" 
                 name="isAllowBelowMOQ"
                 id="allowBelowMoq" 
-                checked={allowBelowMoq}
+                checked={isAllowBelowMoq}
                 onChange={(e) => setAllowBelowMoq(e.target.checked)}
                 style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#e11d48', margin: 0 }} 
               />

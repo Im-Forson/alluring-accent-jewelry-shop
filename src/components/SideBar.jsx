@@ -11,6 +11,7 @@ import {
 import { BiHomeAlt as HomeIcon } from 'react-icons/bi';
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import axios from 'axios'; // 1. Imported axios
 
 export default function SideBar() {
   const navigate = useNavigate();
@@ -39,10 +40,27 @@ export default function SideBar() {
     };
   }, [menuOpen]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    toast.success("Logged out", { duration: 2000 });
-    navigate("/login");
+  // 2. Updated to an async network function hitting the cloud signout route
+  const handleLogout = async () => {
+    try {
+      // Hit the live signout endpoint on your Render backend
+      await axios.post('https://alluring-accent-backend.onrender.com/api/admin/signout', {}, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (error) {
+      // Log error silently so the user is still cleared out locally even if connection drops
+      console.error("Backend signout error:", error);
+    } finally {
+      // Clear all active local session tokens cleanly
+      localStorage.removeItem("adminLoggedIn");
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("token");
+      
+      toast.success("Logged out successfully", { duration: 2000 });
+      navigate("/login");
+    }
   };
 
   const closeMenu = () => {
