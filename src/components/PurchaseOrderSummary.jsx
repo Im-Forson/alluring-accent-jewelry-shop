@@ -196,7 +196,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   {
                     orders.map((order, index) => (
                       <div key={index} className="pb-3 mb-3 border-b border-zinc-200/60 flex flex-col gap-0.5">
-                        <span className="text-xs font-bold font-sans capitalize text-zinc-800 truncate">{order.title}</span>
+                        <span className="text-xs font-bold font-sans capitalize text-zinc-800 truncate">{order.name}</span>
                         <div className="flex justify-between mt-[2px]">
                           <span className="text-[11px] font-semibold font-sans text-zinc-400">{order.quantity} x {orderDetails.currency}{order.price.toLocaleString()}</span>
                           <span className="text-[11px] font-semibold font-sans text-zinc-400">{orderDetails.currency}{order.totalPrice.toLocaleString()}</span>

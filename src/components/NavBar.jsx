@@ -213,7 +213,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                         ) : (
                             favorites.map(item => (
                                 <div key={item.id} className="flex gap-3 bg-pink-50 p-3 items-center">
-                                    <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover  shrink-0" />
+                                    <img src={item.images[0]} alt={item.name} className="w-16 h-16 rounded-lg object-cover  shrink-0" />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
                                             <h4 className="text-sm font-bold font-sans text-zinc-800 truncate capitalize font-mono mb-1">{item.name}</h4>

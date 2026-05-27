@@ -8,6 +8,9 @@ export function ShopProvider({ children }) {
     const [allProducts, setAllProducts] = useState([]);
     const [viewingProduct, setViewingProduct] = useState({});
 
+    const [ishomeDataLoading, setisHomeDataLoading] = useState(true);
+    const [isShopDataLoading, setisShopDataLoading] = useState(true);
+    const [isBestSellersDataLoading, setIsBestSellersDataLoading] = useState(true);
     const [] = useState([]);
 
     const [orders, setOrders] = useState([]);
@@ -26,6 +29,18 @@ export function ShopProvider({ children }) {
     const [shopColor, setShopColor] = useState("All Colors");
     const [shopPrice, setShopPrice] = useState("All Prices");
     const [shopCollection, setShopCollection] = useState("All Collections");
+
+    const setHomeDataLoading = (val) => {
+        setisHomeDataLoading(val);
+    }
+
+    const setShopDataLoading = (val) => {
+        setisShopDataLoading(val);
+    }
+
+    const setBestSellersDataLoading = (val) => {
+        setIsBestSellersDataLoading(val);
+    }
 
     const activatePage = (page) => {
         setActivePage(page);
@@ -57,7 +72,7 @@ export function ShopProvider({ children }) {
         if (existingItem) {
             return prevCart;
         }
-
+        removeFavorite(product.id);
         return [...prevCart, product];
         });
     };
@@ -110,13 +125,14 @@ export function ShopProvider({ children }) {
             setFavorites((prev) => [updatedAllProduct[productIndex], ...prev]);
         } else {
             const newFavorites = favorites.filter(
-                (item) => item.id !== updatedAllProduct[id].id
+                (item, index) => item.id !== updatedAllProduct[productIndex].id
             );
             setFavorites(newFavorites);
         }
     };
 
     const removeFavorite = (id) => {
+        console.log('removing...')
         setFavorites(favorites.filter(item => item.id !== id));
 
         // Remove favorite in all products
@@ -153,6 +169,13 @@ export function ShopProvider({ children }) {
     return (
         <ShopContext.Provider 
             value={{
+                ishomeDataLoading,
+                setHomeDataLoading,
+                isShopDataLoading,
+                setShopDataLoading,
+                isBestSellersDataLoading,
+                setBestSellersDataLoading,
+
                 allProducts,
                 loadAllProducts,
 
