@@ -102,6 +102,17 @@ export default function SideBar() {
             Dashboard
           </NavLink>
 
+            <NavLink
+            to="/category"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><FiBox /></span>
+            Category
+          </NavLink>
+
           <NavLink
             to="/addproduct"
             onClick={closeMenu}

@@ -18,6 +18,7 @@ import Promotion from './pages/Promotion';
 import ManageProduct from './pages/ManageProduct';
 import AllProducts from './pages/AllProducts';
 import AllBestSellers from './pages/AllBestSellers';
+import Category from './pages/Category';
 
 
 
@@ -35,8 +36,8 @@ const appRouter = createBrowserRouter([
   {path: '/order', element: <Order/>},
   {path: '/addproduct', element: <AddProduct/>},
   {path: '/promotion', element: <Promotion/>},
-  {path: '/manageproduct', element: <ManageProduct/>}
- 
+  {path: '/manageproduct', element: <ManageProduct/>},
+  {path: '/category', element: <Category/>},
  
 
 ])
