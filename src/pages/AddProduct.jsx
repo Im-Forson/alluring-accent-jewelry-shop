@@ -20,10 +20,7 @@ function AddProduct() {
   const [isSubmitting, setSubmitting] = useState(false);
 
   const [availableTags, setAvailableTags] = useState([
-    "Best Seller", "New", "Hot", "Popular", "Trending",
-    "Sale", "Featured", "Coming Soon", "Limited Offer", "Pre Order",
-    "Classic", "Wedding", "Mother's Day", "Father's Day", "Anniversary", "Birthstone", 
-    "Customizable", "Handmade", "Luxury", "Minimalist"
+    "Best Seller", "New", "Hot", "Popular",
   ]);
 
   const [availableCategories, setAvailableCategories] = useState([
@@ -42,6 +39,8 @@ function AddProduct() {
   const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState("environment");
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+
+  const [photos, setPhotos] = useState([]);
 
   const filteredTags = availableTags.filter((tag) =>
     tag.toLowerCase().includes(tagInput.toLowerCase())
@@ -84,6 +83,36 @@ function AddProduct() {
     setColors(colors.filter((_, index) => index !== indexToRemove));
   };
 
+  const handleAddCategory = async () => {
+    setSubmitting(true);
+    const categoryLoadId = toast.loading("Creating category...");
+
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/category/create`, 
+        {category: categoryInput.trim()},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`,
+            // "Content-Type": ""
+          }
+        }
+      );
+
+      if (res.status === 201) {
+        toast.dismiss(categoryLoadId);
+        toast.error("Category created", {duration: 2000});
+        setSubmitting(false);
+      }
+    } catch (error) {
+      toast.dismiss(categoryLoadId);
+      toast.error("Category failed to create", {duration: 2000});
+      setSubmitting(false);
+    }
+    setAvailableCategories([...availableCategories, categoryInput.trim()]);
+    setIsCategoryDropdownOpen(false);
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -99,7 +128,7 @@ function AddProduct() {
         return;
       }
 
-      if (mediaFiles.length === 0) {
+      if (photos.length === 0) {
         toast.dismiss(loadId);
         toast.error("Image upload is required", {duration: 2000});
         setSubmitting(false);
@@ -141,8 +170,8 @@ function AddProduct() {
         formData.append("colors", color);
       });
 
-      mediaFiles.forEach((file) => {
-        formData.append("images", file);
+      photos.forEach((file, index) => {
+        formData.append(`images`, file);
       });
 
       if (tagInput.trim() === "") {
@@ -150,7 +179,7 @@ function AddProduct() {
       }
 
       const response = await axios.post(
-        'https://alluring-accent-backend.onrender.com/api/product/create', 
+        'http://localhost:1000/api/product/create', 
         formData,
 
         {
@@ -167,7 +196,7 @@ function AddProduct() {
 
         setColors([]);
         setColor('');
-        setMediaFiles([]);
+        setPhotos([]);
         setProductsArray([]);
         setProductsArray(null);
         setMainIndex(0);
@@ -237,6 +266,12 @@ function AddProduct() {
     if (input) input.click();
   };
 
+  
+  const handlePhotoChange = (e) => {
+    const files = Array.from(e.target.files);
+    setPhotos([...photos, ...files]);
+};
+
   return (
     <div className={`admin-layout ${sidebarOpen ? 'sidebar-active' : ''}`}>
       <SideBar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
@@ -256,7 +291,49 @@ function AddProduct() {
         </header>
 
         <form className="product-form" onSubmit={handleSubmit}>
-          <div className="media-upload-card">
+          <div>
+            <h3 className="text-xl font-semibold mb-4">Product Photos</h3>
+            <input
+                type="file"
+                multiple
+                id="images"
+                required
+                accept="image/*"
+                className="border border-[#7F8C8D] shadow-sm p-2 rounded w-full"
+                onChange={handlePhotoChange}
+            />
+
+            {/* Preview */}
+            {photos.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {photos.map((file, index) => {
+                        const objectUrl = URL.createObjectURL(file);
+                        return (
+                            <div key={index} className="relative group">
+                                <img
+                                    src={objectUrl}
+                                    alt={`preview-${index}`}
+                                    className="w-full h-32 object-cover rounded border"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const updatedPhotos = [...photos];
+                                        updatedPhotos.splice(index, 1);
+                                        setPhotos(updatedPhotos);
+                                        URL.revokeObjectURL(objectUrl);
+                                    }}
+                                    className="absolute top-1 right-1 bg-slate-500 text-white rounded-full w-6 h-6 text-xs font-bold flex items-center justify-center"
+                                >
+                                    X
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+          </div>
+          {/* <div className="media-upload-card">
             <div className="media-upload-header">
               <h3>Product Media</h3>
               <span className="media-count">{mediaFiles.length} file(s) uploaded</span>
@@ -367,7 +444,7 @@ function AddProduct() {
                 );
               })}
             </div>
-          )}
+          )} */}
 
           <div className="input-group">
             <input type="text" name="name" placeholder="Product Name" className="form-input" required />
@@ -421,10 +498,7 @@ function AddProduct() {
                 {categoryInput.trim() !== "" && !categoryExactExists && (
                   <li 
                     className="add-new-option-row"
-                    onClick={() => {
-                      setAvailableCategories([...availableCategories, categoryInput.trim()]);
-                      setIsCategoryDropdownOpen(false);
-                    }}
+                    onClick={handleAddCategory}
                   >
                     + Add New Category: "{categoryInput.trim()}"
                   </li>
