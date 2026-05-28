@@ -4,6 +4,7 @@ import { FiCamera, FiChevronDown, FiX, FiMenu } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import toast from 'react-hot-toast'; 
 import axios from 'axios'; // Linked: Added axios import for backend communication
+import { Loader2 } from 'lucide-react';
 
 function AddProduct() {
   const [color, setColor] = useState("");
@@ -14,7 +15,9 @@ function AddProduct() {
   const [selectedPreview, setSelectedPreview] = useState(null);
   const [mainIndex, setMainIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAllowBelowMoq, setAllowBelowMoq] = useState(false);
+  const [isAllowBelowMOQ, setAllowBelowMoq] = useState(false);
+
+  const [isSubmitting, setSubmitting] = useState(false);
 
   const [availableTags, setAvailableTags] = useState([
     "Best Seller", "New", "Hot", "Popular", "Trending",
@@ -84,102 +87,102 @@ function AddProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!categoryInput.trim()) {
-      toast.error("Please choose or type a product category designation.");
-      return;
-    }
-
-    if (mediaFiles.length === 0) {
-      toast.error("Please upload or capture at least one image or video.");
-      return;
-    }
-
-    const formData = new FormData(e.target);
-
-    const convertToBase64 = (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-      });
-    };
-
-    // Trigger a processing loader toast to keep the user informed while media transfers
-    const loadId = toast.loading("Processing and uploading product configurations...");
+    setSubmitting(true);
+    const loadId = toast.loading("Processing and uploading product...");
 
     try {
-      // const base64MediaStrings = await Promise.all(
-      //   mediaFiles.map((file) => convertToBase64(file))
-      // );
+
+      if (!categoryInput.trim()) {
+        toast.dismiss(loadId);
+        toast.error("Product category is required", {duration: 2000});
+        setSubmitting(false);
+        return;
+      }
+
+      if (mediaFiles.length === 0) {
+        toast.dismiss(loadId);
+        toast.error("Image upload is required", {duration: 2000});
+        setSubmitting(false);
+        return;
+      }
 
       if (tagInput.trim() && !tagExactExists) {
         setAvailableTags(prev => [...prev, tagInput.trim()]);
       }
+
       if (categoryInput.trim() && !categoryExactExists) {
         setAvailableCategories(prev => [...prev, categoryInput.trim()]);
       }
 
-      // Build out data object payload according to your endpoint's field configurations
-      const payload = {
-        name: formData.get("name"),
-        description: formData.get("description"),
-        price: parseFloat(formData.get("price")),
-        category: categoryInput.trim(),
-        minimumOrder: parseInt(formData.get("minimumOrder"), 10),
-        isAllowBelowMOQ: isAllowBelowMoq,
-        stock: parseInt(formData.get("stock"), 10),
-        tag: tagInput.trim(),
-        colors: [...colors],
-        images: mediaFiles,
-      };
+      const form = e.target;
+      const formData = new FormData(form);
 
-      console.log(localStorage.getItem("ACCESS_TOKEN"))
+      if (isAllowBelowMOQ) {
+        const productPrice = parseFloat(formData.get('price'));
+        const belowMoqPrice = parseFloat(formData.get('belowMOQPrice'));
+        if (belowMoqPrice < productPrice) {
+          toast.dismiss(loadId);
+          toast.error('Below MOQ price cannot be less than actual price!', {duration: 3000});
+          setSubmitting(false);
+          return;
+        }
+      }
 
-      // Linked: Dispatching to live cloud backend endpoint
+      if (colors.length === 0) {
+        toast.dismiss(loadId);
+        toast.error('Color is required!', {duration: 3000});
+        setSubmitting(false);
+        return;
+      }
+
+      formData.set("isAllowBelowMOQ", isAllowBelowMOQ);
+
+      colors.forEach(color => {
+        formData.append("colors", color);
+      });
+
+      mediaFiles.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      if (tagInput.trim() === "") {
+        formData.set("tag", "null")
+      }
+
       const response = await axios.post(
         'https://alluring-accent-backend.onrender.com/api/product/create', 
-        payload,
+        formData,
 
         {
           headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
+            authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`,
+            "Content-Type": "multipart/form-data",
           }
         }
       );
 
-      // Keep your existing client fallback state updates matching current system flows
-      const newProduct = {
-        id: response.data?.product?._id || `prod_${Date.now()}`,
-        ...payload
-      };
+      if (response.status === 201) {
+        toast.dismiss(loadId);
+        toast.success('Product Publised!', {duration: 2000});
 
-      const existingProducts = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
-      const updatedInventory = [...existingProducts, newProduct];
-      localStorage.setItem("inventoryProducts", JSON.stringify(updatedInventory));
-
-      toast.dismiss(loadId);
-      toast.success("Product published successfully!");
-
-      setProductsArray(prev => [...prev, { ...newProduct, media: mediaFiles }]);
-      setMediaFiles([]);
-      setColors([]);
-      setTagInput("");
-      setCategoryInput("");
-      setMainIndex(0);
-      setAllowBelowMoq(false);
-
-      if (e.target && typeof e.target.reset === 'function') {
-        e.target.reset();
+        setColors([]);
+        setColor('');
+        setMediaFiles([]);
+        setProductsArray([]);
+        setProductsArray(null);
+        setMainIndex(0);
+        setSidebarOpen(false);
+        setAllowBelowMoq(false);
+        setTagInput('');
+        setCategoryInput('');
+        setSubmitting(false);
+        form.reset()
       }
 
     } catch (error) {
-      console.error("Network upload execution error:", error);
       toast.dismiss(loadId);
-      
-      const errMsg = error.response?.data?.message || "An error occurred while saving product media.";
-      toast.error(errMsg);
+      toast.error("Pubish Unsuccessful!", {duration: 2000});
+      setSubmitting(false);
     }
   };
 
@@ -457,12 +460,18 @@ function AddProduct() {
           <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <input type="number" min="1" name="minimumOrder" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
             
+            {
+              isAllowBelowMOQ && (
+                <input type="number" min="1" name="belowMOQPrice" placeholder="Enter Below (MOQ) Price" className="form-input" required />
+              )
+            }
+            
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px' }}>
               <input 
                 type="checkbox" 
                 name="isAllowBelowMOQ"
                 id="allowBelowMoq" 
-                checked={isAllowBelowMoq}
+                checked={isAllowBelowMOQ}
                 onChange={(e) => setAllowBelowMoq(e.target.checked)}
                 style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#e11d48', margin: 0 }} 
               />
@@ -529,7 +538,15 @@ function AddProduct() {
           </div>
 
           <div className="form-actions-row">
-            <button type="submit" className="btn-primary">Publish Product</button>
+            {
+              isSubmitting ? (
+                <div className="btn-primary">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                <button type="submit" className="btn-primary">Publish Product</button>
+              )
+            }
           </div>
         </form>
       </main>
