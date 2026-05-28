@@ -7,16 +7,19 @@ import {
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useNavigate } from "react-router";
-import toast from 'react-hot-toast'; // Imported react-hot-toast
+import toast from 'react-hot-toast'; 
+import axios from 'axios';
 
 function ManageProduct() {
   const navigate = useNavigate();
   const [productList, setProductList] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Interactive UI States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
+  const [selectedEditPreview, setSelectedEditPreview] = useState(null);
   
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,12 +39,12 @@ function ManageProduct() {
 
   // --- DYNAMIC PAGINATION STATES ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 100; 
+  const itemsPerPage = 25; 
 
   const dropdownRef = useRef(null);
   const filterRef = useRef(null);
 
-  // Sync data from localStorage and handle outside clicks
+  // Load backend database and handle outside click triggers
   useEffect(() => {
     loadProducts();
     
@@ -60,42 +63,60 @@ function ManageProduct() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  const loadProducts = () => {
-    const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
-    
-    const outOfStock = storedItems.filter(item => (parseInt(item.stock) || 0) === 0);
-    const lowStock = storedItems.filter(item => {
-      const stockVal = parseInt(item.stock) || 0;
-      return stockVal < 50 && stockVal > 0;
-    });
+  // --- LIVE BACKEND REFRESH ENGINE ---
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/product/all');
+      
+      // Adapt based on incoming database array wrapper safely
+      const storedItems = response.data || [];
+      
+      // Compute alerts dynamically from database snapshot
+      const outOfStock = storedItems.filter(item => (parseInt(item.stock) || 0) === 0);
+      const lowStock = storedItems.filter(item => {
+        const stockVal = parseInt(item.stock) || 0;
+        return stockVal < 50 && stockVal > 0;
+      });
 
-    setNotifMetrics({
-      lowStockItems: lowStock,
-      outOfStockItems: outOfStock,
-      totalAlertsCount: outOfStock.length + lowStock.length
-    });
+      setNotifMetrics({
+        lowStockItems: lowStock,
+        outOfStockItems: outOfStock,
+        totalAlertsCount: outOfStock.length + lowStock.length
+      });
 
-    const dynamicProducts = storedItems.map((item) => {
-      let resolvedThumb = "https://via.placeholder.com/100?text=No+Media";
-      if (item.media && item.media.length > 0) {
-        resolvedThumb = item.media[item.mainIndex || 0];
-      }
-      return {
-        id: item.id,
-        name: item.name || "Unnamed Product",
-        category: item.category || 'General',
-        stock: item.stock || '0',
-        price: parseFloat(item.price || 0).toFixed(2),
-        status: parseInt(item.stock) > 0 ? 'Active' : 'Inactive',
-        image: resolvedThumb,
-        tag: item.tag || '',
-        description: item.description || '',
-        moq: item.moq || '1',
-        colors: item.colors || [],
-        media: item.media || []
-      };
-    });
-    setProductList(dynamicProducts);
+      // Map MongoDB document parameters seamlessly to your UI components
+      const dynamicProducts = storedItems.map((item, idx) => {
+        let resolvedThumb = "https://via.placeholder.com/100?text=No+Media";
+        if (item.images && item.images.length > 0) {
+          resolvedThumb = item.images[0];
+        } else if (item.media && item.media.length > 0) {
+          resolvedThumb = item.media[item.mainIndex || 0];
+        }
+        
+        return {
+          id: item.id || item.id || `product-${idx}`,
+          name: item.name || "Unnamed Product",
+          category: item.category || 'General',
+          stock: item.stock || '0',
+          price: parseFloat(item.price || 0).toFixed(2),
+          status: parseInt(item.stock) > 0 ? 'Active' : 'Inactive',
+          image: resolvedThumb,
+          tag: item.tag || '',
+          description: item.description || '',
+          moq: item.moq || '1',
+          colors: item.colors || [],
+          media: item.images || item.media || []
+        };
+      });
+      
+      setProductList(dynamicProducts);
+    } catch (error) {
+      console.error("Database connection failure:", error);
+      toast.error("Failed to synchronize inventory database.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const goToAddProduct = () => navigate("/addproduct");
@@ -130,7 +151,7 @@ function ManageProduct() {
 
   const handleExportToCSV = () => {
     if (filteredProducts.length === 0) {
-      toast.error("No data available to export."); // Replaced alert with toast.error
+      toast.error("No data available to export.");
       return;
     }
 
@@ -154,51 +175,147 @@ function ManageProduct() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("Inventory exported successfully!"); // Added a success toast message
+    toast.success("Inventory exported successfully!");
   };
 
-  const handleDeleteProduct = (id) => {
+  // --- DELETE DATABASE CONTROLLER ---
+  const handleDeleteProduct = async (id) => {
     setActiveDropdownId(null);
     
-    // Kept native window.confirm for safety, but customized the reactions with toasts
-    const confirmed = window.confirm("Are you sure you want to permanently remove this product from inventory?");
+    const confirmed = window.confirm("Are you sure you want to permanently remove this product?");
     if (!confirmed) return;
 
-    const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
-    const filteredItems = storedItems.filter(item => item.id !== id);
-    localStorage.setItem("inventoryProducts", JSON.stringify(filteredItems));
-    loadProducts();
-    toast.success("Product successfully removed from inventory."); // Replaced alert with toast.success
+    const loadId = toast.loading("Purging product records...");
+    try {
+      await axios.delete(`https://alluring-accent-backend.onrender.com/api/product/delete/${id}`, {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
+        }
+      });
+      
+      toast.dismiss(loadId);
+      toast.success("Product successfully removed from live database.");
+      
+      // Update local state arrays cleanly without loading full cycles
+      setProductList(prev => prev.filter(item => item.id !== id));
+      
+      // Re-trigger alert evaluations
+      setNotifMetrics(prev => {
+        const remainingLow = prev.lowStockItems.filter(item => item._id !== id && item.id !== id);
+        const remainingOut = prev.outOfStockItems.filter(item => item._id !== id && item.id !== id);
+        return {
+          lowStockItems: remainingLow,
+          outOfStockItems: remainingOut,
+          totalAlertsCount: remainingLow.length + remainingOut.length
+        };
+      });
+    } catch (error) {
+      toast.dismiss(loadId);
+      toast.error(error.response?.data?.message || "Could not completely erase database record.");
+    }
   };
 
   const handleOpenEditModal = (product) => {
     setActiveDropdownId(null);
-    setEditingProduct({ ...product });
+    // Preserve existing media: combine main image + existing media array
+    const existingMedia = [];
+    if (product.image) existingMedia.push(product.image);
+    if (product.media && Array.isArray(product.media)) {
+      existingMedia.push(...product.media);
+    }
+    setEditingProduct({ ...product, media: existingMedia });
     setIsModalOpen(true);
+    setSelectedEditPreview(null);
   };
 
-  const handleUpdateProductSubmit = (e) => {
-    e.preventDefault();
-    const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
-    const updatedItems = storedItems.map(item => {
-      if (item.id === editingProduct.id) {
-        return {
-          ...item,
-          name: editingProduct.name,
-          category: editingProduct.category,
-          price: editingProduct.price,
-          stock: editingProduct.stock,
-          tag: editingProduct.tag,
-        };
-      }
-      return item;
-    });
+  const handleRemoveEditMedia = (indexToRemove) => {
+    if (!editingProduct || !editingProduct.media) return;
+    const updatedMedia = editingProduct.media.filter((_, index) => index !== indexToRemove);
+    setEditingProduct({ ...editingProduct, media: updatedMedia });
+  };
 
-    localStorage.setItem("inventoryProducts", JSON.stringify(updatedItems));
-    setIsModalOpen(false);
-    setEditingProduct(null);
-    loadProducts();
-    toast.success("Product configurations saved successfully."); // Added a success toast message
+  // --- UPDATE DATABASE PUT SUBMIT CONTROLLER ---
+  const handleUpdateProductSubmit = async (e) => {
+    e.preventDefault();
+    const loadId = toast.loading("Synchronizing modifications with backend database...");
+
+    console.log('editingProduct.media:', editingProduct.media)
+    console.log('editingProduct.images:', editingProduct.images)
+
+    try {
+      // const payload = {
+      //   name: editingProduct.name,
+      //   category: editingProduct.category,
+      //   price: parseFloat(editingProduct.price),
+      //   stock: parseInt(editingProduct.stock),
+      //   tag: editingProduct.tag,
+      //   description: editingProduct.description || '',
+      //   minimumOrder: parseInt(editingProduct.moq || editingProduct.minimumOrder) || undefined,
+      //   isAllowBelowMOQ: !!editingProduct.isAllowBelowMOQ,
+      //   colors: Array.isArray(editingProduct.colors) ? editingProduct.colors : (editingProduct.colors ? editingProduct.colors.split(',').map(s => s.trim()).filter(Boolean) : []),
+      //   // images: editingProduct.media || editingProduct.images || []
+      // };
+
+      const form = e.target;
+      const formData = new FormData(form);
+
+      formData.append('name', editingProduct.name);
+      formData.append('category', editingProduct.category);
+      formData.append('price', parseFloat(editingProduct.price));
+      formData.append('stock', parseInt(editingProduct.stock));
+      formData.append('tag', editingProduct.tag);
+      formData.append('description', editingProduct.description || '');
+      formData.append('isAllowBelowMOQ', editingProduct.isAllowBelowMOQ || false);
+      formData.append('minimumOrder',  parseInt(editingProduct.moq || editingProduct.minimumOrder));
+
+      if (editingProduct.isAllowBelowMOQ && (editingProduct.belowMOQPrice || editingProduct.belowMOQPrice === 0)) {
+        formData.append('belowMOQPrice', parseFloat(editingProduct.belowMOQPrice));
+      }
+
+      const colors = editingProduct.colors || [];
+      colors.map((color) => formData.append('colors', color));
+
+     // Separate current active strings (old URLs) and file updates safely
+      const currentMediaItems = editingProduct.media || [];
+      
+      let newFilesAdded = false;
+
+      currentMediaItems.forEach((item) => {
+        if (item instanceof File) {
+          // If the admin added a completely new file upload
+          formData.append('images', item);
+          newFilesAdded = true;
+        } else if (typeof item === 'string') {
+          // Keep previous image links alive and pass them down safely
+          formData.append('images', item); 
+        }
+      });
+
+      // BACKWARDS COMPATIBILITY SAFETY: Fallback checking route variables
+      const targetId = editingProduct.id || editingProduct._id;
+
+      await axios.patch(
+        `https://alluring-accent-backend.onrender.com/api/product/update/${editingProduct.id}`,
+        formData,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
+          }
+        }
+      );
+
+      toast.dismiss(loadId);
+      toast.success("Product configurations saved to database successfully.");
+      setIsModalOpen(false);
+      setEditingProduct(null);
+      
+      // Refresh current catalog state to display modifications accurately
+      loadProducts();
+    } catch (error) {
+      console.log("Update error details:", error.response || error);
+      toast.dismiss(loadId);
+      toast.error(error.response?.data?.message || "Failed to commit parameters to database.");
+    }
   };
 
   const toggleDropdown = (id, e) => {
@@ -206,48 +323,44 @@ function ManageProduct() {
     setActiveDropdownId(activeDropdownId === id ? null : id);
   };
 
-  const toggleProductStatus = (id) => {
+  // --- STATUS ACTION TOGGLE DATABASE LINK ---
+  const toggleProductStatus = async (id) => {
     setActiveDropdownId(null);
-    const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
-    let isNowActive = false;
+    const targetProduct = productList.find(p => p.id === id);
+    if (!targetProduct) return;
 
-    const updatedItems = storedItems.map(item => {
-      if (item.id === id) {
-        const currentStock = parseInt(item.stock) || 0;
-        const targetStock = currentStock === 0 ? '10' : '0';
-        isNowActive = targetStock !== '0';
-        return { ...item, stock: targetStock };
-      }
-      return item;
-    });
-    localStorage.setItem("inventoryProducts", JSON.stringify(updatedItems));
-    loadProducts();
+    const currentStock = parseInt(targetProduct.stock) || 0;
+    const targetStock = currentStock === 0 ? 10 : 0;
     
-    // Added situational toast reminders for convenience
-    if (isNowActive) {
-      toast.success("Product is now Active (Defaulted to 10 units).");
-    } else {
-      toast.error("Product is now Inactive (Stock set to 0).");
+    const loadId = toast.loading("Updating visibility states...");
+    try {
+      await axios.patch(
+        `https://alluring-accent-backend.onrender.com/api/product/update/${id}`,
+        { stock: targetStock },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
+          }
+        }
+      );
+      
+      toast.dismiss(loadId);
+      if (targetStock > 0) {
+        toast.success("Product is now Active (Defaulted to 10 units).");
+      } else {
+        toast.error("Product is now Inactive (Stock set to 0).");
+      }
+      loadProducts();
+    } catch (error) {
+      toast.dismiss(loadId);
+      toast.error("Failed to alter product status config.");
     }
   };
 
-  const duplicateProduct = (product) => {
+  const duplicateProduct = async (product) => {
     setActiveDropdownId(null);
-    const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
-    const baseItem = storedItems.find(item => item.id === product.id);
-    
-    if (baseItem) {
-      const clone = {
-        ...baseItem,
-        id: `prod_${Date.now()}`,
-        name: `${baseItem.name} (Copy)`,
-      };
-      localStorage.setItem("inventoryProducts", JSON.stringify([...storedItems, clone]));
-      loadProducts();
-      toast.success(`Duplicated Template: "${baseItem.name} (Copy)"`); // Replaced native alerts with a neat success toast
-    } else {
-      toast.error("Failed to duplicate product workspace.");
-    }
+    toast.error("Template duplication workspace must be completed via the Add Product page layout.");
   };
 
   const lowStockItems = filteredProducts.filter(p => {
@@ -295,7 +408,7 @@ function ManageProduct() {
                   ) : (
                     <>
                       {notifMetrics.outOfStockItems.map(item => (
-                        <div key={`notif-out-${item.id}`} style={notifItemStyle}>
+                        <div key={`notif-out-${item._id || item.id}`} style={notifItemStyle}>
                           <div style={{ ...statusIndicatorStyle, backgroundColor: '#ef4444' }}></div>
                           <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
                             <span style={{ fontSize: '13px', color: '#0f172a', fontWeight: '500' }}>{item.name} is empty!</span>
@@ -305,11 +418,11 @@ function ManageProduct() {
                       ))}
 
                       {notifMetrics.lowStockItems.map(item => (
-                        <div key={`notif-low-${item.id}`} style={notifItemStyle}>
+                        <div key={`notif-low-${item._id || item.id}`} style={notifItemStyle}>
                           <div style={{ ...statusIndicatorStyle, backgroundColor: '#f97316' }}></div>
                           <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
                             <span style={{ fontSize: '13px', color: '#0f172a', fontWeight: '500' }}>{item.name} running low</span>
-                            <small style={{ fontSize: '11px', color: '#64748b' }}>Critical Level: {item.stock} items left in store.</small>
+                            <small style={{ fontSize: '11px', color: '#64748b' }}>Critical Level: {item.stock} items left left in store.</small>
                           </div>
                         </div>
                       ))}
@@ -376,7 +489,11 @@ function ManageProduct() {
 
         {/* Table Panel Grid */}
         <section className="table-panel">
-          {productList.length === 0 ? (
+          {loading ? (
+            <div style={{ padding: '60px 20px', textAlign: 'center', background: '#fff', borderRadius: '8px', color: '#64748b' }}>
+              <h3>Synchronizing item configurations with live backend database...</h3>
+            </div>
+          ) : productList.length === 0 ? (
             <div className="empty-state-wrapper" style={{ padding: '60px 20px', textAlign: 'center', background: '#fff', borderRadius: '8px' }}>
               <FiShoppingBag style={{ fontSize: '3.5rem', color: '#cbd5e1', marginBottom: '16px' }} />
               <h3 style={{ color: '#334155', marginBottom: '8px', fontSize: '18px' }}>Your Catalog Database is Empty</h3>
@@ -578,31 +695,31 @@ function ManageProduct() {
             <form onSubmit={handleUpdateProductSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Product Identity Title</label>
-                <input 
-                  type="text" 
-                  value={editingProduct.name} 
+                <input
+                  type="text"
+                  value={editingProduct.name}
                   onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  style={inputStyle} required 
+                  style={inputStyle} required
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div style={inputGroupStyle}>
                   <label style={labelStyle}>Category classification</label>
-                  <input 
-                    type="text" 
-                    value={editingProduct.category} 
+                  <input
+                    type="text"
+                    value={editingProduct.category}
                     onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                    style={inputStyle} required 
+                    style={inputStyle} required
                   />
                 </div>
                 <div style={inputGroupStyle}>
                   <label style={labelStyle}>Keywords / Tags</label>
-                  <input 
-                    type="text" 
-                    value={editingProduct.tag} 
+                  <input
+                    type="text"
+                    value={editingProduct.tag}
                     onChange={(e) => setEditingProduct({ ...editingProduct, tag: e.target.value })}
-                    style={inputStyle} 
+                    style={inputStyle}
                   />
                 </div>
               </div>
@@ -610,30 +727,181 @@ function ManageProduct() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div style={inputGroupStyle}>
                   <label style={labelStyle}>Price (GHC)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     step="0.01"
-                    value={editingProduct.price} 
+                    value={editingProduct.price}
                     onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
-                    style={inputStyle} required 
+                    style={inputStyle} required
                   />
                 </div>
                 <div style={inputGroupStyle}>
                   <label style={labelStyle}>Stock Allocation Units</label>
-                  <input 
-                    type="number" 
-                    value={editingProduct.stock} 
+                  <input
+                    type="number"
+                    value={editingProduct.stock}
                     onChange={(e) => setEditingProduct({ ...editingProduct, stock: e.target.value })}
-                    style={inputStyle} required 
+                    style={inputStyle} required
                   />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                <div style={inputGroupStyle}>
+                  <label style={labelStyle}>Description</label>
+                  <textarea
+                    value={editingProduct.description || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                    style={{ ...inputStyle, minHeight: '80px', resize: 'none'  }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={inputGroupStyle}>
+                  <label style={labelStyle}>Minimum Order Quantity</label>
+                  <input
+                    type="number"
+                    value={editingProduct.moq || editingProduct.minimumOrder || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, moq: e.target.value })}
+                    style={inputStyle}
+                  />
+                </div>
+                <div style={inputGroupStyle}>
+                  <label style={labelStyle}>Allow Below MOQ</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={!!editingProduct.isAllowBelowMOQ}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, isAllowBelowMOQ: e.target.checked })}
+                    />
+                    <small style={{ color: '#64748b' }}>Allow purchases below minimum order</small>
+                  </div>
+                </div>
+              </div>
+
+              {editingProduct.isAllowBelowMOQ && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                  <div style={inputGroupStyle}>
+                    <label style={labelStyle}>Below MOQ Price (GHC)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editingProduct.belowMOQPrice || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, belowMOQPrice: e.target.value })}
+                      style={inputStyle}
+                      placeholder="Enter Below (MOQ) Price"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                <div style={inputGroupStyle}>
+                  <label style={labelStyle}>Colors (comma separated)</label>
+                  <input
+                    type="text"
+                    value={Array.isArray(editingProduct.colors) ? editingProduct.colors.join(', ') : (editingProduct.colors || '')}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, colors: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                <div style={inputGroupStyle}>
+                  <label style={labelStyle}>Images / Media</label>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <span style={{ width: '10px', height: '10px', background: '#e11d48', borderRadius: '2px', display: 'inline-block' }}></span>
+                      <small style={{ color: '#475569' }}>Main</small>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <span style={{ width: '10px', height: '10px', background: '#64748b', borderRadius: '2px', display: 'inline-block' }}></span>
+                      <small style={{ color: '#475569' }}>Existing</small>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <span style={{ width: '10px', height: '10px', background: '#16a34a', borderRadius: '2px', display: 'inline-block' }}></span>
+                      <small style={{ color: '#475569' }}>New</small>
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*"
+                    onChange={(e) => setEditingProduct({ ...editingProduct, media: [...(editingProduct.media || []), ...Array.from(e.target.files)] })}
+                    style={inputStyle}
+                  />
+                  {editingProduct.media && editingProduct.media.length > 0 && (
+                    <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                      {editingProduct.media.map((file, index) => {
+                        let previewUrl = '';
+                        let isImage = true;
+                        const isExisting = typeof file === 'string';
+                        const isMainImage = isExisting && file === editingProduct.image;
+                        
+                        if (file instanceof File) {
+                          previewUrl = URL.createObjectURL(file);
+                          isImage = file.type.startsWith('image');
+                        } else if (typeof file === 'string') {
+                          previewUrl = file;
+                          isImage = !file.includes('video');
+                        }
+                        
+                        return (
+                          <div key={index} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer' }}>
+                            {isMainImage && <div style={{ position: 'absolute', top: '4px', left: '4px', background: '#e11d48', color: '#fff', padding: '2px 6px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>Main</div>}
+                            {isExisting && !isMainImage && <div style={{ position: 'absolute', top: '4px', left: '4px', background: '#64748b', color: '#fff', padding: '2px 6px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>Existing</div>}
+                            {isImage ? (
+                              <img
+                                src={previewUrl}
+                                alt="Media preview"
+                                onClick={() => setSelectedEditPreview({ url: previewUrl, type: 'image' })}
+                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <video
+                                src={previewUrl}
+                                onClick={() => setSelectedEditPreview({ url: previewUrl, type: 'video' })}
+                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveEditMedia(index)}
+                              style={{ position: 'absolute', top: '2px', right: '2px', width: '20px', height: '20px', padding: 0, background: '#e11d48', color: '#fff', border: 'none', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold' }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '12px' }}>
                 <button type="button" onClick={() => setIsModalOpen(false)} style={cancelBtnStyle}>Discard Changes</button>
-                <button type="submit" style={saveBtnStyle}>Save Parameter Modifications</button>
+                <button type="submit" style={saveBtnStyle}>Save Changes</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* FULLSCREEN MEDIA PREVIEW MODAL FOR EDIT */}
+      {selectedEditPreview && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.95)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000 }} onClick={() => setSelectedEditPreview(null)}>
+          <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+            {selectedEditPreview.type === 'video' ? (
+              <video src={selectedEditPreview.url} controls autoPlay style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            ) : (
+              <img src={selectedEditPreview.url} alt="Fullscreen view" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            )}
+            <button onClick={() => setSelectedEditPreview(null)} style={{ position: 'absolute', top: '20px', right: '20px', width: '40px', height: '40px', padding: 0, background: '#e11d48', color: '#fff', border: 'none', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+              <FiX />
+            </button>
           </div>
         </div>
       )}
@@ -651,7 +919,7 @@ const dropdownItemStyle = { padding: '10px 16px', background: 'none', border: 'n
 const filterDropdownStyle = { position: 'absolute', left: 0, top: '45px', backgroundColor: '#fff', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', borderRadius: '6px', padding: '6px 0', zIndex: 110, minWidth: '180px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
 const actionDropdownMenuStyle = { position: 'absolute', right: 0, top: '35px', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: '6px', padding: '6px 0', zIndex: 100, minWidth: '160px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
 const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
-const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' };
+const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', maxHeight: '75vh', overflowY: 'auto' };
 const inputGroupStyle = { display: 'flex', flexDirection: 'column', gap: '6px' };
 const labelStyle = { fontSize: '13px', fontWeight: '500', color: '#4a5568' };
 const inputStyle = { padding: '10px 14px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '14px', outline: 'none' };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../DashBoard.css';
 import { NavLink } from 'react-router';
+import axios from 'axios'; // Imported to handle API connectivity
 
 // Import the specific icons we need
 import {
@@ -9,8 +10,6 @@ import {
 } from 'react-icons/fi';
 
 import SideBar from '../components/SideBar';
-
-
 
 // ==========================================================================
 // STATIC INLINE STYLES MOVED TO TOP TO PREVENT INITIALIZATION HOP RUNTIME ERRORS
@@ -54,6 +53,9 @@ const statusIndicatorStyle = {
 };
 
 function DashBoard() {
+  // Global loading states for overall dashboard network requests
+  const [loadingDashboardData, setLoadingDashboardData] = useState(true);
+
   // --- STATE SYSTEM FOR DYNAMIC REAL-TIME MONITORING ---
   const [productMetrics, setProductMetrics] = useState({
     totalProducts: 0,
@@ -96,62 +98,130 @@ function DashBoard() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
+  // MASTER DASHBOARD SYNCHRONIZATION ENGINE
   useEffect(() => {
-    // ==========================================================
-    // EXTRA CLEANUP: FLUSH PREVIOUS MOCK ENTRIES IF THEY EXIST
-    // ==========================================================
-    const currentOrders = JSON.parse(localStorage.getItem("inventoryOrders")) || [];
-    const containsMockData = currentOrders.some(order => order.id && order.id.startsWith('ORD-99'));
+    const synchronizeDashboard = async () => {
+      try {
+        setLoadingDashboardData(true);
+        
+        // Fire all endpoints parallel to maximize pipeline speed
+        await Promise.all([
+          fetchLiveCatalogMetrics(),
+          fetchLiveTodayStats(),
+          fetchLiveRecentOrders()
+        ]);
 
-    if (containsMockData) {
-      localStorage.setItem("inventoryOrders", JSON.stringify([]));
-    }
+      } catch (err) {
+        console.error("Dashboard master synchronization error:", err);
+      } finally {
+        setLoadingDashboardData(false);
+      }
+    };
 
-    // ==========================================================
-    // 1. EVALUATE REAL INVENTORY PRODUCTS DATA
-    // ==========================================================
-    const storedItems = JSON.parse(localStorage.getItem("inventoryProducts")) || [];
-
-    const outOfStock = storedItems.filter(item => (parseInt(item.stock) || 0) === 0);
-    const lowStock = storedItems.filter(item => {
-      const stockVal = parseInt(item.stock) || 0;
-      return stockVal < 50 && stockVal > 0;
-    });
-
-    setProductMetrics({
-      totalProducts: storedItems.length,
-      outOfStockCount: outOfStock.length,
-      lowStockCount: lowStock.length,
-      lowStockItems: lowStock,
-      outOfStockItems: outOfStock
-    });
-
-    // ==========================================================
-    // 2. EVALUATE REAL ORDERS TRANSACTIONAL DATA
-    // ==========================================================
-    const storedOrders = JSON.parse(localStorage.getItem("inventoryOrders")) || [];
-    const todayDateKey = new Date().toISOString().slice(0, 10);
-
-    const ordersToday = storedOrders.filter(order => order.date === todayDateKey);
-
-    const salesSumToday = ordersToday
-      .filter(order => order.status !== 'Cancelled')
-      .reduce((sum, order) => sum + parseFloat(order.amount || 0), 0);
-
-    const pendingCount = storedOrders.filter(order => order.status === 'Pending' || order.status === 'Processing').length;
-    const newCustomersToday = ordersToday.filter(order => order.isNewCustomer === true).length;
-
-    setOrderMetrics({
-      todaysSales: salesSumToday.toFixed(2),
-      totalOrdersCount: storedOrders.length,
-      pendingOrdersCount: pendingCount,
-      newCustomersCount: newCustomersToday
-    });
-
-    const sortedFeed = [...storedOrders].reverse().slice(0, 5);
-    setLiveOrdersList(sortedFeed);
-
+    synchronizeDashboard();
   }, []);
+
+  // =====================================================================
+  // 1. LIVE REFRESH LINK: INVENTORY BACKEND DATA (ACTIVE)
+  // =====================================================================
+  const fetchLiveCatalogMetrics = async () => {
+    try {
+      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/product/all');
+      
+      // Adapt safely based on array wrappers
+      const storedItems = response.data.products || response.data || [];
+
+      const outOfStock = storedItems.filter(item => (parseInt(item.stock) || 0) === 0);
+      const lowStock = storedItems.filter(item => {
+        const stockVal = parseInt(item.stock) || 0;
+        return stockVal < 50 && stockVal > 0;
+      });
+
+      // Remap properties safely to match existing component names
+      const normalLowStockItems = lowStock.map(item => ({
+        id: item._id,
+        name: item.name || "Unnamed Item",
+        stock: item.stock || 0
+      }));
+
+      const normalOutOfStockItems = outOfStock.map(item => ({
+        id: item._id,
+        name: item.name || "Unnamed Item",
+        stock: 0
+      }));
+
+      setProductMetrics({
+        totalProducts: storedItems.length,
+        outOfStockCount: outOfStock.length,
+        lowStockCount: lowStock.length,
+        lowStockItems: normalLowStockItems,
+        outOfStockItems: normalOutOfStockItems
+      });
+    } catch (error) {
+      console.error("Failed syncing products metric data:", error);
+    }
+  };
+
+  // =====================================================================
+  // 🛠️ BACKEND DEVELOPER: INSERT TODAY'S STATS LINK HERE
+  // Replace the placeholder URL below once your collaborator completes the endpoint.
+  // =====================================================================
+  const fetchLiveTodayStats = async () => {
+    try {
+      // PLUG REAL URL PATH HERE:
+      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/dashboard/today-stats', {
+        headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
+      });
+
+      // Destructure data parameters returned from the Mongoose aggregations
+      if (response.data) {
+        setOrderMetrics({
+          todaysSales: parseFloat(response.data.todaySales || 0).toFixed(2),
+          totalOrdersCount: response.data.totalOrdersCount || 0,
+          pendingOrdersCount: response.data.pendingOrdersCount || 0,
+          newCustomersCount: response.data.newCustomersCount || 0
+        });
+      }
+    } catch (error) {
+      console.warn("Today's stats endpoint not fully linked or initialized yet. Falling back to base configurations.");
+      // Keep static defaults safe if backend isn't deployment ready yet
+      setOrderMetrics({
+        todaysSales: "0.00",
+        totalOrdersCount: 0,
+        pendingOrdersCount: 0,
+        newCustomersCount: 0
+      });
+    }
+  };
+
+  // =====================================================================
+  // 🛠️ BACKEND DEVELOPER: INSERT RECENT ORDERS DATA LINK HERE
+  // Replace the placeholder URL below once your collaborator completes the endpoint.
+  // =====================================================================
+  const fetchLiveRecentOrders = async () => {
+    try {
+      // PLUG REAL URL PATH HERE:
+      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/orders/recent', {
+        headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
+      });
+
+      const ordersData = response.data.orders || response.data || [];
+
+      // Structure database entries into UI table row mapping params cleanly
+      const unifiedOrders = ordersData.map(order => ({
+        id: order._id || order.id || "N/A",
+        name: order.customerName || order.name || "Anonymous User",
+        amount: order.totalAmount || order.amount || 0,
+        color: order.statusColor || '#f1f5f9', // fallback background styling color
+        time: order.formattedTime || order.createdAt || order.date || "Just Now"
+      }));
+
+      setLiveOrdersList(unifiedOrders);
+    } catch (error) {
+      console.warn("Recent transactions feed endpoint not ready. Falling back to default empty state arrays.");
+      setLiveOrdersList([]);
+    }
+  };
 
   // Total alert notifications combining out of stock and low stock warnings
   const totalAlertNotificationsCount = productMetrics.outOfStockCount + productMetrics.lowStockCount;
@@ -197,7 +267,6 @@ function DashBoard() {
                   <button onClick={() => setIsNotifOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><FiX /></button>
                 </div>
 
-                {/* Fixed "maxHeight" typo fix below */}
                 <div className="notification-scroll-container" style={{ maxHeight: '280px', overflowY: 'auto' }}>
                   {totalAlertNotificationsCount === 0 ? (
                     <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '13px', fontStyle: 'italic' }}>
@@ -236,135 +305,143 @@ function DashBoard() {
           </div>
         </header>
 
-        {/* Top Metric Cards Grid */}
-        <section className="metrics-grid">
-          <div className="metric-card">
-            <div className="icon-wrapper yellow"><FiBox /></div>
-            <div className="metric-data">
-              <span className="label">Total Products</span>
-              <h3>{productMetrics.totalProducts}</h3>
-            </div>
+        {loadingDashboardData ? (
+          <div style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b', fontSize: '15px' }}>
+            <h3>Compiling database metric aggregations...</h3>
           </div>
-          <div className="metric-card">
-            <div className="icon-wrapper pink"><FiArchive /></div>
-            <div className="metric-data">
-              <span className="label">Out of Stock</span>
-              <h3>{productMetrics.outOfStockCount}</h3>
-            </div>
-          </div>
-          <div className="metric-card">
-            <div className="icon-wrapper orange"><FiAlertTriangle /></div>
-            <div className="metric-data">
-              <span className="label">Low Stock</span>
-              <h3>{productMetrics.lowStockCount}</h3>
-            </div>
-          </div>
-        </section>
-
-        {/* Middle Section: Stats & Orders */}
-        <section className="dashboard-row">
-          <div className="dashboard-card">
-            <h3 className="card-title">Today's Stats</h3>
-            <div className="stats-list">
-              <div className="stat-item">
-                <span>Today's Sales</span>
-                <strong>GHC {orderMetrics.todaysSales}</strong>
-              </div>
-              <div className="stat-item">
-                <span>Total Orders</span>
-                <strong>{orderMetrics.totalOrdersCount}</strong>
-              </div>
-              <div className="stat-item">
-                <span>New Customers</span>
-                <strong>{orderMetrics.newCustomersCount}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-card recent-orders">
-            <h3 className="card-title">Recent Orders</h3>
-            <div className="orders-list">
-              {liveOrdersList.length === 0 ? (
-                <div style={{ padding: '30px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', width: '100%' }}>
-                  No active user orders found. Waiting for incoming data...
+        ) : (
+          <>
+            {/* Top Metric Cards Grid */}
+            <section className="metrics-grid">
+              <div className="metric-card">
+                <div className="icon-wrapper yellow"><FiBox /></div>
+                <div className="metric-data">
+                  <span className="label">Total Products</span>
+                  <h3>{productMetrics.totalProducts}</h3>
                 </div>
-              ) : (
-                liveOrdersList.map(order => (
-                  <div className="order-item" key={order.id}>
-                    <div className="order-user-wrapper">
-                      <FiUser className="order-user-icon" />
-                      <div className="order-user">
-                        <span className="order-name">{order.name}</span>
-                        <small className="order-id-label">{order.id}</small>
-                      </div>
-                    </div>
-                    <div className="order-financials">
-                      <strong className="order-amount-label">GHC {parseFloat(order.amount).toFixed(2)}</strong>
-                      <span className="status-badge" style={{ backgroundColor: order.color || '#f1f5f9' }}>
-                        {order.time || order.date}
-                      </span>
-                    </div>
+              </div>
+              <div className="metric-card">
+                <div className="icon-wrapper pink"><FiArchive /></div>
+                <div className="metric-data">
+                  <span className="label">Out of Stock</span>
+                  <h3>{productMetrics.outOfStockCount}</h3>
+                </div>
+              </div>
+              <div className="metric-card">
+                <div className="icon-wrapper orange"><FiAlertTriangle /></div>
+                <div className="metric-data">
+                  <span className="label">Low Stock</span>
+                  <h3>{productMetrics.lowStockCount}</h3>
+                </div>
+              </div>
+            </section>
+
+            {/* Middle Section: Stats & Orders */}
+            <section className="dashboard-row">
+              <div className="dashboard-card">
+                <h3 className="card-title">Today's Stats</h3>
+                <div className="stats-list">
+                  <div className="stat-item">
+                    <span>Today's Sales</span>
+                    <strong>GHC {orderMetrics.todaysSales}</strong>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
+                  <div className="stat-item">
+                    <span>Total Orders</span>
+                    <strong>{orderMetrics.totalOrdersCount}</strong>
+                  </div>
+                  <div className="stat-item">
+                    <span>New Customers</span>
+                    <strong>{orderMetrics.newCustomersCount}</strong>
+                  </div>
+                </div>
+              </div>
 
-        {/* Bottom Section: Alerts & Promotions */}
-        <section className="dashboard-row">
-          <div className="dashboard-card alerts-card">
-            <h3 className="card-title">Low Stock Alerts</h3>
-            <ul className="simple-list">
-              {productMetrics.lowStockItems.length === 0 ? (
-                <li style={{ color: '#64748b', fontStyle: 'italic', fontSize: '13px', border: 'none' }}>
-                  All catalog stock allocations running smoothly.
-                </li>
-              ) : (
-                productMetrics.lowStockItems.slice(0, 3).map((item) => (
-                  <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 0' }}>
-                    <span className="bullet orange"></span>
-                    <span style={{ textAlign: 'left' }}>{item.name}</span>
-                    <strong style={{ color: '#e11d48', marginLeft: 'auto', fontSize: '13px', flexShrink: 0 }}>{item.stock} left</strong>
+              <div className="dashboard-card recent-orders">
+                <h3 className="card-title">Recent Orders</h3>
+                <div className="orders-list">
+                  {liveOrdersList.length === 0 ? (
+                    <div style={{ padding: '30px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', width: '100%' }}>
+                      No active user orders found. Waiting for incoming data...
+                    </div>
+                  ) : (
+                    liveOrdersList.map(order => (
+                      <div className="order-item" key={order.id}>
+                        <div className="order-user-wrapper">
+                          <FiUser className="order-user-icon" />
+                          <div className="order-user">
+                            <span className="order-name">{order.name}</span>
+                            <small className="order-id-label">{order.id}</small>
+                          </div>
+                        </div>
+                        <div className="order-financials">
+                          <strong className="order-amount-label">GHC {parseFloat(order.amount).toFixed(2)}</strong>
+                          <span className="status-badge" style={{ backgroundColor: order.color || '#f1f5f9' }}>
+                            {order.time}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Bottom Section: Alerts & Promotions */}
+            <section className="dashboard-row">
+              <div className="dashboard-card alerts-card">
+                <h3 className="card-title">Low Stock Alerts</h3>
+                <ul className="simple-list">
+                  {productMetrics.lowStockItems.length === 0 ? (
+                    <li style={{ color: '#64748b', fontStyle: 'italic', fontSize: '13px', border: 'none' }}>
+                      All catalog stock allocations running smoothly.
+                    </li>
+                  ) : (
+                    productMetrics.lowStockItems.slice(0, 3).map((item) => (
+                      <li key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 0' }}>
+                        <span className="bullet orange"></span>
+                        <span style={{ textAlign: 'left' }}>{item.name}</span>
+                        <strong style={{ color: '#e11d48', marginLeft: 'auto', fontSize: '13px', flexShrink: 0 }}>{item.stock} left</strong>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+
+              <div className="dashboard-card promos-card">
+                <h3 className="card-title">Active Promotions</h3>
+                <ul className="simple-list">
+                  <li>
+                    <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
+                      <span className="bullet yellow"></span>
+                      <span>Spring Sale – 20% Off All Jewelry</span>
+                    </div>
+                    <span className="arrow">›</span>
                   </li>
-                ))
-              )}
-            </ul>
-          </div>
-
-          <div className="dashboard-card promos-card">
-            <h3 className="card-title">Active Promotions</h3>
-            <ul className="simple-list">
-              <li>
-                <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
-                  <span className="bullet yellow"></span>
-                  <span>Spring Sale – 20% Off All Jewelry</span>
+                  <li>
+                    <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
+                      <span className="bullet yellow"></span>
+                      <span>Flash Deal – 30% Off Diamond Rings</span>
+                    </div>
+                    <span className="arrow">›</span>
+                  </li>
+                </ul>
+                <div className="card-action-right">
+                  <NavLink
+                    to="/promotion"
+                    className="manage-btn"
+                    style={({ isActive }) => ({
+                      display: "inline-block",
+                      textDecoration: "none",
+                      textAlign: "center"
+                    })}
+                  >
+                    Manage Promotions
+                  </NavLink>
                 </div>
-                <span className="arrow">›</span>
-              </li>
-              <li>
-                <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
-                  <span className="bullet yellow"></span>
-                  <span>Flash Deal – 30% Off Diamond Rings</span>
-                </div>
-                <span className="arrow">›</span>
-              </li>
-            </ul>
-            <div className="card-action-right">
-              <NavLink
-                to="/promotion"
-                className="manage-btn"
-                style={({ isActive }) => ({
-                  display: "inline-block",
-                  textDecoration: "none",
-                  textAlign: "center"
-                })}
-              >
-                Manage Promotions
-              </NavLink>
-            </div>
-          </div>
-        </section>
+              </div>
+            </section>
+          </>
+        )}
       </main>
     </div>
   );
