@@ -189,7 +189,7 @@ function AddProduct() {
 
       if (response.status === 201) {
         toast.dismiss(loadId);
-        toast.success('Product Publised!', {duration: 2000});
+        toast.success('Product Publised', {duration: 2000});
 
         setColors([]);
         setColor('');

@@ -1,16 +1,44 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../Category.css';
 import SideBar from '../components/SideBar';
+import { useShop } from '../../utilities/ShopContext';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { Loader2 } from 'lucide-react';
+import Dialog from '../components/Dialog';
 
 function Category() {
+  const { categories, loadCategories } = useShop();
+
   // Starts completely empty as requested - built from scratch
-  const [categories, setCategories] = useState([]);
+  const [allCategories, setAllCategories] = useState(categories);
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [isFetchCategories, setFetchCategories] = useState(false);
+
+  const [isDialog, setDialog] = useState(false);
+  const [categoryId, setCategoryId] = useState();
 
   // Form input states
   const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+
+      if (categoryResponse.status === 200) {
+        loadCategories(categoryResponse.data);
+        setAllCategories(categoryResponse.data)
+        setFetchCategories(false);
+      }
+    }
+
+    if (categories.length === 0 || isFetchCategories) {
+      fetchCategories();
+    }
+  }, [isFetchCategories])
 
   // Handle single image selection and render a local preview URL
   const handleImageChange = (e) => {
@@ -23,9 +51,14 @@ function Category() {
   };
 
   // Submit and save new category entry
-  const handleCreateCategory = (e) => {
+  const handleCreateCategory = async (e) => {
     e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
     setError('');
+    setSubmitting(true);
+    const loadId = toast.loading("Submitting category...");
 
     if (!newCategoryName.trim()) {
       setError('Please type a category name.');
@@ -33,36 +66,84 @@ function Category() {
     }
 
     // Verify uniqueness (case-insensitive) to prevent database collisions
-    const duplicateExists = categories.some(
-      (cat) => cat.name.toLowerCase() === newCategoryName.trim().toLowerCase()
+    const duplicateExists = allCategories.some(
+      (cat) => (cat.name).toLowerCase() === (newCategoryName.trim()).toLowerCase()
     );
     if (duplicateExists) {
       setError('This category already exists.');
       return;
     }
 
-    const newCategory = {
-      id: Date.now(), // Unique structural timestamp ID
-      name: newCategoryName.trim(),
-      image: imagePreview // Local blob path (replace with server response link on full integration)
-    };
+    formData.append("image", selectedImage);
 
-    setCategories([...categories, newCategory]);
-    
-    // Reset control fields safely
-    setNewCategoryName('');
-    setSelectedImage(null);
-    setImagePreview(null);
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/category/create`,
+      formData,
+      {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`,
+          "Content-Type": "multipart/form-data",
+        }
+      }
+    );
+
+    if (res.status === 201 || res.status === 200) {
+      toast.dismiss(loadId);
+      toast.success('Category Publised', {duration: 2000});
+      setNewCategoryName('');
+      setSelectedImage(null);
+      setImagePreview(null);
+      setFetchCategories(true);
+      setSubmitting(false);
+    }
+
+    setAllCategories([...allCategories, newCategory]);
   };
 
   // Delete handler for any created categories
-  const handleDeleteCategory = (id) => {
-    setCategories(categories.filter(cat => cat.id !== id));
+  const handleDeleteCategory = async (id) => {
+    setDialog(false);
+    const loadId = toast.loading("Deleting category...");
+
+    try {
+      const res = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/category/delete/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
+          }
+        }
+      )
+  
+      if (res.status === 200) {
+        toast.dismiss(loadId);
+        setFetchCategories(true);
+      }
+      else {
+        toast.dismiss(loadId);
+        setDialog(false);
+        toast.error('Unsuccesfull', {duration: 2000});
+      }
+    } catch (error) {
+        toast.dismiss(loadId);
+        toast.error('Unsuccesfull', {duration: 2000});
+        console.log(error)
+        setDialog(false);
+    }
   };
 
   return (
     <div className="admin-dashboard-wrapper">
-      
+      <Dialog
+      isOpen={isDialog}
+      title={'Remove Category'}
+      message={'Confirm to remove category'}
+      onConfirm={() => handleDeleteCategory(categoryId)}
+      onCancel={() => {
+        setDialog(false)
+      }}
+      />
       <SideBar />
 
 
@@ -83,18 +164,19 @@ function Category() {
               {error && <div className="form-error-toast">{error}</div>}
 
               <div className="form-input-group">
-                <label htmlFor="categoryName">Category Label Name</label>
+                <label htmlFor="categoryName">Category Name</label>
                 <input
+                name='name'
                   id="categoryName"
                   type="text"
-                  placeholder="e.g., Necklaces, Luxury Rings, Custom Bracelets"
+                  placeholder="eg., Rings"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                 />
               </div>
 
               <div className="form-input-group">
-                <label>Display Banner (Strict Limit: 1 Image)</label>
+                <label>Display Banner </label>
                 <div className="media-uploader-box">
                   <input
                     type="file"
@@ -127,17 +209,27 @@ function Category() {
                 </div>
               )}
 
-              <button type="submit" className="submit-action-btn">
-                Add To Active Channels
-              </button>
+              
+
+              {
+                isSubmitting ? (
+                  <div className="submit-action-btn">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </div>
+                ) : (
+                  <button type="submit" className="submit-action-btn">
+                    Submit
+                  </button>
+                )
+              }
             </form>
           </section>
 
           {/* Active Live Grid Display */}
           <section className="category-card-display">
-            <h2>Active Catalog Channels ({categories.length})</h2>
+            <h2>Active Catalog Channels ({allCategories.length})</h2>
             
-            {categories.length === 0 ? (
+            {allCategories.length === 0 ? (
               <div className="empty-state-notice">
                 <span className="empty-state-icon">📂</span>
                 <h3>No categories active yet</h3>
@@ -145,7 +237,7 @@ function Category() {
               </div>
             ) : (
               <div className="categories-scroller-list">
-                {categories.map((category) => (
+                {allCategories.map((category) => (
                   <div key={category.id} className="category-row-item">
                     <div className="row-item-meta">
                       <div className="row-thumbnail-box">
@@ -156,15 +248,18 @@ function Category() {
                         )}
                       </div>
                       <div className="row-text-info">
-                        <h3>{category.name}</h3>
-                        <span className="badge custom-badge">Live Storefront</span>
+                        <h3 className='capitalize'>{category.name}</h3>
+                        {/* <span className="badge custom-badge">Live Storefront</span> */}
                       </div>
                     </div>
                     
                     <button
                       type="button"
                       className="delete-category-btn"
-                      onClick={() => handleDeleteCategory(category.id)}
+                      onClick={() => {
+                        setDialog(true);
+                        setCategoryId(category.id)
+                      }}
                     >
                       Remove
                     </button>

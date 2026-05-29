@@ -187,7 +187,7 @@ export default function HomePage() {
                                             className="group relative h-[70px] md:h-[200px] w-full rounded-full md:rounded-xl bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)] cursor-pointer overflow-hidden active:opacity-25"
 
                                             onClick={() => {
-                                                loadShopCategory(category.category)
+                                                loadShopCategory(category.name)
                                                 navigate('/shop')
                                             }}
                                         >
@@ -197,7 +197,7 @@ export default function HomePage() {
                                             <img src={category.image} alt="img " className='w-full h-full object-cover' />
                                             
                                             <div className="hidden md:flex flex-col relative left-[10px] bottom-[50px] z-20">
-                                                <h1 className='text-[17px] capitalize font-bold'>{category.category}</h1>
+                                                <h1 className='text-[17px] capitalize font-bold'>{category.name}</h1>
                                                 <div className='hidden md:flex items-center gap-2 cursor-pointer'>
                                                     <p className="capitalize text-[13px] group-hover:text-pink-600 group-hover:font-bold">shop now</p>
                                                     <MoveRight className='h-4 group-hover:text-pink-500'/>
@@ -205,7 +205,7 @@ export default function HomePage() {
                                             </div>
                                         </div>
                                         <div className="w-full flex justify-center md:hidden mt-1">
-                                            <h1 className='text-xs capitalize font-bold'>{category.category}</h1>
+                                            <h1 className='text-xs capitalize font-bold'>{category.name}</h1>
                                         </div>
                                     </div>
                                 
