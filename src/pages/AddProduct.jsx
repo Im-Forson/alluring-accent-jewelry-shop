@@ -5,8 +5,11 @@ import SideBar from '../components/SideBar';
 import toast from 'react-hot-toast'; 
 import axios from 'axios'; // Linked: Added axios import for backend communication
 import { Loader2 } from 'lucide-react';
+import { useShop } from '../../utilities/ShopContext';
 
 function AddProduct() {
+  const { categories } = useShop();
+
   const [color, setColor] = useState("");
   const [colors, setColors] = useState([]);
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -23,9 +26,7 @@ function AddProduct() {
     "Best Seller", "New", "Hot", "Popular",
   ]);
 
-  const [availableCategories, setAvailableCategories] = useState([
-    "Rings", "Necklaces", "Earrings", "Bracelets", "Anklets", "Brooches", "Cufflinks","Body Jewelry", "Watches"
-  ]);
+  const [availableCategories, setAvailableCategories] = useState(categories);
 
   const [tagInput, setTagInput] = useState("");
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
@@ -44,12 +45,14 @@ function AddProduct() {
     tag.toLowerCase().includes(tagInput.toLowerCase())
   );
 
-  const filteredCategories = availableCategories.filter((cat) =>
-    cat.toLowerCase().includes(categoryInput.toLowerCase())
+  const filteredCategories = availableCategories.filter((cat) => {
+      let name = cat.name
+      name.toLowerCase().includes(categoryInput.toLowerCase())
+    }
   );
 
   const tagExactExists = availableTags.some(t => t.toLowerCase() === tagInput.trim().toLowerCase());
-  const categoryExactExists = availableCategories.some(c => c.toLowerCase() === categoryInput.trim().toLowerCase());
+  const categoryExactExists = availableCategories.some(c => c.name.toLowerCase() === categoryInput.trim().toLowerCase());
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -410,8 +413,8 @@ function AddProduct() {
             <input
               type="text"
               name="category"
-              placeholder="Select category or type to create a new one..."
-              className="form-input"
+              placeholder="Select category"
+              className="form-input capitalize"
               value={categoryInput}
               onChange={(e) => {
                 setCategoryInput(e.target.value);
@@ -431,26 +434,19 @@ function AddProduct() {
             <FiChevronDown className="select-arrow" onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)} />
 
             {isCategoryDropdownOpen && (
-              <ul className="tag-dropdown">
-                {filteredCategories.map((catItem, idx) => (
+              <ul className="tag-dropdown capitalize">
+                {availableCategories.map((catItem, idx) => (
                   <li
                     key={idx}
                     onClick={() => {
-                      setCategoryInput(catItem);
+                      setCategoryInput(catItem.name);
                       setIsCategoryDropdownOpen(false);
                     }}
                   >
-                    {catItem}
+                    {catItem.name}
                   </li>
                 ))}
-                {categoryInput.trim() !== "" && !categoryExactExists && (
-                  <li 
-                    className="add-new-option-row"
-                    onClick={handleAddCategory}
-                  >
-                    + Add New Category: "{categoryInput.trim()}"
-                  </li>
-                )}
+                
               </ul>
             )}
           </div>

@@ -42,7 +42,7 @@ export default function BestSellers() {
     return (
         <section className='px-4 md:px-10 mb-15 md:mb-20'>
             {/* Header section wrapper layout */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-">
                 <div>
                     <h2 className='text-medium md:text-2xl font-bold'>Best <span className='text-pink-600'>Sellers</span></h2>
                 </div>

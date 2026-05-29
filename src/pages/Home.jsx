@@ -67,9 +67,16 @@ export default function HomePage() {
 
             const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
 
-            console.log(categoryResponse.data);
             if (categoryResponse.status === 200) {
-                loadCategories(categoryResponse.data);
+                const allCategories = categoryResponse.data;
+                const filteredCategories = allCategories.filter(cat => {
+                    const catName = cat.name.toLowerCase();
+                    if (catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets') {
+                        return cat;
+                    }
+                })
+
+                loadCategories(filteredCategories);
             }
             else {
                 loadCategories(['All Jewellery'])
@@ -168,7 +175,7 @@ export default function HomePage() {
                         </section>
                         {/* categories */}
                         <section className='px-4 md:px-10 mb-5 md:mb-10'>
-                            <div className="flex justify-between items-center mb-3 md:mb-4">
+                            <div className="flex justify-between items-center mb-4 md:mb-4">
                                 <div className="">
                                     <h2 className='text-medium md:text-2xl font-bold'>Shop <span className='text-pink-600'>Category</span></h2>
                                     {/* <h3 className="hidden md:flex text-sm">Explore our most loved pieces</h3> */}
@@ -213,7 +220,6 @@ export default function HomePage() {
                             </div>
                         </section>
                         <BestSellers/>
-                        {/* <div className="mb-15"></div> */}
                         <TrackYourOrder/>
                         <WhyShopWithUs/>
                         <OrderSuccessModal/>
