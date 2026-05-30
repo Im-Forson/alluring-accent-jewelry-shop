@@ -3,6 +3,8 @@
    ========================================================================== */
 
 :root {
+  /* Restored missing layout baseline variable mapping */
+  --bg-primary: #0b0f19;         /* Ultimate dark base background layer */
   --bg-surface: #111827;         /* Deep surface card container color */
   --bg-input: #1f2937;           /* Form input background field color */
   --text-main: #f3f4f6;          /* Primary white text */
@@ -17,12 +19,6 @@
   --transition-fast: 0.2s ease;
 }
 
-/* Base structural area reset */
-.promo-admin-layout {
-  display: flex;
-  min-height: 100vh;
-  background-color: #FDF5F7;
-}
 
 .main-content-area {
   flex: 1;
@@ -30,6 +26,7 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -37,7 +34,8 @@
    ========================================================================== */
 .promo-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) 120px;
+  /* FIXED: Removed the trailing 120px forcing layout compression on desktop */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
   margin-bottom: 32px;
   align-items: center;
@@ -81,8 +79,37 @@
   color: var(--text-main);
 }
 
+/* Header Action Icons Container */
+.header-search-icons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+}
 
+.top-action-icon {
+  font-size: 20px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.top-action-icon:hover { color: var(--accent-pink); }
 
+.top-bag-wrapper {
+  position: relative;
+}
+
+.bag-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--accent-pink);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+}
 
 /* ==========================================================================
    CONTENT PANEL & DATA TABLES
@@ -231,7 +258,7 @@
   border: 1px solid var(--border-color);
 }
 .radio-label { font-size: 14px; color: var(--text-muted); }
-.radio-options { display: flex; gap: 16px; color: var(--text-main);}
+.radio-options { display: flex; gap: 16px; }
 
 .radio-container {
   display: flex;
@@ -253,9 +280,6 @@
 .radio-container input:checked + .custom-radio {
   border-color: var(--accent-pink);
 }
-
-
-
 .radio-container input:checked + .custom-radio::after {
   content: '';
   width: 8px;
@@ -375,7 +399,7 @@
 .btn-flash-sale:hover { transform: translateY(-1px); }
 
 /* ==========================================================================
-   FLASH SALE MODAL BACKDROP OVERLAY OVERRIDES
+   FIXED MOBILE SCROLL EDIT MODAL SYSTEM 
    ========================================================================== */
 .modal-overlay {
   position: fixed;
@@ -388,7 +412,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000; /* Raised layer above mobile elements */
+  overflow-y: auto;
+  padding: 20px 12px;
+  box-sizing: border-box;
 }
 
 .modal-container {
@@ -398,6 +425,9 @@
   width: 100%;
   max-width: 480px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 40px);
   overflow: hidden;
   animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -413,6 +443,7 @@
   align-items: center;
   padding: 20px 24px;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 .modal-header h3 { margin: 0; font-size: 18px; color: var(--accent-pink); font-weight: 700; }
 .modal-close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; }
@@ -423,6 +454,8 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  overflow-y: auto; /* Activates internal scrolling exclusively for forms */
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-description {
@@ -460,6 +493,7 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 10px;
+  flex-shrink: 0;
 }
 .modal-submit-btn {
   background-color: #e11d48;
@@ -485,7 +519,49 @@
 .modal-cancel-btn:hover { background-color: var(--bg-input); color: var(--text-main); }
 
 /* ==========================================================================
-   RESPONSIVE LAYOUT RESPONSIVENESS
+   SIDEBAR DRAWER MECHANICS FOR MOBILE DEVICES
+   ========================================================================== */
+.mobile-header-actions-bar {
+  display: none;
+  background-color: #111723;
+  padding: 16px;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mobile-hamburger-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.mobile-page-context-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.sidebar-mobile-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA LAYOUT BREAKPOINTS
    ========================================================================== */
 @media (max-width: 1024px) {
   .create-promo-form {
@@ -504,243 +580,39 @@
 }
 
 @media (max-width: 768px) {
-  .main-content-area { padding: 16px; }
+  .mobile-header-actions-bar {
+    display: flex;
+  }
+
+  .main-content-area { 
+    padding: 16px; 
+    padding-top: 0 !important;
+  }
+  
   .promo-metrics { grid-template-columns: 1fr; }
-  .header-search-icons { justify-content: space-between; margin-top: 10px; }
+  .header-search-icons { display: none; } /* Clear out duplicate search layout rows on mobile */
   .date-range-row { grid-template-columns: 1fr; }
   .submit-buttons { flex-direction: column; width: 100%; }
   .submit-buttons button { width: 100%; text-align: center; }
-}
 
-/* Layout row containing selected target badge pills */
-.target-badge-panel-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: -8px;
-  margin-bottom: 8px;
-}
+  /* Enforce core sliding layouts for the external SideBar components */
+  .admin-layout .admin-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
 
-.target-pill-badge {
-  background-color: rgba(244, 63, 94, 0.15);
-  border: 1px solid var(--accent-pink);
-  color: var(--text-main);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.remove-badge-icon {
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: color var(--transition-fast);
-}
-.remove-badge-icon:hover { color: #ffffff; }
-
-/* Checkbox adjustment inside selection popup list row */
-.multi-option-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.dropdown-checkbox {
-  accent-color: var(--accent-pink);
-  width: 15px;
-  height: 15px;
-  cursor: pointer;
+  .admin-layout.sidebar-active .admin-sidebar {
+    left: 0 !important;
+  }
 }
 
 /* ==========================================================================
    ADVANCED SEARCHABLE MULTI-SELECT DROPDOWN SYSTEM
-   ========================================================================== */
-
-.searchable-select-container {
-  position: relative;
-  width: 100%;
-}
-
-/* Main Input Trigger Field */
-.searchable-select-trigger {
-  width: 100%;
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-sizing: border-box;
-  user-select: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.searchable-select-trigger:hover {
-  border-color: rgba(244, 63, 94, 0.6);
-}
-
-.searchable-select-trigger:focus-within {
-  border-color: var(--accent-pink);
-  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
-}
-
-/* Animated Rotation Indicator Arrow */
-.field-select-arrow {
-  color: var(--text-muted);
-  font-size: 16px;
-  transition: transform var(--transition-fast), color var(--transition-fast);
-}
-.field-select-arrow.rotated {
-  transform: rotate(180deg);
-  color: var(--accent-pink);
-}
-
-/* Floating Layer Menu Card */
-.searchable-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  width: 100%;
-  background-color: #161d2f; /* Deep contrasting velvet black layer */
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-md);
-  z-index: 150; /* Ensures absolute stack order prominence over rows */
-  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
-}
-
-/* Floating Internal Search Header Context Box Row */
-.search-input-wrapper {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background-color: rgba(0, 0, 0, 0.25);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.search-menu-icon {
-  color: var(--accent-pink);
-  margin-right: 12px;
-  font-size: 15px;
-}
-
-.menu-search-field {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-main);
-  font-size: 14px;
-  padding: 2px 0;
-}
-.menu-search-field::placeholder {
-  color: #555e70;
-}
-
-.clear-search-icon {
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 14px;
-  transition: color var(--transition-fast);
-}
-.clear-search-icon:hover { color: var(--text-main); }
-
-/* Option Container Scroll Node Area Wrapper */
-.options-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 240px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) transparent;
-}
-
-/* Category vs Product Separator Sub-headers */
-.dropdown-section-header {
-  background-color: rgba(0, 0, 0, 0.15);
-  padding: 8px 16px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  letter-spacing: 0.08em;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  pointer-events: none;
-}
-.dropdown-section-header:first-of-type {
-  border-top: none;
-}
-
-/* Dropdown Individual Checkbox Option Items */
-.multi-option-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  font-size: 14px;
-  color: #d1d5db;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
-}
-
-.multi-option-item:hover {
-  background-color: rgba(244, 63, 94, 0.04);
-  color: var(--text-main);
-}
-
-/* Style State Modifier when active item checklist true */
-.multi-option-item.selected-item {
-  background-color: rgba(244, 63, 94, 0.08);
-  color: var(--accent-pink);
-}
-
-/* Premium Custom Checkbox Alignment Indicators */
-.dropdown-checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 1px solid #4b5563;
-  border-radius: 4px;
-  background-color: transparent;
-  display: inline-grid;
-  place-content: center;
-  cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.dropdown-checkbox:checked {
-  background-color: var(--accent-pink);
-  border-color: var(--accent-pink);
-}
-
-.dropdown-checkbox:checked::before {
-  content: "";
-  width: 8px;
-  height: 5px;
-  border-left: 2px solid white;
-  border-bottom: 2px solid white;
-  transform: rotate(-45deg) translate(1px, -1px);
-}
-
-.no-options-found {
-  padding: 20px 16px;
-  font-size: 13px;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-/* ==========================================================================
-   DYNAMIC CHIP BADGE WRAPPER BLOCKS (Under Input)
    ========================================================================== */
 .target-badge-panel-row {
   display: flex;
@@ -781,16 +653,171 @@
   transform: scale(1.15);
 }
 
-/* ==========================================================================
-   DROPDOWN FOOTER ACTIONS & DONE BUTTON
-   ========================================================================== */
+.searchable-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-select-trigger {
+  width: 100%;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  user-select: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.searchable-select-trigger:hover { border-color: rgba(244, 63, 94, 0.6); }
+.searchable-select-trigger:focus-within {
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+}
+
+.field-select-arrow {
+  color: var(--text-muted);
+  font-size: 16px;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+.field-select-arrow.rotated {
+  transform: rotate(180deg);
+  color: var(--accent-pink);
+}
+
+.searchable-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background-color: #161d2f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  z-index: 150;
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.search-menu-icon {
+  color: var(--accent-pink);
+  margin-right: 12px;
+  font-size: 15px;
+}
+
+.menu-search-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-size: 14px;
+  padding: 2px 0;
+}
+.menu-search-field::placeholder { color: #555e70; }
+.clear-search-icon {
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: color var(--transition-fast);
+}
+.clear-search-icon:hover { color: var(--text-main); }
+
+.options-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.dropdown-section-header {
+  background-color: rgba(0, 0, 0, 0.15);
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+.dropdown-section-header:first-of-type { border-top: none; }
+
+.multi-option-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #d1d5db;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.multi-option-item:hover {
+  background-color: rgba(244, 63, 94, 0.04);
+  color: var(--text-main);
+}
+.multi-option-item.selected-item {
+  background-color: rgba(244, 63, 94, 0.08);
+  color: var(--accent-pink);
+}
+
+.dropdown-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  background-color: transparent;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.dropdown-checkbox:checked {
+  background-color: var(--accent-pink);
+  border-color: var(--accent-pink);
+}
+.dropdown-checkbox:checked::before {
+  content: "";
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.no-options-found {
+  padding: 20px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
 
 .dropdown-footer-actions-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background-color: #0d121f; /* Premium solid deep base block */
+  background-color: #0d121f;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -813,20 +840,13 @@
   cursor: pointer;
   letter-spacing: 0.03em;
   box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
-  transition: 
-    background-color var(--transition-fast), 
-    transform var(--transition-fast), 
-    box-shadow var(--transition-fast);
+  transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
-
-/* Hover and Focus States */
 .dropdown-done-btn:hover {
-  background-color: #e11d48; /* Smooth rich rose transformation transition */
+  background-color: #e11d48;
   box-shadow: 0 6px 16px rgba(244, 63, 94, 0.35);
   transform: translateY(-1px);
 }
-
-/* Active Pressed Down Feedback State */
 .dropdown-done-btn:active {
   transform: translateY(1px);
   box-shadow: 0 2px 6px rgba(244, 63, 94, 0.2);

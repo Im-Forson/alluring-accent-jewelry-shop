@@ -296,7 +296,7 @@ function Promotion() {
   };
 
   return (
-    <div className="promo-admin-layout">
+    <div className="admin-layout">
       <SideBar />
 
       <main className="main-content-area">

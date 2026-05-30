@@ -197,6 +197,7 @@
     padding: 20px 14px !important;
     /* Clean, elastic phone scroll handling */
     -webkit-overflow-scrolling: touch;
+
   }
 
   .inventory-header {
@@ -287,9 +288,9 @@
   }
 
   /* 2. Target the inner body container to handle the actual scrolling framework */
-  .modal-scrollable-body {
+  .modal-content-card {
     flex: 1;                     /* Takes up all remaining vertical space */
-    overflow-y: auto !important; /* Enables vertical scrolling when content overflows */
+    overflow-x: auto !important; /* Enables vertical scrolling when content overflows */
     -webkit-overflow-scrolling: touch; /* Ensures smooth, kinetic momentum scrolling on iOS */
     padding: 16px !important;    /* Slightly tighter padding for smaller phone screens */
   }
