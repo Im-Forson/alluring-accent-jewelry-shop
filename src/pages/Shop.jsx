@@ -25,11 +25,13 @@ import Footer from '../components/Footer'
 import WhyShopWithUs from '../components/WhyShopWithUs'
 import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
+import OrderSuccessModal from '../components/OrderSuccessModal'
+import ProcessOverlay from '../components/ProcessOverlay'
 
 
 
 export default function Shop() {
-    const { allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, } = useShop();
+    const { allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, isOpenPaymentSummary, openPaymentSummary, } = useShop();
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
@@ -485,6 +487,12 @@ export default function Shop() {
                         )}
 
 
+                        <OrderSuccessModal/>
+                        <ProcessOverlay/>
+                        {/* <PurchaseOrderSummary
+                            isOpen={isOpenPaymentSummary}
+                            setIsOpen={openPaymentSummary}
+                        /> */}
                         {/* <section id="center">
                             <div class="flex flex-row items-center justify-cennter gap-2">
                                 <p class=" md:text-[14px] text-center text-[grey] font-bold">Shop Page Under Development</p>

@@ -14,11 +14,15 @@ export function ShopProvider({ children }) {
     const [isShopDataLoading, setisShopDataLoading] = useState(true);
     const [isBestSellersDataLoading, setIsBestSellersDataLoading] = useState(true);
     const [] = useState([]);
+    
+    const [isOpenPaymentSummary, setOpenPaymentSummary] = useState(false);
+    const [paystackResponse, setPaystackResponse] = useState(null);
 
     const [orders, setOrders] = useState([]);
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
     const [successfulOrders, setSuccessfulOrders] = useState([]);
     const [trackingOrder, setTrackingOrder] = useState({});
+    const [orderReceipt, setOrderReceipt] = useState({});
 
     const [cart, setCart] = useState([]);
     const [favorites, setFavorites] = useState([]);
@@ -31,6 +35,8 @@ export function ShopProvider({ children }) {
     const [shopColor, setShopColor] = useState("All Colors");
     const [shopPrice, setShopPrice] = useState("All Prices");
     const [shopCollection, setShopCollection] = useState("All Collections");
+
+    const [isProcessing, setProcessing] = useState(false);
 
     const setHomeDataLoading = (val) => {
         setisHomeDataLoading(val);
@@ -62,6 +68,10 @@ export function ShopProvider({ children }) {
 
     const addOrder = (newOrder) => {
             setOrders(newOrder);
+    }
+
+    const loadOrderReceipt = (receipt) => {
+            setOrderReceipt(receipt);
     }
 
     const updateIsOrderSuccess = (value) => {
@@ -138,7 +148,6 @@ export function ShopProvider({ children }) {
     };
 
     const removeFavorite = (id) => {
-        console.log('removing...')
         setFavorites(favorites.filter(item => item.id !== id));
 
         // Remove favorite in all products
@@ -172,6 +181,18 @@ export function ShopProvider({ children }) {
         setTrackingOrder(order);
     }
 
+    const openPaymentSummary = (value) => {
+        setOpenPaymentSummary(value);
+    }
+
+    const loadPaystackResponse = (response) => {
+        setPaystackResponse(response);
+    }
+
+    const setProcessOverlay = (value) => {
+        setProcessing(value);
+    }
+
     return (
         <ShopContext.Provider 
             value={{
@@ -198,6 +219,8 @@ export function ShopProvider({ children }) {
                 updateIsOrderSuccess,
                 trackingOrder,
                 loadTrackingOrder,
+                orderReceipt,
+                loadOrderReceipt,
 
                 successfulOrders,
                 loadSuccessfulOrder,
@@ -224,6 +247,15 @@ export function ShopProvider({ children }) {
                 shopCollection,
                 shopPrice,
                 loadShopCategory,
+
+                isOpenPaymentSummary,
+                openPaymentSummary,
+
+                paystackResponse,
+                loadPaystackResponse,
+
+                isProcessing,
+                setProcessOverlay,
             }}
         >
         {children}

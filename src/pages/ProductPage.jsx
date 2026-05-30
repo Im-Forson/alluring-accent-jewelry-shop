@@ -11,6 +11,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import BestSellers from '../components/BestSellers';
 import PurchaseOrderSummary from '../components/PurchaseOrderSummary';
 import { ErrorState } from '../components/ErrorState'
+import OrderSuccessModal from '../components/OrderSuccessModal';
 
 export default function ProductPage() {
   const { allProducts, cart, addToCart, removeCartItem, removeFavorite, viewingProduct, addOrder } = useShop();
@@ -126,10 +127,12 @@ export default function ProductPage() {
                 ) : (
                     <div className="">
                         <NavBar activePage={'product'}/>
+
                         <PurchaseOrderSummary
                             isOpen={isOpenPurchaseOrderSummary}
                             setIsOpen={setIsOpenPurchaseOrderSummary}
                         />
+                        {/* <OrderSuccessModal/> */}
 
                         <div className="min-h-screen bg-white text-zinc-800 font-sans pt-20 pb-16">
                             <div className="px-8 mb-5">

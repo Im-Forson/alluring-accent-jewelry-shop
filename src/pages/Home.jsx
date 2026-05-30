@@ -28,6 +28,8 @@ import flowernecklace from '../assets/necklace-flower.png'
 import collection1 from '../assets/hero-collection.png'
 import collection2 from '../assets/collection-2.png'
 import OrderSuccessModal from '../components/OrderSuccessModal'
+import PurchaseOrderSummary from '../components/PurchaseOrderSummary'
+import ProcessOverlay from '../components/ProcessOverlay'
 
 const categories = [
     {title: 'Rings', image: ring},
@@ -42,7 +44,7 @@ export default function HomePage() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
-    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading } = useShop();
+    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading, isOpenPaymentSummary, openPaymentSummary, } = useShop();
 
     const [favorites, setFavorites] = useState([]);
     const [favoriteCount, setFavoriteCount] = useState(0);
@@ -159,6 +161,7 @@ export default function HomePage() {
                 ) :
                 (
                     <div>
+                        
                         <section className="mb-5 md:mb-10">
                             <NavBar 
                             activePage={'home'} 
@@ -173,6 +176,10 @@ export default function HomePage() {
                             />
                             <Hero/>
                         </section>
+                        {/* <PurchaseOrderSummary
+                            isOpen={isOpenPaymentSummary}
+                            setIsOpen={openPaymentSummary}
+                        /> */}
                         {/* categories */}
                         <section className='px-4 md:px-10 mb-5 md:mb-10'>
                             <div className="flex justify-between items-center mb-4 md:mb-4">
@@ -224,7 +231,7 @@ export default function HomePage() {
                         <WhyShopWithUs/>
                         <OrderSuccessModal/>
                         <Footer/>
-                        
+                        <ProcessOverlay/>
                     </div>
                 )
             }

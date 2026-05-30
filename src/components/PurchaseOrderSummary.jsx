@@ -1,26 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Truck, ShieldCheck, MapPin, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import axios from 'axios';
+import { useLocation } from 'react-router';
+
+import Alert from './Alert';
 
 import { useShop } from '../../utilities/ShopContext';
+import toast from 'react-hot-toast';
 
 export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
-  const { orders, cart, removeCartItem, updateIsOrderSuccess } = useShop();
+  const { orders, addOrder, loadOrderReceipt, cart, removeCartItem, updateIsOrderSuccess, paystackResponse, loadPaystackResponse, setProcessOverlay } = useShop();
   const navigate = useNavigate();
+  const location = useLocation();
   // console.log(orders)
 
+  const [isAlert, setAlert] = useState(false);
+
   const [] = useState(false);
-  
+
   // 1. Initialize Controlled Form Input State Fields
   const [formData, setFormData] = useState({
-    fullName: '',
-    phoneNumber: '',
+    recipient: '',
+    phone: '',
+    email: '',
     region: 'Accra',
     city: '',
-    deliveryAddress: ''
+    address: ''
   });
 
   // Sample purchase cost payload attributes matching your item structure
+  
   const orderDetails = {
     title: "Rose Gold Infinity Ring",
     purchasingPrice: 450.00,
@@ -40,43 +50,117 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Process and Submit final form handler 
-  const handleSubmitOrder = (e) => {
-    e.preventDefault();
-    
-    // Quick baseline input validation check
-    if (!formData.fullName || !formData.phoneNumber || !formData.city || !formData.deliveryAddress) {
-      alert("Please fill in all delivery information details to secure your purchase order.");
-      return;
-    }
-
-    const receiptPayload = {
-      customer: formData,
-      item: orderDetails.title,
-      totalPaid: totalCost
-    };
-    
-    handleRemoveOrdersFromCart();
-    setIsOpen(false);
-    updateIsOrderSuccess(true); // show upon transaction onsuccess
-    navigate(-1);
+  const handleSubmitOrder = () => {
+    const handler = window.PaystackPop.setup({
+      key: "pk_test_d9b8c4ff167bb22afa168ab92ab2f50bee0706bc",
+      email: "info.alluringaccent@gmail.com",
+      amount: 5000 * 100,
+      currency: "GHS",
+  
+      callback: function (response) {
+        // 👉 send reference to backend
+        // verifyPayment(response.reference);
+      },
+  
+      onClose: function () {
+        console.log("Payment closed");
+      },
+    });
+  
+    handler.openIframe();
   };
 
-  const handleRemoveOrdersFromCart = (e) => {
-    cart.map((item) => {
+  const handleRemoveOrdersFromCart = () => {
+    orders.map((item) => {
       removeCartItem(item.id);
     })
   }
 
+  const payWithPaystack = async (e) => {
+    try {
+      e.preventDefault()
+      if (formData.email.trim() === '') {
+        formData.email = 'null';
+      }
+  
+      formData.isOrderPlaced = true
+      formData.deliveryCost = orderDetails.shippingFee
+      formData.subtotal = itemsTotalCost
+      formData.totalCost = grandTotal
+      formData.products = orders
+  
+      const handler = window.PaystackPop.setup({
+        key: `${import.meta.env.VITE_PAYSTACK_PUBLIC_KEY}`,
+        email: "info.alluringaccent@gmail.com",
+        amount: grandTotal * 100,
+        currency: "GHS",
+    
+        callback: function (response) {
+          console.log("Success:", response.reference);
+          processReceipt();
+        },
+    
+        onClose: function () {
+          console.log("Payment closed");
+        },
+      });
+    
+      handler.openIframe();
+    } catch (error) {
+      
+    }
+  };
+
+  const processReceipt = async () => {
+    try {
+      setProcessOverlay(true);
+      setIsOpen(false);
+      if (location.key !== 'default') {
+        navigate(-1);
+      }
+  
+      if (formData.email.trim() === '') {
+        formData.email = 'null';
+      }
+  
+      formData.isOrderPlaced = true
+      formData.deliveryCost = orderDetails.shippingFee
+      formData.subtotal = itemsTotalCost
+      formData.totalCost = grandTotal
+      formData.products = orders
+  
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/order/create`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      )
+  
+      const receipt = res.data.orderInfo
+  
+      if (res.status === 201) {
+        loadOrderReceipt(receipt)
+        setProcessOverlay(false)
+        handleRemoveOrdersFromCart();
+        addOrder([])
+        updateIsOrderSuccess(true); // show upon transaction onsuccess
+  
+      }
+      else {
+        setProcessOverlay(false);
+        toast.error('Something went wrong', {duration: 2000});
+      }
+    } catch (error) {
+      setProcessOverlay(false);
+      toast.error('Something went wrong', {duration: 2000});
+    }
+  }
+
   return (
     <div className="flex flex-col items-center justify-center p-">
-      
-      {/* 2. THE CHASSIS BUY NOW LINK ACTION TRIGGER */}
-      
-
-      {/* ========================================================================= */}
-      {/* PURCHASE ORDER SLIDE MODAL WINDOW CONTENT LAYER                          */}
-      {/* ========================================================================= */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           
@@ -88,7 +172,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
           {/* Modal layout component structure */}
           <form 
-            onSubmit={handleSubmitOrder}
+            onSubmit={payWithPaystack}
             className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl p-5 md:p-7 max-h-[90vh] overflow-y-auto animate-scaleIn z-10 border border-zinc-100 font-sans no-scrollbar"
           >
             {/* Modal Exit Action button */}
@@ -123,10 +207,11 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   <label className="text-[10px] font-bold text-zinc-500 tracking-wide uppercase">Recipient Full Name</label>
                   <input 
                     type="text"
-                    name="fullName"
-                    value={formData.fullName}
+                    name="recipient"
+                    value={formData.recipient}
                     onChange={handleInputChange}
-                    placeholder="e.g. Ama Serwaa"
+                    placeholder="Ama Serwaa"
+                    required
                     className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa]"
                   />
                 </div>
@@ -135,10 +220,23 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   <label className="text-[10px] font-bold text-zinc-500 tracking-wide uppercase">Phone Number</label>
                   <input 
                     type="tel"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
+                    name="phone"
+                    value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="e.g. +233 24 000 0000"
+                    placeholder="024 000 0000"
+                    required
+                    className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-500 tracking-wide uppercase">Email</label>
+                  <input 
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="example@gmail.com"
                     className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa]"
                   />
                 </div>
@@ -150,6 +248,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                     name="region"
                     value={formData.region}
                     onChange={handleInputChange}
+                    required
                     className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa] cursor-pointer"
                   >
                     <option value="Accra">Greater Accra (Accra)</option>
@@ -168,6 +267,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                       value={formData.city}
                       onChange={handleInputChange}
                       placeholder="e.g. East Legon"
+                      required
                       className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa]"
                     />
                   </div>
@@ -175,10 +275,11 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                     <label className="text-[10px] font-bold text-zinc-500 tracking-wide uppercase">Address</label>
                     <input 
                       type="text"
-                      name="deliveryAddress"
-                      value={formData.deliveryAddress}
+                      name="address"
+                      value={formData.address}
                       onChange={handleInputChange}
                       placeholder="e.g. GA-123-4567"
+                      required
                       className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa]"
                     />
                   </div>
@@ -222,7 +323,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   <div className="flex justify-between items-baseline mb-4">
                     <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Total Cost</span>
                     <span className="text-base font-black text-pink-600 font-sans">
-                      {orderDetails.currency} {grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                    GH₵ {grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}
                     </span>
                   </div>
 
@@ -230,6 +331,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   <button 
                     type="submit"
                     className="w-full bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold py-3 rounded-xl uppercase tracking-widest transition-colors shadow-sm active:scale-[0.98]"
+                    // onClick={() => {console.log('.................')}}
                   >
                     Place Purchase Order
                   </button>

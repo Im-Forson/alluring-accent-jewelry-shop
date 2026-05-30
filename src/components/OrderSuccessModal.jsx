@@ -5,26 +5,27 @@ import { toast } from 'react-hot-toast';
 import { useShop } from '../../utilities/ShopContext';
 
 export default function OrderSuccessModal() {
-  const { isOrderSuccess, updateIsOrderSuccess } = useShop();
+  const { isOrderSuccess, updateIsOrderSuccess, orderReceipt } = useShop();
+  // console.log('orderReceipt...:', orderReceipt)
 
   const [isOpen, setIsOpen] = useState(true); 
   const [copied, setCopied] = useState(false);
 
   // Sample static payload mirroring live checkout transactional receipts data
-  const receiptData = {
-    orderId: "LUV-8392-GHX5",
-    customerName: "Ama Serwaa",
-    phoneNumber: "+233 24 000 0000",
-    city: "East Legon",
-    region: "Greater Accra",
-    deliveryTimeline: "1 - 2 Business Days",
-    totalPaid: "GH₵ 510.00"
-  };
+  // const orderReceipt = {
+  //   orderId: "LUV-8392-GHX5",
+  //   customerName: "Ama Serwaa",
+  //   phoneNumber: "+233 24 000 0000",
+  //   city: "East Legon",
+  //   region: "Greater Accra",
+  //   deliveryTimeline: "1 - 2 Business Days",
+  //   totalPaid: "GH₵ 510.00"
+  // };
 
   // Helper action: Copy Order Identifier straight to user hardware clipboard
   const handleCopyOrderId = async () => {
     try {
-      await navigator.clipboard.writeText(receiptData.orderId);
+      await navigator.clipboard.writeText(orderReceipt.orderId);
       setCopied(true);
       
       // Optional react-hot-toast notification trigger
@@ -89,7 +90,7 @@ export default function OrderSuccessModal() {
               <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-3 flex justify-between items-center">
                 <div>
                   <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block">Unique Order Ref ID</span>
-                  <span className="text-xs font-black text-zinc-800 tracking-wide select-all font-mono">{receiptData.orderId}</span>
+                  <span className="text-xs font-black text-zinc-800 tracking-wide select-all font-mono">{orderReceipt.orderId}</span>
                 </div>
                 <button 
                   onClick={handleCopyOrderId}
@@ -104,25 +105,25 @@ export default function OrderSuccessModal() {
               <div className="border border-zinc-100 rounded-xl p-3.5 space-y-2.5 text-xs">
                 <div className="flex justify-between items-center text-zinc-500 font-medium">
                   <span>Recipient Name</span>
-                  <span className="font-bold text-zinc-800">{receiptData.customerName}</span>
+                  <span className="font-bold text-zinc-800">{orderReceipt.recipient}</span>
                 </div>
                 
                 <div className="flex justify-between items-center text-zinc-500 font-medium">
-                  <span>Helpline Phone</span>
-                  <span className="font-bold text-zinc-800 font-sans">{receiptData.phoneNumber}</span>
+                  <span>Phone Number</span>
+                  <span className="font-bold text-zinc-800 font-sans">{orderReceipt.phone}</span>
                 </div>
                 
                 <div className="flex justify-between items-start text-zinc-500 font-medium">
-                  <span>Destination Hub</span>
+                  <span>Destination</span>
                   <div className="text-right flex flex-col items-end gap-0.5">
-                    <span className="font-bold text-zinc-800 flex items-center gap-0.5"><MapPin className="w-3 h-3 text-pink-500" /> {receiptData.city}</span>
-                    <span className="text-[10px] text-zinc-400 font-semibold">{receiptData.region} Region</span>
+                    <span className="font-bold text-zinc-800 flex items-center gap-0.5"><MapPin className="w-3 h-3 text-pink-500" /> {orderReceipt.city}</span>
+                    <span className="text-[10px] text-zinc-400 font-semibold">{orderReceipt.region} Region</span>
                   </div>
                 </div>
 
                 <div className="border-t border-zinc-100 pt-2.5 mt-1 flex justify-between items-center font-bold">
                   <span className="text-zinc-500">Amount Transacted</span>
-                  <span className="text-sm font-black text-pink-600 font-sans">{receiptData.totalPaid}</span>
+                  <span className="text-sm font-black text-pink-600 font-sans">GH₵ {orderReceipt.totalCost}</span>
                 </div>
               </div>
 
@@ -134,7 +135,7 @@ export default function OrderSuccessModal() {
                 <div className="space-y-0.5 flex-1">
                   <h4 className="text-[11px] font-bold uppercase tracking-wide text-zinc-800">Fulfillment Tracking</h4>
                   <p className="text-[11px] text-zinc-500 leading-relaxed">
-                    Expected Arrival: <span className="font-bold text-zinc-700">{receiptData.deliveryTimeline}</span>. 
+                    Expected Arrival: <span className="font-bold text-zinc-700">{orderReceipt.deliveryTimeline}</span>. 
                     You can use your reference code inside our **Track Order** panel to monitor courier movement updates.
                   </p>
                 </div>
