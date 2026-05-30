@@ -49,6 +49,8 @@ function Login() {
 
       if (response.status === 200 || response.status === 201) {
         localStorage.setItem("ACCESS_TOKEN", response.data.token);
+        localStorage.setItem("adminLoggedIn", "true");
+        localStorage.setItem("adminToken", response.data.token);
 
         toast.success("Welcome Admin!", {
           duration: 2000,
@@ -61,7 +63,7 @@ function Login() {
           },
         });
 
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
 
     } catch (error) {

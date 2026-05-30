@@ -4,6 +4,7 @@ import {
   FiSearch, FiShoppingBag, FiChevronDown, FiCalendar, FiX, FiClock, FiPercent, FiDollarSign 
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
+import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 import toast from 'react-hot-toast';
 
 function Promotion() {
@@ -11,6 +12,7 @@ function Promotion() {
   // STATE MANAGEMENT & INITIALIZATION
   // ==========================================
   const [promos, setPromos] = useState([]);
+  useAdminBackButton();
   
   // Create New Promotion Form States
   const [promoTitle, setPromoTitle] = useState("");

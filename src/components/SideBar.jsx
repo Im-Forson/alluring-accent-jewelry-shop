@@ -55,11 +55,12 @@ export default function SideBar() {
     } finally {
       // Clear all active local session tokens cleanly
       localStorage.removeItem("adminLoggedIn");
+      localStorage.removeItem("ACCESS_TOKEN");
       localStorage.removeItem("adminToken");
       localStorage.removeItem("token");
       
       toast.success("Logged out successfully", { duration: 2000 });
-      navigate("/login");
+      navigate("/login", { replace: true });
     }
   };
 

@@ -9,12 +9,16 @@ import SideBar from '../components/SideBar';
 import { useNavigate } from "react-router";
 import toast from 'react-hot-toast'; 
 import axios from 'axios';
+import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 
 function ManageProduct() {
   const navigate = useNavigate();
   const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
   
+  // Prevent unauthorized navigation and warn on browser back/forward
+  useAdminBackButton();
+
   // Interactive UI States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -215,17 +219,63 @@ function ManageProduct() {
     }
   };
 
+  const getUniqueFiles = (files) => {
+    const uniqueKeys = new Set();
+    return files.filter((file) => {
+      const key = `${file.name}-${file.size}-${file.type}`;
+      if (uniqueKeys.has(key)) return false;
+      uniqueKeys.add(key);
+      return true;
+    });
+  };
+
   const handleOpenEditModal = (product) => {
     setActiveDropdownId(null);
-    // Preserve existing media: combine main image + existing media array
-    const existingMedia = [];
-    if (product.image) existingMedia.push(product.image);
-    if (product.media && Array.isArray(product.media)) {
-      existingMedia.push(...product.media);
+
+    const existingImages = [];
+    const existingSet = new Set();
+
+    if (product.image && !existingSet.has(product.image)) {
+      existingImages.push(product.image);
+      existingSet.add(product.image);
     }
-    setEditingProduct({ ...product, media: existingMedia });
+
+    if (product.images && Array.isArray(product.images)) {
+      product.images.forEach((url) => {
+        if (!existingSet.has(url)) {
+          existingImages.push(url);
+          existingSet.add(url);
+        }
+      });
+    }
+
+    if (product.media && Array.isArray(product.media)) {
+      product.media.forEach((url) => {
+        if (!existingSet.has(url)) {
+          existingImages.push(url);
+          existingSet.add(url);
+        }
+      });
+    }
+
+    setEditingProduct({
+      ...product,
+      media: [],
+      existingImages
+    });
     setIsModalOpen(true);
     setSelectedEditPreview(null);
+  };
+
+  const handleRemoveExistingImage = (indexToRemove) => {
+    if (!editingProduct || !editingProduct.existingImages) return;
+    const removedUrl = editingProduct.existingImages[indexToRemove];
+    const updatedExistingImages = editingProduct.existingImages.filter((_, index) => index !== indexToRemove);
+    setEditingProduct({
+      ...editingProduct,
+      existingImages: updatedExistingImages,
+      image: removedUrl === editingProduct.image ? updatedExistingImages[0] || '' : editingProduct.image
+    });
   };
 
   const handleRemoveEditMedia = (indexToRemove) => {
@@ -238,9 +288,6 @@ function ManageProduct() {
   const handleUpdateProductSubmit = async (e) => {
     e.preventDefault();
     const loadId = toast.loading("Synchronizing modifications with backend database...");
-
-    console.log('editingProduct.media:', editingProduct.media)
-    console.log('editingProduct.images:', editingProduct.images)
 
     try {
       // const payload = {
@@ -273,23 +320,26 @@ function ManageProduct() {
       }
 
       const colors = editingProduct.colors || [];
-      colors.map((color) => formData.append('colors', color));
+      colors.forEach((color) => formData.append('colors', color));
 
-     // Separate current active strings (old URLs) and file updates safely
-      const currentMediaItems = editingProduct.media || [];
-      
-      let newFilesAdded = false;
-
-      currentMediaItems.forEach((item) => {
-        if (item instanceof File) {
-          // If the admin added a completely new file upload
-          formData.append('images', item);
-          newFilesAdded = true;
-        } else if (typeof item === 'string') {
-          // Keep previous image links alive and pass them down safely
-          formData.append('images', item); 
+      const newFileUploads = editingProduct.media || [];
+      let hasNewFiles = false;
+      newFileUploads.forEach((file) => {
+        if (file instanceof File) {
+          formData.append('images', file);
+          hasNewFiles = true;
         }
       });
+
+      if (hasNewFiles) {
+        formData.append('appendImages', 'true');
+      }
+
+      if (editingProduct.existingImages && editingProduct.existingImages.length > 0) {
+        editingProduct.existingImages.forEach((url) => {
+          formData.append('existingImages', url);
+        });
+      }
 
       // BACKWARDS COMPATIBILITY SAFETY: Fallback checking route variables
       const targetId = editingProduct.id || editingProduct._id;
@@ -312,7 +362,6 @@ function ManageProduct() {
       // Refresh current catalog state to display modifications accurately
       loadProducts();
     } catch (error) {
-      console.log("Update error details:", error.response || error);
       toast.dismiss(loadId);
       toast.error(error.response?.data?.message || "Failed to commit parameters to database.");
     }
@@ -829,29 +878,56 @@ function ManageProduct() {
                     type="file"
                     multiple
                     accept="image/*,video/*"
-                    onChange={(e) => setEditingProduct({ ...editingProduct, media: [...(editingProduct.media || []), ...Array.from(e.target.files)] })}
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        const addedFiles = Array.from(e.target.files);
+                        setEditingProduct({
+                          ...editingProduct,
+                          media: getUniqueFiles([...(editingProduct.media || []), ...addedFiles])
+                        });
+                      }
+                    }}
                     style={inputStyle}
                   />
-                  {editingProduct.media && editingProduct.media.length > 0 && (
+
+                  {(editingProduct.existingImages && editingProduct.existingImages.length > 0) && (
+                    <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                      {editingProduct.existingImages.map((url, index) => {
+                        const isMainImage = url === editingProduct.image;
+                        return (
+                          <div key={`existing-${index}`} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer' }}>
+                            {isMainImage ? (
+                              <div style={{ position: 'absolute', top: '4px', left: '4px', background: '#e11d48', color: '#fff', padding: '2px 6px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>Main</div>
+                            ) : (
+                              <div style={{ position: 'absolute', top: '4px', left: '4px', background: '#64748b', color: '#fff', padding: '2px 6px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>Existing</div>
+                            )}
+                            <img
+                              src={url}
+                              alt="Existing media preview"
+                              onClick={() => setSelectedEditPreview({ url, type: 'image' })}
+                              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveExistingImage(index)}
+                              style={{ position: 'absolute', top: '2px', right: '2px', width: '20px', height: '20px', padding: 0, background: '#e11d48', color: '#fff', border: 'none', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold' }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {(editingProduct.media && editingProduct.media.length > 0) && (
                     <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
                       {editingProduct.media.map((file, index) => {
-                        let previewUrl = '';
-                        let isImage = true;
-                        const isExisting = typeof file === 'string';
-                        const isMainImage = isExisting && file === editingProduct.image;
-                        
-                        if (file instanceof File) {
-                          previewUrl = URL.createObjectURL(file);
-                          isImage = file.type.startsWith('image');
-                        } else if (typeof file === 'string') {
-                          previewUrl = file;
-                          isImage = !file.includes('video');
-                        }
-                        
+                        const previewUrl = URL.createObjectURL(file);
+                        const isImage = file.type.startsWith('image');
                         return (
-                          <div key={index} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer' }}>
-                            {isMainImage && <div style={{ position: 'absolute', top: '4px', left: '4px', background: '#e11d48', color: '#fff', padding: '2px 6px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>Main</div>}
-                            {isExisting && !isMainImage && <div style={{ position: 'absolute', top: '4px', left: '4px', background: '#64748b', color: '#fff', padding: '2px 6px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>Existing</div>}
+                          <div key={`new-${index}`} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer' }}>
+                            <div style={{ position: 'absolute', top: '4px', left: '4px', background: '#16a34a', color: '#fff', padding: '2px 6px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>New</div>
                             {isImage ? (
                               <img
                                 src={previewUrl}

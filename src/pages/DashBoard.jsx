@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fi';
 
 import SideBar from '../components/SideBar';
+import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 
 // ==========================================================================
 // STATIC INLINE STYLES MOVED TO TOP TO PREVENT INITIALIZATION HOP RUNTIME ERRORS
@@ -55,6 +56,8 @@ const statusIndicatorStyle = {
 function DashBoard() {
   // Global loading states for overall dashboard network requests
   const [loadingDashboardData, setLoadingDashboardData] = useState(true);
+
+  useAdminBackButton();
 
   // --- STATE SYSTEM FOR DYNAMIC REAL-TIME MONITORING ---
   const [productMetrics, setProductMetrics] = useState({

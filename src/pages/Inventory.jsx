@@ -7,9 +7,11 @@ import {
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useNavigate } from "react-router";
+import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 
 function Inventory() {
   const navigate = useNavigate();
+  useAdminBackButton();
   const [productList, setProductList] = useState([]);
   
   // Modals & Action Menus

@@ -19,27 +19,32 @@ import ManageProduct from './pages/ManageProduct';
 import AllProducts from './pages/AllProducts';
 import AllBestSellers from './pages/AllBestSellers';
 import Category from './pages/Category';
+import ProtectedRoute from './components/ProtectedRoute';
 
 
 
 const appRouter = createBrowserRouter([
-  {path: '/', element: <HomePage/>},
-  {path: '/shop', element: <Shop/>},
-  {path: '/contact', element: <Contact/>},
-  {path: '/bestsellers', element: <AllBestSellers/>},
-  {path: '/*', element: <NotFound/>},
-  {path: '/product', element: <ProductPage/>},
-  {path: '/login', element: <LoginPage/>},
-  {path: '/signup', element: <SignupPage/>},
-  {path: '/dashboard', element: <DashBoard/>},
-  {path: '/inventory', element: <Inventory/>},
-  {path: '/order', element: <Order/>},
-  {path: '/addproduct', element: <AddProduct/>},
-  {path: '/promotion', element: <Promotion/>},
-  {path: '/manageproduct', element: <ManageProduct/>},
-  {path: '/category', element: <Category/>},
- 
-
+  { path: '/', element: <HomePage/> },
+  { path: '/shop', element: <Shop/> },
+  { path: '/contact', element: <Contact/> },
+  { path: '/bestsellers', element: <AllBestSellers/> },
+  { path: '/product', element: <ProductPage/> },
+  { path: '/login', element: <LoginPage/> },
+  { path: '/signup', element: <SignupPage/> },
+  {
+    path: '/',
+    element: <ProtectedRoute />, 
+    children: [
+      { path: '/dashboard', element: <DashBoard/> },
+      { path: '/inventory', element: <Inventory/> },
+      { path: '/order', element: <Order/> },
+      { path: '/addproduct', element: <AddProduct/> },
+      { path: '/promotion', element: <Promotion/> },
+      { path: '/manageproduct', element: <ManageProduct/> },
+      { path: '/category', element: <Category/> }
+    ]
+  },
+  { path: '/*', element: <NotFound/> }
 ])
 
 function App() {

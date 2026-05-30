@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../Category.css';
 import SideBar from '../components/SideBar';
+import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 import { useShop } from '../../utilities/ShopContext';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import Dialog from '../components/Dialog';
 
 function Category() {
   const { categories, loadCategories } = useShop();
+  useAdminBackButton();
 
   // Starts completely empty as requested - built from scratch
   const [allCategories, setAllCategories] = useState(categories);

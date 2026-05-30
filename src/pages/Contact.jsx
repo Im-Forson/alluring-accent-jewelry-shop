@@ -40,7 +40,7 @@ import Footer from '../components/Footer'
 
                     <div className="info-box">
                         <FaPhoneAlt className="info-icon" />
-                        <span>+233 24 000 0000</span>
+                        <span>+233 55 698 1498</span>
                     </div>
 
                     <div className="info-box">

@@ -5,12 +5,14 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import SideBar from '../components/SideBar';
+import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 
 function Order() {
   const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useAdminBackButton();
 
   // Interactive Dropdown States
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);

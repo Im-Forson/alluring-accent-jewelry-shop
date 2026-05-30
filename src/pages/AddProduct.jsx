@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../AddProduct.css';
 import { FiCamera, FiChevronDown, FiX, FiMenu } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
+import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 import toast from 'react-hot-toast'; 
 import axios from 'axios'; // Linked: Added axios import for backend communication
 import { Loader2 } from 'lucide-react';
@@ -9,6 +10,7 @@ import { useShop } from '../../utilities/ShopContext';
 
 function AddProduct() {
   const { categories } = useShop();
+  useAdminBackButton();
 
   const [color, setColor] = useState("");
   const [colors, setColors] = useState([]);
