@@ -274,3 +274,26 @@
     gap: 16px !important;
   }
 }
+
+/* Media Query for Mobile Devices (max-width: 768px) */
+@media (max-width: 768px) {
+  /* 1. Force the side panel modal to fit completely within the mobile screen height */
+  .modal-content-card {
+    max-width: 100% !important; /* Spans the full width of the phone screen */
+    height: 100vh !important;    /* Forces it to exactly match the screen height */
+    display: flex;
+    flex-direction: column;      /* Keeps header, body, and footer stacked vertically */
+    overflow: hidden;            /* Prevents the entire card itself from breaking the layout */
+  }
+
+  /* 2. Target the inner body container to handle the actual scrolling framework */
+  .modal-scrollable-body {
+    flex: 1;                     /* Takes up all remaining vertical space */
+    overflow-y: auto !important; /* Enables vertical scrolling when content overflows */
+    -webkit-overflow-scrolling: touch; /* Ensures smooth, kinetic momentum scrolling on iOS */
+    padding: 16px !important;    /* Slightly tighter padding for smaller phone screens */
+  }
+}
+
+
+

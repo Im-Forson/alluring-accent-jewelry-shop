@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../Promotion.css';
 import { 
-  FiSearch, FiShoppingBag, FiChevronDown, FiCalendar, FiX, FiClock, FiPercent, FiDollarSign 
+  FiSearch, FiChevronDown, FiCalendar, FiX, FiClock, FiPercent, FiDollarSign 
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
@@ -18,142 +18,242 @@ function Promotion() {
   const [promoTitle, setPromoTitle] = useState("");
   const [discountType, setDiscountType] = useState('percentage');
   const [discountValue, setDiscountValue] = useState("");
-  const [targetCategory, setTargetCategory] = useState("");
+  
+  // Multi-Select & Search States for Targets
+  const [selectedTargets, setSelectedTargets] = useState([]); 
+  const [targetSearchQuery, setTargetSearchQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // DOM Reference boundary node for click-outside detection
+  const dropdownRef = useRef(null);
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [displayBanner, setDisplayBanner] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
+  // Dynamic States for Live Database Syncing
+  const [dbCategories, setDbCategories] = useState([]);
+  const [dbProducts, setDbProducts] = useState([]);
+  const [isLoadingDatabase, setIsLoadingDatabase] = useState(true);
+
   // Flash Sale Setup Panel State
   const [isFlashSaleModalOpen, setIsFlashSaleModalOpen] = useState(false);
   const [flashDiscount, setFlashDiscount] = useState("50");
-  const [flashDuration, setFlashDuration] = useState("3"); // in hours
+  const [flashDuration, setFlashDuration] = useState("3"); 
   const [flashCategory, setFlashCategory] = useState("all");
 
-  // Sync data with local engine database on render lifecycle
+  // ==========================================
+  // CLICK-OUTSIDE EVENT LISTENER TRIGGER
+  // ==========================================
   useEffect(() => {
-    const storedPromos = JSON.parse(localStorage.getItem("storePromotions")) || [
-      { id: 1, title: 'Spring Sale', subtitle: '20% Off All Items', price: '346.00', stock: '21 in Stock', status: 'active', type: 'percentage', value: '20', category: 'all', start: '2026-04-20', end: '2026-04-25', banner: true },
-      { id: 2, title: 'Flash Deal', subtitle: '30% Off Rings Today!', price: '750.00', stock: '12 in Stock', status: 'active', type: 'percentage', value: '30', category: 'rings', start: '2026-05-24', end: '2026-05-25', banner: true },
-      { id: 3, title: 'Holiday Clearance', subtitle: 'Selected Items Only', price: '726.00', stock: 'Out of Stock', status: 'expired', type: 'fixed', value: '100', category: 'necklaces', start: '2026-05-01', end: '2026-05-10', banner: false }
-    ];
-    setPromos(storedPromos);
-    localStorage.setItem("storePromotions", JSON.stringify(storedPromos));
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+        setTargetSearchQuery(""); 
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   // ==========================================
-  // REAL-TIME METRIC DYNAMIC CALCULATION
+  // ASYNC BACKEND DATABASE SYNCHRONIZATION
   // ==========================================
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setIsLoadingDatabase(true);
+      try {
+        const promosResponse = await fetch('/api/promotions');
+        const categoriesResponse = await fetch('/api/categories');
+        const productsResponse = await fetch('/api/products');
+
+        if (promosResponse.ok) {
+          const promosData = await promosResponse.json();
+          setPromos(promosData);
+        }
+        if (categoriesResponse.ok) {
+          const categoriesData = await categoriesResponse.json();
+          setDbCategories(categoriesData);
+        }
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          setDbProducts(productsData);
+        }
+      } catch (error) {
+        console.error("Backend Sync Error:", error);
+        toast.error("Failed to connect to the backend database.", { duration: 2000 });
+        setDbCategories([{ id: "rings", name: "Rings" }, { id: "necklaces", name: "Necklaces" }]);
+      } finally {
+        setIsLoadingDatabase(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // ==========================================
+  // COMPUTE UNIFIED SEARCHABLE OPTIONS LIST
+  // ==========================================
+  const searchableOptions = [
+    { id: "all", name: "All Jewelry Inventory", type: "global" },
+    ...dbCategories.map(cat => ({
+      id: `cat:${cat.id || cat._id || cat.name.toLowerCase()}`,
+      name: `${cat.name} (Entire Collection)`,
+      type: "category"
+    })),
+    ...dbProducts.map(prod => ({
+      id: `prod:${prod.id || prod._id}`,
+      name: `${prod.name || prod.title} (Single Product)`,
+      type: "product"
+    }))
+  ];
+
   const activeCount = promos.filter(p => p.status === 'active').length;
   const upcomingCount = promos.filter(p => p.status === 'upcoming').length;
   const expiredCount = promos.filter(p => p.status === 'expired').length;
 
   // ==========================================
-  // CORE PROMOTION ADMINISTRATIVE ENGINES
+  // MULTI-SELECT HANDLER ENGINES
   // ==========================================
-  
-  const handleSavePromotion = (e) => {
-    e.preventDefault();
-    if (!promoTitle || !discountValue || !targetCategory) {
-      toast.error("Please fill out all primary promotion fields.");
+  const handleToggleTarget = (targetId) => {
+    if (targetId === "all") {
+      setSelectedTargets(["all"]);
       return;
     }
 
-    let updatedPromos;
-    const formattedSubtitle = discountType === 'percentage' 
-      ? `${discountValue}% Off ${targetCategory === 'all' ? 'All Items' : targetCategory}`
-      : `GHC ${discountValue} Off ${targetCategory === 'all' ? 'All Items' : targetCategory}`;
+    setSelectedTargets(prev => {
+      const cleanPrev = prev.filter(t => t !== "all");
+      if (cleanPrev.includes(targetId)) {
+        return cleanPrev.filter(t => t !== targetId);
+      } else {
+        return [...cleanPrev, targetId];
+      }
+    });
+  };
 
-    if (editingId) {
-      updatedPromos = promos.map(p => {
-        if (p.id === editingId) {
-          return {
-            ...p,
-            title: promoTitle,
-            subtitle: formattedSubtitle,
-            type: discountType,
-            value: discountValue,
-            category: targetCategory,
-            start: startDate || p.start,
-            end: endDate || p.end,
-            banner: displayBanner
-          };
-        }
-        return p;
-      });
-      setEditingId(null);
-      toast.success("Campaign updated successfully!");
-    } else {
-      const newPromo = {
-        id: Date.now(),
-        title: promoTitle,
-        subtitle: formattedSubtitle,
-        price: '0.00', 
-        stock: 'In Stock',
-        status: 'active',
-        type: discountType,
-        value: discountValue,
-        category: targetCategory,
-        start: startDate || new Date().toISOString().split('T')[0],
-        end: endDate || new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
-        banner: displayBanner
-      };
-      updatedPromos = [newPromo, ...promos];
-      toast.success("New promotional campaign launched!");
+  const handleRemoveTargetBadge = (targetId) => {
+    setSelectedTargets(prev => prev.filter(t => t !== targetId));
+  };
+
+  // ==========================================
+  // CORE PROMOTION ADMINISTRATIVE ENGINES
+  // ==========================================
+  const handleSavePromotion = async (e) => {
+    e.preventDefault();
+    if (!promoTitle || !discountValue || selectedTargets.length === 0) {
+      toast.error("Please fill out all fields and select target assets.");
+      return;
     }
 
-    setPromos(updatedPromos);
-    localStorage.setItem("storePromotions", JSON.stringify(updatedPromos));
-    clearFormFields();
+    const targetLabels = selectedTargets.map(id => {
+      return searchableOptions.find(o => o.id === id)?.name || id;
+    }).join(", ");
+
+    const formattedSubtitle = discountType === 'percentage' 
+      ? `${discountValue}% Off on: [${targetLabels}]`
+      : `GHC ${discountValue} Off on: [${targetLabels}]`;
+
+    const payload = {
+      title: promoTitle,
+      subtitle: formattedSubtitle,
+      type: discountType,
+      value: discountValue,
+      targets: selectedTargets, 
+      start: startDate || new Date().toISOString().split('T')[0],
+      end: endDate || new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
+      banner: displayBanner,
+      status: 'active',
+      price: '0.00',
+      stock: 'In Stock'
+    };
+
+    try {
+      if (editingId) {
+        const response = await fetch(`/api/promotions/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          const updatedResult = await response.json();
+          setPromos(promos.map(p => p.id === editingId || p._id === editingId ? updatedResult : p));
+          setEditingId(null);
+          toast.success("Campaign updated successfully in database!");
+        }
+      } else {
+        const response = await fetch('/api/promotions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          const newPromoData = await response.json();
+          setPromos([newPromoData, ...promos]);
+          toast.success("New promotional campaign launched onto live servers!");
+        }
+      }
+      clearFormFields();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to commit promotion payload parameters to database.");
+    }
   };
 
   const handleEditClick = (promo) => {
-    setEditingId(promo.id);
+    setEditingId(promo.id || promo._id);
     setPromoTitle(promo.title);
     setDiscountType(promo.type);
     setDiscountValue(promo.value);
-    setTargetCategory(promo.category);
-    setStartDate(promo.start);
-    setEndDate(promo.end);
+    setSelectedTargets(promo.targets || [promo.category]); 
+    setStartDate(promo.start ? promo.start.split('T')[0] : "");
+    setEndDate(promo.end ? promo.end.split('T')[0] : "");
     setDisplayBanner(promo.banner);
-    toast.loading("Editing promotion campaign...", { id: "edit-load", duration: 1000 });
+    toast.loading("Editing campaign instance data...", { id: "edit-load", duration: 1000 });
   };
 
-  const handleTogglePause = (id) => {
-    let currentStatus = "";
-    const updated = promos.map(p => {
-      if (p.id === id) {
-        const nextStatus = p.status === 'active' ? 'expired' : 'active';
-        currentStatus = nextStatus;
-        return { ...p, status: nextStatus };
+  const handleTogglePause = async (promoInstance) => {
+    const id = promoInstance.id || promoInstance._id;
+    const nextStatus = promoInstance.status === 'active' ? 'expired' : 'active';
+    
+    try {
+      const response = await fetch(`/api/promotions/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus })
+      });
+
+      if (response.ok) {
+        setPromos(promos.map(p => (p.id === id || p._id === id) ? { ...p, status: nextStatus } : p));
+        nextStatus === 'active' ? toast.success("Campaign live!") : toast.error("Campaign paused.");
       }
-      return p;
-    });
-
-    setPromos(updated);
-    localStorage.setItem("storePromotions", JSON.stringify(updated));
-
-    if (currentStatus === 'active') {
-      toast.success("Campaign reactivated live!");
-    } else {
-      toast.error("Campaign paused and set to inactive.");
+    } catch (err) {
+      toast.error("Could not modify live status configuration.");
     }
   };
 
-  const handleDeleteClick = (id) => {
-    if(!window.confirm("Permanently delete this promotion code from your client storefront?")) return;
-    const updated = promos.filter(p => p.id !== id);
-    setPromos(updated);
-    localStorage.setItem("storePromotions", JSON.stringify(updated));
-    toast.success("Promotion successfully purged.");
+  const handleDeleteClick = async (id) => {
+    if (!window.confirm("Permanently delete this promotion code from your database?")) return;
+    try {
+      const response = await fetch(`/api/promotions/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        setPromos(promos.filter(p => p.id !== id && p._id !== id));
+        toast.success("Promotion deleted.");
+      }
+    } catch (err) {
+      toast.error("Database deletion operation failed.");
+    }
   };
 
-  const handleLaunchFlashSale = () => {
+  const handleLaunchFlashSale = async () => {
     const flashTitle = `⚡ EMERGENCY FLASH SALE ⚡`;
     const flashSubtitle = `${flashDiscount}% OFF ALL ${flashCategory.toUpperCase()} ITEMS!`;
     
-    const newFlashPromo = {
-      id: Date.now(),
+    const flashPayload = {
       title: flashTitle,
       subtitle: flashSubtitle,
       price: '⚡ PROMO ⚡',
@@ -161,28 +261,34 @@ function Promotion() {
       status: 'active',
       type: 'percentage',
       value: flashDiscount,
-      category: flashCategory,
+      targets: [flashCategory === 'all' ? 'all' : `cat:${flashCategory}`],
       start: new Date().toISOString(),
       end: new Date(Date.now() + parseInt(flashDuration) * 60 * 60 * 1000).toISOString(),
       banner: true
     };
 
-    const updated = [newFlashPromo, ...promos];
-    setPromos(updated);
-    localStorage.setItem("storePromotions", JSON.stringify(updated));
-    localStorage.setItem("activeFlashSaleCampaign", JSON.stringify(newFlashPromo));
-    
-    setIsFlashSaleModalOpen(false);
-    toast.success("Flash sale deployed! Storefront urgency counters active.", {
-      icon: '⚡',
-      duration: 4000
-    });
+    try {
+      const response = await fetch('/api/promotions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(flashPayload)
+      });
+
+      if (response.ok) {
+        const deployedFlash = await response.json();
+        setPromos([deployedFlash, ...promos]);
+        setIsFlashSaleModalOpen(false);
+        toast.success("Emergency flash sale deployed down to store nodes!", { icon: '⚡' });
+      }
+    } catch (err) {
+      toast.error("Failed to deploy flash markdown parameters.");
+    }
   };
 
   const clearFormFields = () => {
     setPromoTitle("");
     setDiscountValue("");
-    setTargetCategory("");
+    setSelectedTargets([]);
     setStartDate("");
     setEndDate("");
     setDisplayBanner(false);
@@ -190,11 +296,10 @@ function Promotion() {
   };
 
   return (
-    <div className="admin-layout">
+    <div className="promo-admin-layout">
       <SideBar />
 
       <main className="main-content-area">
-        
         {/* Top Metric Cards */}
         <section className="promo-metrics">
           <div className="promo-card active-card">
@@ -220,14 +325,6 @@ function Promotion() {
               <h3>{expiredCount}</h3>
             </div>
           </div>
-
-          <div className="header-search-icons">
-            <FiSearch className="top-action-icon" />
-            <div className="top-bag-wrapper">
-              <FiShoppingBag className="top-action-icon" />
-              <span className="bag-badge">{activeCount}</span>
-            </div>
-          </div>
         </section>
 
         {/* Current Promotions Panel */}
@@ -248,12 +345,12 @@ function Promotion() {
                 {promos.length === 0 ? (
                   <tr>
                     <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
-                      No promotional campaigns currently logged.
+                      No promotional campaigns currently logged in database nodes.
                     </td>
                   </tr>
                 ) : (
                   promos.map((promo) => (
-                    <tr key={promo.id} style={{ opacity: promo.status === 'expired' ? 0.6 : 1 }}>
+                    <tr key={promo.id || promo._id} style={{ opacity: promo.status === 'expired' ? 0.6 : 1 }}>
                       <td>
                         <div className="promo-info-cell">
                           <strong style={{ color: promo.title.includes('⚡') ? '#e11d48' : 'inherit' }}>
@@ -276,11 +373,11 @@ function Promotion() {
                           <button 
                             className="action-btn pause-btn" 
                             style={{ backgroundColor: promo.status === 'expired' ? '#10b981' : '#f59e0b' }} 
-                            onClick={() => handleTogglePause(promo.id)}
+                            onClick={() => handleTogglePause(promo)}
                           >
                             {promo.status === 'expired' ? 'Activate' : 'Pause'}
                           </button>
-                          <button className="action-btn delete-btn" onClick={() => handleDeleteClick(promo.id)}>Delete</button>
+                          <button className="action-btn delete-btn" onClick={() => handleDeleteClick(promo.id || promo._id)}>Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -317,7 +414,7 @@ function Promotion() {
                       checked={discountType === 'percentage'} 
                       onChange={() => setDiscountType('percentage')} 
                     />
-                    <span className="custom-radio"></span>
+                    <span className="custom-radio" ></span>
                     Percentage %
                   </label>
                   <label className="radio-container">
@@ -343,19 +440,112 @@ function Promotion() {
                 />
               </div>
 
-              <div className="form-field select-field">
-                <select 
-                  className="panel-input panel-select" 
-                  value={targetCategory} 
-                  onChange={(e) => setTargetCategory(e.target.value)}
+              {/* DYNAMIC COMBINED SEARCHABLE MULTI-SELECT DROPDOWN MENU */}
+              <div className="form-field searchable-select-container" ref={dropdownRef}>
+                <div 
+                  className="searchable-select-trigger" 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
-                  <option value="" disabled hidden>Select Products or Categories</option>
-                  <option value="all">All Jewelry</option>
-                  <option value="rings">Rings Only</option>
-                  <option value="necklaces">Necklaces Only</option>
-                </select>
-                <FiChevronDown className="field-select-arrow" />
+                  <span style={{ color: selectedTargets.length === 0 ? 'var(--text-muted)' : 'var(--text-main)' }}>
+                    {selectedTargets.length === 0 
+                      ? "Search database categories or items..." 
+                      : `Selected Targets (${selectedTargets.length})`}
+                  </span>
+                  <FiChevronDown className={`field-select-arrow ${isDropdownOpen ? 'rotated' : ''}`} />
+                </div>
+
+                {isDropdownOpen && (
+                  <div className="searchable-dropdown-menu">
+                    <div className="search-input-wrapper">
+                      <FiSearch className="search-menu-icon" />
+                      <input 
+                        type="text"
+                        placeholder="Type catalog title or collection..."
+                        className="menu-search-field"
+                        value={targetSearchQuery}
+                        onChange={(e) => setTargetSearchQuery(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                      />
+                      {targetSearchQuery && (
+                        <FiX className="clear-search-icon" onClick={() => setTargetSearchQuery("")} />
+                      )}
+                    </div>
+
+                    <ul className="options-list">
+                      {searchableOptions.filter(opt => 
+                        opt.name.toLowerCase().includes(targetSearchQuery.toLowerCase())
+                      ).length === 0 ? (
+                        <li className="no-options-found">No database matches found</li>
+                      ) : (
+                        searchableOptions
+                          .filter(opt => opt.name.toLowerCase().includes(targetSearchQuery.toLowerCase()))
+                          .map((opt, idx, filteredArray) => {
+                            const showHeader = idx === 0 || filteredArray[idx - 1].type !== opt.type;
+                            const isChecked = selectedTargets.includes(opt.id);
+
+                            return (
+                              <React.Fragment key={opt.id}>
+                                {showHeader && (
+                                  <li className="dropdown-section-header">
+                                    {opt.type === "global" && "Global Targets"}
+                                    {opt.type === "category" && "Live Inventory Collections"}
+                                    {opt.type === "product" && "Store Products"}
+                                  </li>
+                                )}
+                                <li 
+                                  className={`option-item multi-option-item ${isChecked ? 'selected-item' : ''}`}
+                                  onClick={() => handleToggleTarget(opt.id)}
+                                >
+                                  <input 
+                                    type="checkbox" 
+                                    className="dropdown-checkbox"
+                                    checked={isChecked}
+                                    readOnly 
+                                  />
+                                  <span>{opt.name}</span>
+                                </li>
+                              </React.Fragment>
+                            );
+                          })
+                      )}
+                    </ul>
+
+                    {/* ACTION FOOTER BAR WITH DONE BUTTON */}
+                    <div className="dropdown-footer-actions-bar">
+                      <span className="selection-summary-text">
+                        {selectedTargets.length} selected
+                      </span>
+                      <button 
+                        type="button" 
+                        className="dropdown-done-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDropdownOpen(false);
+                          setTargetSearchQuery("");
+                        }}
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Target Multi-Select Badge Box Footer */}
+              {selectedTargets.length > 0 && (
+                <div className="target-badge-panel-row">
+                  {selectedTargets.map(targetId => {
+                    const foundObj = searchableOptions.find(o => o.id === targetId);
+                    return (
+                      <div key={targetId} className="target-pill-badge">
+                        <span>{foundObj ? foundObj.name : targetId}</span>
+                        <FiX className="remove-badge-icon" onClick={() => handleRemoveTargetBadge(targetId)} />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div className="form-field date-range-row">
                 <div className="date-input-wrapper">
@@ -382,7 +572,7 @@ function Promotion() {
                 <label>Campaign Settings Preview</label>
                 <div className="preview-card-box">
                   <strong>Type:</strong> {discountType.toUpperCase()}<br/>
-                  return <strong>Targeting:</strong> {targetCategory || 'None chosen yet'}<br/>
+                  <strong>Configured Targets:</strong> {selectedTargets.length} items<br/>
                   <strong>Status:</strong> {editingId ? '⚠️ Editing' : '✨ New Entry'}
                 </div>
               </div>
@@ -400,7 +590,7 @@ function Promotion() {
                 {editingId && (
                   <button type="button" className="btn-save-promo cancel-btn" onClick={clearFormFields}>Cancel</button>
                 )}
-                <button type="submit" className="btn-save-promo">
+                <button type="submit" className="btn-save-promo" disabled={isLoadingDatabase}>
                   {editingId ? 'Update Campaign' : 'Save Promotion'}
                 </button>
                 <button 
@@ -416,9 +606,7 @@ function Promotion() {
         </section>
       </main>
 
-      {/* ==========================================
-          FLASH SALE CONFIGURATION OVERLAY DRAWER
-          ========================================== */}
+      {/* FLASH SALE OVERLAY DRAWER */}
       {isFlashSaleModalOpen && (
         <div className="modal-overlay" onClick={() => setIsFlashSaleModalOpen(false)}>
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
@@ -458,8 +646,9 @@ function Promotion() {
                 <label className="modal-label">Target Segment</label>
                 <select className="modal-select" value={flashCategory} onChange={(e) => setFlashCategory(e.target.value)}>
                   <option value="all">Entire Jewelry Inventory</option>
-                  <option value="rings">Rings Stock Only</option>
-                  <option value="necklaces">Necklaces Stock Only</option>
+                  {dbCategories.map(c => (
+                    <option key={c.id || c._id} value={c.id || c._id}>{c.name} Stock Only</option>
+                  ))}
                 </select>
               </div>
 

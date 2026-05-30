@@ -129,7 +129,7 @@ function DashBoard() {
   // =====================================================================
   const fetchLiveCatalogMetrics = async () => {
     try {
-      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/product/all');
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
       
       // Adapt safely based on array wrappers
       const storedItems = response.data.products || response.data || [];
@@ -172,7 +172,7 @@ function DashBoard() {
   const fetchLiveTodayStats = async () => {
     try {
       // PLUG REAL URL PATH HERE:
-      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/dashboard/today-stats', {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/dashboard/today-stats`, {
         headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
       });
 
@@ -204,7 +204,7 @@ function DashBoard() {
   const fetchLiveRecentOrders = async () => {
     try {
       // PLUG REAL URL PATH HERE:
-      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/orders/recent', {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/orders/recent`, {
         headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
       });
 
@@ -351,10 +351,6 @@ function DashBoard() {
                   <div className="stat-item">
                     <span>Total Orders</span>
                     <strong>{orderMetrics.totalOrdersCount}</strong>
-                  </div>
-                  <div className="stat-item">
-                    <span>New Customers</span>
-                    <strong>{orderMetrics.newCustomersCount}</strong>
                   </div>
                 </div>
               </div>

@@ -536,3 +536,44 @@
     left: 0 !important;
   }
 }
+
+
+/* Base styling for the status pill */
+.status-badge-pill {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 20px;
+  text-align: center;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+/* 1. Pending Status - Subtle Orange/Yellow warning color */
+.pill-pending {
+  background-color: #fef3c7; /* Soft amber */
+  color: #b45309;            /* Deep amber text */
+  border: 1px solid #fde68a;
+}
+
+/* 2. Processing Status - Elegant Royal Blue */
+.pill-processing {
+  background-color: #dbeafe; /* Soft blue */
+  color: #1d4ed8;            /* Deep blue text */
+  border: 1px solid #bfdbfe;
+}
+
+/* 3. Out For Delivery Status - Vibrant Purple/Indigo */
+.pill-out-for-delivery {
+  background-color: #f3e8ff; /* Soft purple */
+  color: #6b21a8;            /* Deep purple text */
+  border: 1px solid #e9d5ff;
+}
+
+/* 4. Delivered Status - Crisp, Clean Emerald Green */
+.pill-delivered {
+  background-color: #d1fae5; /* Soft emerald */
+  color: #065f46;            /* Deep emerald text */
+  border: 1px solid #a7f3d0;
+}

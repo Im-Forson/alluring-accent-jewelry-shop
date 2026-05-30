@@ -11,6 +11,34 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 
+export function useWindowSize() {
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, []);
+
+  return windowSize;
+}
+
+
+
 function ManageProduct() {
   const navigate = useNavigate();
   const [productList, setProductList] = useState([]);
@@ -71,7 +99,7 @@ function ManageProduct() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://alluring-accent-backend.onrender.com/api/product/all');
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
       
       // Adapt based on incoming database array wrapper safely
       const storedItems = response.data || [];
@@ -191,7 +219,7 @@ function ManageProduct() {
 
     const loadId = toast.loading("Purging product records...");
     try {
-      await axios.delete(`https://alluring-accent-backend.onrender.com/api/product/delete/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/product/delete/${id}`, {
         headers: {
           authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
         }
@@ -345,7 +373,7 @@ function ManageProduct() {
       const targetId = editingProduct.id || editingProduct._id;
 
       await axios.patch(
-        `https://alluring-accent-backend.onrender.com/api/product/update/${editingProduct.id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/product/update/${editingProduct.id}`,
         formData,
         {
           headers: {
@@ -384,7 +412,7 @@ function ManageProduct() {
     const loadId = toast.loading("Updating visibility states...");
     try {
       await axios.patch(
-        `https://alluring-accent-backend.onrender.com/api/product/update/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/product/update/${id}`,
         { stock: targetStock },
         {
           headers: {
@@ -994,8 +1022,8 @@ const statusIndicatorStyle = { width: '8px', height: '8px', borderRadius: '50%',
 const dropdownItemStyle = { padding: '10px 16px', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '13px', color: '#4a5568', display: 'flex', alignItems: 'center', transition: 'background 0.2s' };
 const filterDropdownStyle = { position: 'absolute', left: 0, top: '45px', backgroundColor: '#fff', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', borderRadius: '6px', padding: '6px 0', zIndex: 110, minWidth: '180px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
 const actionDropdownMenuStyle = { position: 'absolute', right: 0, top: '35px', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: '6px', padding: '6px 0', zIndex: 100, minWidth: '160px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
-const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
-const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', maxHeight: '75vh', overflowY: 'auto' };
+const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000,};
+const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', maxHeight: '90vh', overflowY: 'auto' };
 const inputGroupStyle = { display: 'flex', flexDirection: 'column', gap: '6px' };
 const labelStyle = { fontSize: '13px', fontWeight: '500', color: '#4a5568' };
 const inputStyle = { padding: '10px 14px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '14px', outline: 'none' };
