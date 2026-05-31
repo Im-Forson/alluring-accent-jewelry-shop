@@ -1,7 +1,14 @@
 import '../SignupPage.css';
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faLock, faEyeSlash, faEye, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faUser, 
+  faLock, 
+  faEyeSlash, 
+  faEye, 
+  faEnvelope,
+  faShoppingBag // Added icon for storefront navigation consistency
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-hot-toast';
 import axios from 'axios'; 
 import { useNavigate } from "react-router";
@@ -10,7 +17,7 @@ function SignupPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // 2. Loading state to disable button during request
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   
   // Unified form state management
   const [formData, setFormData] = useState({
@@ -27,7 +34,7 @@ function SignupPage() {
     }));
   };
 
-  const handleSignupSubmit = async (e) => { // 3. Made function async
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
     const { username, password, confirmedPassword } = formData;
 
@@ -45,7 +52,7 @@ function SignupPage() {
     try {
       setIsSubmitting(true);
 
-      // 4. Send the payload to your live Render backend
+      // Send the payload to your live Render backend
       const response = await axios.post(
         'https://alluring-accent-backend.onrender.com/api/admin/signup', 
         {
@@ -62,7 +69,7 @@ function SignupPage() {
 
       console.log("Signup response:", response);
 
-      // 5. Handle successful creation based on standard HTTP success statuses
+      // Handle successful creation based on standard HTTP success statuses
       if (response.status === 200 || response.status === 201) {
         toast.success(`Admin account for ${username} created successfully!`);
         
@@ -74,17 +81,13 @@ function SignupPage() {
         });
       }
 
-      //navigate("/login"); // Optionally redirect to login after successful signup
-       setTimeout(() => {
+      setTimeout(() => {
         navigate("/login");
       }, 2000); // Redirect after a short delay to allow users to see the success message
-
-      
 
     } catch (error) {
       console.error("Signup network error:", error);
       
-      // 6. Capture whatever custom message your backend developer sends back (like "Email already in use")
       const backendMessage = error.response?.data?.message || "Could not connect to the authentication host.";
       toast.error(backendMessage);
     } finally {
@@ -116,7 +119,7 @@ function SignupPage() {
                   placeholder="Enter Your Username" 
                   value={formData.username}
                   onChange={handleInputChange}
-                  disabled={isSubmitting} // Lock input during submission
+                  disabled={isSubmitting} 
                   required
                 />
               </div>
@@ -134,7 +137,7 @@ function SignupPage() {
                   placeholder='Enter Your Password' 
                   value={formData.password}
                   onChange={handleInputChange}
-                  disabled={isSubmitting} // Lock input during submission
+                  disabled={isSubmitting} 
                   required
                 />
                 <FontAwesomeIcon 
@@ -156,9 +159,9 @@ function SignupPage() {
                   id="confirmedPassword"
                   name="confirmedPassword"
                   placeholder='Confirm Your Password' 
-                  value={formData.confirmPassword}
+                  value={formData.confirmedPassword} // Fixed typo value assignment point here
                   onChange={handleInputChange}
-                  disabled={isSubmitting} // Lock input during submission
+                  disabled={isSubmitting} 
                   required
                 />
                 <FontAwesomeIcon 
@@ -174,19 +177,58 @@ function SignupPage() {
             <button 
               type="submit" 
               className="signup-btn"
-              disabled={isSubmitting} // Prevent multi-clicks
+              disabled={isSubmitting} 
               style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
             >
               {isSubmitting ? "Creating Account..." : "Sign Up"}
             </button>
+
+            {/* DECORATIVE SEPARATOR LINE */}
+            <div style={{ display: 'flex', alignItems: 'center', margin: '24px 0 16px', color: 'rgba(0,0,0,0.15)' }}>
+              <div style={{ flex: 1, height: '1px', backgroundColor: 'currentColor' }}></div>
+              <span style={{ padding: '0 12px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>OR</span>
+              <div style={{ flex: 1, height: '1px', backgroundColor: 'currentColor' }}></div>
+            </div>
+
+
+            
+          <div className="login-redirect-text" style={{ marginTop: '-40px', fontSize: '13px', textAlign: 'center' }}>
+            Already have an account? <a href="/login" className="login-link">Login</a>
+          </div>
+
+          
+
+            {/* CUSTOMER FACING STOREFRONT REDIRECT BUTTON */}
+            <button
+              type="button"
+              className="storefront-redirect-btn"
+              onClick={() => navigate("/")}
+              style={{
+                marginTop: '24px',
+                width: '100%',
+                padding: '12px',
+                borderRadius: '10px',
+                border: '2px dashed #be185d',
+                background: 'transparent',
+                color: '#be185d',
+                fontWeight: '600',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <FontAwesomeIcon icon={faShoppingBag} />
+              Go to Customer Storefront
+            </button>
           </form>
 
-          <div className="login-redirect-text" style={{ marginTop: '16px', fontSize: '13px', textAlign: 'center' }}>
-            Already have an account? <a href="/login" className="login-link">Login</a>
           </div>
         </div>
       </div>
-    </div>
   );
 }
 

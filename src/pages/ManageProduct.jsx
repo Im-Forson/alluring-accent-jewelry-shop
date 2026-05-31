@@ -5,6 +5,8 @@ import {
   FiChevronLeft, FiChevronRight, FiShoppingBag, FiX,
   FiCopy, FiCheck, FiPlus
 } from 'react-icons/fi';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserShield } from "@fortawesome/free-solid-svg-icons";
 import SideBar from '../components/SideBar';
 import { useNavigate } from "react-router";
 import toast from 'react-hot-toast'; 
@@ -510,7 +512,7 @@ function ManageProduct() {
             )}
 
             <div className="badge-wrapper"></div>
-            <img src="https://i.pravatar.cc/150?img=47" alt="Profile" className="top-profile-img" />
+               
           </div>
         </header>
 

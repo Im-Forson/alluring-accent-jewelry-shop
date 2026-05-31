@@ -10,7 +10,8 @@ import {
   faLock,
   faEye,
   faEyeSlash,
-  faSpinner
+  faSpinner,
+  faShoppingBag // Added icon for the customer storefront escape hatch
 } from "@fortawesome/free-solid-svg-icons";
 
 function Login() {
@@ -96,7 +97,7 @@ function Login() {
       <div className="background-glow glow-1"></div>
       <div className="background-glow glow-2"></div>
 
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLogin} className="login-form">
         <h1 className="login-title">Admin Login</h1>
 
         <p className="login-subtitle">
@@ -112,7 +113,7 @@ function Login() {
           <div className="lg-input-box">
             <FontAwesomeIcon icon={faUser} className="lg-left-icon" />
             <input
-              type="text" // 
+              type="text" 
               name="username" 
               placeholder="Enter admin username"
               value={username}
@@ -146,7 +147,7 @@ function Login() {
           </div>
         </div>
 
-        {/* BUTTON */}
+        {/* PRIMARY SUBMIT BUTTON */}
         <button
           type="submit"
           className="login-btn"
@@ -160,6 +161,40 @@ function Login() {
           ) : (
             "Login"
           )}
+        </button>
+
+        {/* DECORATIVE SEPARATOR LINE */}
+        <div style={{ display: 'flex', alignItems: 'center', margin: '24px 0 16px', color: 'rgba(0,0,0,0.15)' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'currentColor' }}></div>
+          <span style={{ padding: '0 12px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>OR</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'currentColor' }}></div>
+        </div>
+
+        {/* CUSTOMER FACING STOREFRONT REDIRECT BUTTON */}
+        <button
+          type="button"
+          className="storefront-redirect-btn"
+          onClick={() => navigate("/")} // Adjust path string to your custom client storefront router target if needed
+          style={{
+            marginTop: '-70px',
+            width: '100%',
+            padding: '12px',
+            borderRadius: '10px',
+            border: '2px dashed #be185d',
+            background: 'transparent',
+            color: '#be185d',
+            fontWeight: '600',
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <FontAwesomeIcon icon={faShoppingBag} />
+          Go to Customer Storefront
         </button>
       </form>
     </div>

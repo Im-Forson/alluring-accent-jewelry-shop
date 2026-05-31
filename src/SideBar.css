@@ -229,3 +229,14 @@
     font-size: 0.9rem;
   }
 }
+
+.profile-icon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; /* Adjust to match your exact layout avatar width */
+  height: 40px; /* Adjust to match your exact layout avatar height */
+  border-radius: 50%;
+  background-color: rgba(190, 24, 93, 0.1); 
+  color: #be185d;
+}

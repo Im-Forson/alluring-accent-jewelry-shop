@@ -1,17 +1,23 @@
 import '../SideBar.css';
 import { NavLink, useNavigate } from 'react-router';
-import {
-  FiBox,
-  FiClipboard,
-  FiTag,
-  FiMenu,
-  FiX
-} from 'react-icons/fi';
-// import { BiHomeAlt } from 'react-index';
-import { BiHomeAlt as HomeIcon } from 'react-icons/bi';
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import axios from 'axios'; // 1. Imported axios
+import axios from 'axios'; 
+
+// Imported official FontAwesome React Components & Icons
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChartPie,
+  faLayerGroup,
+  faPlus,
+  faReceipt,
+  faBoxesStacked,
+  faTags,
+  faBars,
+  faXmark,
+  faSignOutAlt,
+  faUserShield
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function SideBar() {
   const navigate = useNavigate();
@@ -78,7 +84,7 @@ export default function SideBar() {
           aria-label="Toggle Side Navigation"
           onClick={() => setMenuOpen(!menuOpen)}
         >
-          {menuOpen ? <FiX /> : <FiMenu />}
+          {menuOpen ? <FontAwesomeIcon icon={faXmark} /> : <FontAwesomeIcon icon={faBars} />}
         </button>
       </div>
 
@@ -99,18 +105,18 @@ export default function SideBar() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="icon"><HomeIcon /></span>
+            <span className="icon"><FontAwesomeIcon icon={faChartPie} /></span>
             Dashboard
           </NavLink>
 
-            <NavLink
+          <NavLink
             to="/category"
             onClick={closeMenu}
             className={({ isActive }) =>
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="icon"><FiBox /></span>
+            <span className="icon"><FontAwesomeIcon icon={faLayerGroup} /></span>
             Category
           </NavLink>
 
@@ -121,7 +127,7 @@ export default function SideBar() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="icon"><FiBox /></span>
+            <span className="icon"><FontAwesomeIcon icon={faPlus} /></span>
             Add Products
           </NavLink>
 
@@ -132,7 +138,7 @@ export default function SideBar() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="icon"><FiClipboard /></span>
+            <span className="icon"><FontAwesomeIcon icon={faReceipt} /></span>
             Orders
           </NavLink>
 
@@ -143,7 +149,7 @@ export default function SideBar() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="icon"><FiClipboard /></span>
+            <span className="icon"><FontAwesomeIcon icon={faBoxesStacked} /></span>
             Manage Products
           </NavLink>
 
@@ -154,18 +160,14 @@ export default function SideBar() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="icon"><FiTag /></span>
+            <span className="icon"><FontAwesomeIcon icon={faTags} /></span>
             Promotions
           </NavLink>
         </nav>
 
         <div className="sidebar-bottom">
           <div className="user-profile">
-            <img
-              src="https://i.pravatar.cc/150?img=47"
-              alt="Admin Profile Avatar"
-              className="avatar"
-            />
+            <FontAwesomeIcon icon={faUserShield} className="profile-icon" />
             <div className="user-info">
               <strong>Admin</strong>
             </div>
@@ -174,7 +176,9 @@ export default function SideBar() {
           <button
             className="ad-logout-btn"
             onClick={handleLogout}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
           >
+            <FontAwesomeIcon icon={faSignOutAlt} />
             Log Out
           </button>
         </div>
