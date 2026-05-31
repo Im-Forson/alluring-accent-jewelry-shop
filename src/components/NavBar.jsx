@@ -127,10 +127,38 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
         <>
             <div className="fixed top-0 left-0 w-full bg-white shadow z-50 font-sans">
                 {/* ANNOUNCEMENT BAR */}
-                <div className="flex flex-row justify-center items-center gap-1 py-[2px] bg-pink-200 text-[10px] md:text-xs font-semibold tracking-wider text-pink-800 uppercase animate-fade-in-out">
-                    <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
-                    <span>{announcement.message}</span>
+                <div className="w-full overflow-hidden bg-pink-200 py-[2px] text-[10px] md:text-xs font-semibold tracking-wider text-pink-800 uppercase">
+                    <style>{`
+                        @keyframes marquee {
+                        0% { transform: translate3d(100%, 0, 0); }
+                        100% { transform: translate3d(-100%, 0, 0); }
+                        }
+                        .animate-marquee {
+                        animation: marquee 15s linear infinite;
+                        }
+                    `}</style>
+
+                    <div className="animate-marquee whitespace-nowrap will-change-transform inline-flex items-center gap-1">
+                        <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
+                        <span>{announcement.message}</span>
+                    </div>
                 </div>
+
+                {/* <div 
+                style={{ animation: 'fadeInOut 3s ease-in-out infinite' }}
+                className="flex flex-row justify-center items-center gap-1 py-[2px] bg-pink-200 text-[10px] md:text-xs font-semibold tracking-wider text-pink-800 uppercase"
+                >
+                <style>{`
+                    @keyframes fadeInOut {
+                    0%, 100% { opacity: 0.5; transform: translate3d(0, 2px, 0); }
+                    50% { opacity: 1; transform: translate3d(0, 0, 0); }
+                    }
+                `}</style>
+
+                <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
+                <span>{announcement.message}</span>
+                </div> */}
+
 
                 
                 {/* MAIN DESKTOP NAVIGATION BAR */}
