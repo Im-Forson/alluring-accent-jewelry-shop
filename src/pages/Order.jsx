@@ -291,8 +291,8 @@ function Order() {
               )}
             </div>
 
-            <div style={profileIconContainerStyle}>
-              <FontAwesomeIcon icon={faUser} style={{ fontSize: '15px' }} />
+            <div >
+              
             </div>
           </div>
         </header>

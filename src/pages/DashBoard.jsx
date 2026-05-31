@@ -8,6 +8,8 @@ import {
   FiSearch, FiBell, FiTag, FiAlertTriangle, FiBox,
   FiArchive, FiUser, FiActivity, FiDollarSign, FiX
 } from 'react-icons/fi';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserShield } from "@fortawesome/free-solid-svg-icons";
 
 import SideBar from '../components/SideBar';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
@@ -304,7 +306,9 @@ function DashBoard() {
               </div>
             )}
 
-            <img src="https://i.pravatar.cc/150?img=47" alt="Admin" className="header-avatar" />
+            <div>
+              
+            </div>
           </div>
         </header>
 

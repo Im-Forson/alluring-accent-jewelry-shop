@@ -3,7 +3,6 @@
 .login-page{
   width: 100%;
   height: 100vh;
-
   display: flex;
   justify-content: center;
   align-items: center;
@@ -11,6 +10,8 @@
   overflow: hidden;
   position: relative;
 }
+
+
 
 
 /* BACKGROUND GLOWS */
@@ -294,3 +295,12 @@
   }
 
 }
+
+.storefront-redirect-btn:hover {
+  background-color: rgba(190, 24, 93, 0.05) !important;
+  border-style: solid !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(190, 24, 93, 0.15), 0 0 8px rgba(190, 24, 93, 0.1); 
+  
+}
+
