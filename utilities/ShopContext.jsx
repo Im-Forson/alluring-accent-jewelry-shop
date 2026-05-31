@@ -38,6 +38,8 @@ export function ShopProvider({ children }) {
 
     const [isProcessing, setProcessing] = useState(false);
 
+    const [announcement, setAnnouncement] = useState({message: "", isDisplay: false});
+
     const setHomeDataLoading = (val) => {
         setisHomeDataLoading(val);
     }
@@ -193,6 +195,10 @@ export function ShopProvider({ children }) {
         setProcessing(value);
     }
 
+    const setAnnouncementData = (value) => {
+        setAnnouncement(value);
+    }
+
     return (
         <ShopContext.Provider 
             value={{
@@ -256,6 +262,9 @@ export function ShopProvider({ children }) {
 
                 isProcessing,
                 setProcessOverlay,
+
+                announcement,
+                setAnnouncementData,
             }}
         >
         {children}

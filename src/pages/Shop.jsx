@@ -31,7 +31,7 @@ import ProcessOverlay from '../components/ProcessOverlay'
 
 
 export default function Shop() {
-    const { allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, isOpenPaymentSummary, openPaymentSummary, } = useShop();
+    const { allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData, loadCategories } = useShop();
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
@@ -50,6 +50,29 @@ export default function Shop() {
 
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
             const products = response.data;
+
+            const announcementResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/announcement`);
+
+            const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+
+            if (announcementResponse.status === 200) {
+                setAnnouncementData(announcementResponse.data[0]);
+            }
+
+            if (categoryResponse.status === 200) {
+                const allCategories = categoryResponse.data;
+                const filteredCategories = allCategories.filter(cat => {
+                    const catName = cat.name.toLowerCase();
+                    if (catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets') {
+                        return cat;
+                    }
+                })
+
+                loadCategories(filteredCategories);
+            }
+            else {
+                loadCategories(['All Jewellery'])
+            }
 
             products.map((product) => {
                 product.isFavorite = false

@@ -44,7 +44,7 @@ export default function HomePage() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
-    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading, isOpenPaymentSummary, openPaymentSummary, } = useShop();
+    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData } = useShop();
 
     const [favorites, setFavorites] = useState([]);
     const [favoriteCount, setFavoriteCount] = useState(0);
@@ -67,7 +67,13 @@ export default function HomePage() {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
             const products = response.data;
 
+            const announcementResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/announcement`);
+
             const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+
+            if (announcementResponse.status === 200) {
+                setAnnouncementData(announcementResponse.data[0]);
+            }
 
             if (categoryResponse.status === 200) {
                 const allCategories = categoryResponse.data;

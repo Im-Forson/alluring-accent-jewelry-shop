@@ -12,8 +12,10 @@ import PurchaseOrderSummary from "./PurchaseOrderSummary"
 const colors= []
 
 export default function NavBar({ activePage, favoriteCount, cartCount, setFavorites, bestSellers, setBestSellers }) {
-    const { allProducts, addOrder, cart, addToCart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary } = useShop();
+    const { allProducts, addOrder, cart, addToCart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement } = useShop();
     const navigate = useNavigate();
+
+    console.log('announcement:', announcement)
 
     // Drawer Interface Visibility States
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -125,10 +127,11 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
         <>
             <div className="fixed top-0 left-0 w-full bg-white shadow z-50 font-sans">
                 {/* ANNOUNCEMENT BAR */}
-                <div className="flex flex-row justify-center items-center gap-1 py-[2px] bg-pink-200 text-[10px] md:text-xs font-semibold tracking-wider text-pink-800 uppercase">
+                <div className="flex flex-row justify-center items-center gap-1 py-[2px] bg-pink-200 text-[10px] md:text-xs font-semibold tracking-wider text-pink-800 uppercase animate-fade-in-out">
                     <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
-                    <span>Enjoy free insured shipping on premium lines</span>
+                    <span>{announcement.message}</span>
                 </div>
+
                 
                 {/* MAIN DESKTOP NAVIGATION BAR */}
                 <div className="flex flex-row items-center justify-between px-4 md:px-8 py-2">
