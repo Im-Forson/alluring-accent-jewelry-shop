@@ -17,6 +17,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
   const [isAlert, setAlert] = useState(false);
 
+  const [isProcessReceipt, setProcessReceipt] = useState(false);
   const [] = useState(false);
 
   // 1. Initialize Controlled Form Input State Fields
@@ -96,8 +97,9 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         currency: "GHS",
     
         callback: function (response) {
-          console.log("Success:", response.reference);
-          processReceipt();
+          // console.log("Success:", response.reference);
+          // processReceipt();
+          setProcessReceipt(true);
         },
     
         onClose: function () {
@@ -130,8 +132,22 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       formData.products = orders
   
       const res = await axios.post(
+        
         `${import.meta.env.VITE_API_BASE_URL}/order/create`,
-        formData,
+          {
+            recipient: formData.recipient,
+            phone: formData.phone,
+            email: formData.email,
+            region: formData.region,
+            city: formData.city,
+            address: formData.address,
+            products: orders,
+            isOrderPlaced: true,
+            deliveryCost: orderDetails.shippingFee,
+            subtotal: itemsTotalCost,
+            totalCost: grandTotal,
+          },
+        // formData,
         {
           headers: {
             "Content-Type": "application/json"
@@ -158,6 +174,13 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       toast.error('Something went wrong', {duration: 2000});
     }
   }
+
+  useEffect(() => {
+    if (isProcessReceipt) {
+      processReceipt();
+      setProcessReceipt(false);
+    }
+  }, [isProcessReceipt])
 
   return (
     <div className="flex flex-col items-center justify-center p-">
