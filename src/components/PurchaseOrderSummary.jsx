@@ -90,7 +90,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       formData.products = orders
   
       const handler = window.PaystackPop.setup({
-        key: `${import.meta.env.VITE_PAYSTACK_PUBLIC_KEY}`,
+        key: `pk_test_d9b8c4ff167bb22afa168ab92ab2f50bee0706bc`,
         email: "info.alluringaccent@gmail.com",
         amount: grandTotal * 100,
         currency: "GHS",
