@@ -139,7 +139,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                     }
                                 `}</style>
 
-                                <div className="animate-marquee whitespace-nowrap will-change-transform inline-flex items-center gap-1">
+                                <div className="animate-marquee whitespace-nowrap will-change-transform inline-flex  gap-1">
                                     <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
                                     <span>{announcement.message}</span>
                                 </div>

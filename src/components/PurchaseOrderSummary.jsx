@@ -133,7 +133,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
   
       const res = await axios.post(
         
-        `${import.meta.env.VITE_API_BASE_URL}/order/create`,
+        `${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/create`,
           {
             recipient: formData.recipient,
             phone: formData.phone,
