@@ -120,14 +120,9 @@ function Promotion() {
     fetchGlobalBanner();
     fetchTargetingData();
 
-    // Click outside handler to collapse open menus safely
     const closeDropdownOutside = (e) => {
-      if (!e.target.closest('.category-dropdown-container')) {
-        setIsCategoryOpen(false);
-      }
-      if (!e.target.closest('.product-dropdown-container')) {
-        setIsProductOpen(false);
-      }
+      if (!e.target.closest('.category-dropdown-container')) setIsCategoryOpen(false);
+      if (!e.target.closest('.product-dropdown-container')) setIsProductOpen(false);
     };
     document.addEventListener('click', closeDropdownOutside);
 
@@ -169,14 +164,14 @@ function Promotion() {
   }).length;
 
   // ==========================================
-  // SEGREGATED SELECTION ENGINE & LOCKOUTS
+  // OBJECT SELECTION ENGINE & LOCKOUT MECHANISMS
   // ==========================================
-  const hasCategoriesSelected = selectedTargets.some(t => t.startsWith('category:'));
-  const hasProductsSelected = selectedTargets.some(t => t.startsWith('product:'));
+  const hasCategoriesSelected = selectedTargets.some(t => t.type === 'category');
+  const hasProductsSelected = selectedTargets.some(t => t.type === 'product');
 
-  const handleToggleTarget = (targetValue) => {
-    if (targetValue === 'all') {
-      setSelectedTargets(['all']);
+  const handleToggleTarget = (targetType, targetId, targetName) => {
+    if (targetType === 'all') {
+      setSelectedTargets([{ type: 'all', id: 'all', name: 'All Jewelry' }]);
       return;
     }
 
@@ -186,27 +181,19 @@ function Promotion() {
     if (targetExists) {
       updated = updated.filter(item => !(item.type === targetType && item.id === targetId));
     } else {
-      updated.push(targetValue);
+      updated.push({ type: targetType, id: targetId, name: targetName });
     }
 
-    // Fall back automatically to empty state if array drains clean
     setSelectedTargets(updated);
   };
 
   const handleSetAllJewelry = () => {
-    setSelectedTargets(['all']);
+    setSelectedTargets([{ type: 'all', id: 'all', name: 'All Jewelry' }]);
     toast.success("Targeting applied to full jewelry collection storewide.");
   };
 
-  const getTargetLabel = (value) => {
-    if (value === 'all') return 'All Jewelry';
-    if (value.startsWith('category:')) return `Category: ${value.replace('category:', '')}`;
-    if (value.startsWith('product:')) {
-      const prodId = value.replace('product:', '');
-      const item = availableProducts.find(p => (p._id === prodId || p.id === prodId));
-      return item ? `Product: ${item.name}` : 'Selected Product';
-    }
-    return value;
+  const isTargetChecked = (targetType, targetId) => {
+    return selectedTargets.some(item => item.type === targetType && item.id === targetId);
   };
 
   // ==========================================
@@ -218,7 +205,6 @@ function Promotion() {
       toast.error("Please provide a title, numerical value, and an active targeting element scope.");
       return;
     }
-
 
     const willCauseNegativePricing = availableProducts.filter(product => {
       if (selectedTargets.some(t => t.type === 'all')) return true;
@@ -257,21 +243,15 @@ function Promotion() {
     };
 
     try {
-      const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/promotion/${editingId ? 'update' : 'create', editingId ? `/${editingId}` : ''}`;
-      const axiosConfig = {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ''
-        }
-      };
-
+      const baseUrl = import.meta.env.VITE_API_BASE_URL;
+      
       if (editingId) {
         // -------------------------------------------------------------------------
         // 🔥 BOLD LABEL: API FOR UPDATING AN EXISTING PROMOTION (POST/PUT)
         // LOCATION: Inside handleSavePromotion() -> if (editingId) block
         // CURRENT PATH: `${baseUrl}/promotion/update/${editingId}`
         // -------------------------------------------------------------------------
-        await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
         toast.success("Campaign updated successfully!");
       } else {
         // -------------------------------------------------------------------------
@@ -331,7 +311,7 @@ function Promotion() {
 
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     const axiosConfig = { headers: { 'Authorization': token ? `Bearer ${token}` : '' } };
-    const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/promotion/action`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
     const currentPromo = promos.find(p => (p._id || p.id) === targetId);
     const isCurrentlyPaused = currentPromo?.status === 'paused';
@@ -345,7 +325,7 @@ function Promotion() {
       // LOCATION: Inside handleTogglePause() function
       // CURRENT PATHS: `${baseUrl}/promotion/pause/${targetId}` OR `${baseUrl}/promotion/resume/${targetId}`
       // -------------------------------------------------------------------------
-      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/promotion/${actionEndpoint}/${targetId}`, {}, axiosConfig);
+      await axios.put(`${baseUrl}/promotion/${actionEndpoint}/${targetId}`, {}, axiosConfig);
 
       const updated = promos.map(p => {
         if ((p._id || p.id) === targetId) {
@@ -569,7 +549,7 @@ function Promotion() {
                 >
                   ✨ Apply to All Jewelry
                 </button>
-                {selectedTargets.includes('all') && (
+                {selectedTargets.some(t => t.type === 'all') && (
                   <span style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>
                     Currently targeting entire storefront item registry.
                   </span>
@@ -592,7 +572,7 @@ function Promotion() {
                     onClick={() => !hasProductsSelected && setIsCategoryOpen(!isCategoryOpen)}
                   >
                     {hasProductsSelected && <FiLock style={{ color: '#94a3b8', marginRight: '4px' }} />}
-                    {selectedTargets.filter(t => t.startsWith('category:')).length === 0 ? (
+                    {selectedTargets.filter(t => t.type === 'category').length === 0 ? (
                       <span style={{ color: '#94a3b8', fontSize: '13px' }}>
                         {hasProductsSelected ? 'Disabled (Products active)' : 'Select categories...'}
                       </span>
@@ -601,9 +581,9 @@ function Promotion() {
                         <span
                           key={target.id}
                           style={{ backgroundColor: '#fbcfe8', color: '#be185d', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleTarget('category', target.id, target.name); }}
                         >
-                          {getTargetLabel(target).replace('Category: ', '')}
+                          {target.name}
                           <b style={{ color: '#9d174d' }}>×</b>
                         </span>
                       ))
@@ -627,7 +607,7 @@ function Promotion() {
                             const catId = cat.name;
                             const isChecked = isTargetChecked('category', catId);
                             return (
-                              <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
+                              <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget('category', catId, cat.name)}>
                                 <span>📦 {cat.name}</span>
                                 {isChecked && <span style={{ color: '#be185d', fontWeight: 'bold' }}>✓</span>}
                               </div>
@@ -653,7 +633,7 @@ function Promotion() {
                     onClick={() => !hasCategoriesSelected && setIsProductOpen(!isProductOpen)}
                   >
                     {hasCategoriesSelected && <FiLock style={{ color: '#94a3b8', marginRight: '4px' }} />}
-                    {selectedTargets.filter(t => t.startsWith('product:')).length === 0 ? (
+                    {selectedTargets.filter(t => t.type === 'product').length === 0 ? (
                       <span style={{ color: '#94a3b8', fontSize: '13px' }}>
                         {hasCategoriesSelected ? 'Disabled (Categories active)' : 'Select products...'}
                       </span>
@@ -662,9 +642,9 @@ function Promotion() {
                         <span
                           key={target.id}
                           style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleTarget('product', target.id, target.name); }}
                         >
-                          {getTargetLabel(target).replace('Product: ', '')}
+                          {target.name}
                           <b style={{ color: '#3730a3' }}>×</b>
                         </span>
                       ))
@@ -685,10 +665,10 @@ function Promotion() {
                         {availableProducts
                           .filter(prod => prod.name?.toLowerCase().includes(productSearch.toLowerCase()))
                           .map(prod => {
-                            const val = `product:${prod._id || prod.id}`;
-                            const isChecked = selectedTargets.includes(val);
+                            const prodId = prod._id || prod.id;
+                            const isChecked = isTargetChecked('product', prodId);
                             return (
-                              <div key={prod._id || prod.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#e0e7ff' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
+                              <div key={prodId} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#e0e7ff' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget('product', prodId, prod.name)}>
                                 <span>💎 {prod.name}</span>
                                 {isChecked && <span style={{ color: '#4338ca', fontWeight: 'bold' }}>✓</span>}
                               </div>
