@@ -120,9 +120,14 @@ function Promotion() {
     fetchGlobalBanner();
     fetchTargetingData();
 
+    // Click outside handler to collapse open menus safely
     const closeDropdownOutside = (e) => {
-      if (!e.target.closest('.category-dropdown-container')) setIsCategoryOpen(false);
-      if (!e.target.closest('.product-dropdown-container')) setIsProductOpen(false);
+      if (!e.target.closest('.category-dropdown-container')) {
+        setIsCategoryOpen(false);
+      }
+      if (!e.target.closest('.product-dropdown-container')) {
+        setIsProductOpen(false);
+      }
     };
     document.addEventListener('click', closeDropdownOutside);
 
@@ -164,14 +169,14 @@ function Promotion() {
   }).length;
 
   // ==========================================
-  // OBJECT SELECTION ENGINE & LOCKOUT MECHANISMS
+  // SEGREGATED SELECTION ENGINE & LOCKOUTS
   // ==========================================
-  const hasCategoriesSelected = selectedTargets.some(t => t.type === 'category');
-  const hasProductsSelected = selectedTargets.some(t => t.type === 'product');
+  const hasCategoriesSelected = selectedTargets.some(t => t.startsWith('category:'));
+  const hasProductsSelected = selectedTargets.some(t => t.startsWith('product:'));
 
-  const handleToggleTarget = (targetType, targetId, targetName) => {
-    if (targetType === 'all') {
-      setSelectedTargets([{ type: 'all', id: 'all', name: 'All Jewelry' }]);
+  const handleToggleTarget = (targetValue) => {
+    if (targetValue === 'all') {
+      setSelectedTargets(['all']);
       return;
     }
 
@@ -181,19 +186,27 @@ function Promotion() {
     if (targetExists) {
       updated = updated.filter(item => !(item.type === targetType && item.id === targetId));
     } else {
-      updated.push({ type: targetType, id: targetId, name: targetName });
+      updated.push(targetValue);
     }
 
+    // Fall back automatically to empty state if array drains clean
     setSelectedTargets(updated);
   };
 
   const handleSetAllJewelry = () => {
-    setSelectedTargets([{ type: 'all', id: 'all', name: 'All Jewelry' }]);
+    setSelectedTargets(['all']);
     toast.success("Targeting applied to full jewelry collection storewide.");
   };
 
-  const isTargetChecked = (targetType, targetId) => {
-    return selectedTargets.some(item => item.type === targetType && item.id === targetId);
+  const getTargetLabel = (value) => {
+    if (value === 'all') return 'All Jewelry';
+    if (value.startsWith('category:')) return `Category: ${value.replace('category:', '')}`;
+    if (value.startsWith('product:')) {
+      const prodId = value.replace('product:', '');
+      const item = availableProducts.find(p => (p._id === prodId || p.id === prodId));
+      return item ? `Product: ${item.name}` : 'Selected Product';
+    }
+    return value;
   };
 
   // ==========================================
@@ -556,7 +569,7 @@ function Promotion() {
                 >
                   ✨ Apply to All Jewelry
                 </button>
-                {selectedTargets.some(t => t.type === 'all') && (
+                {selectedTargets.includes('all') && (
                   <span style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>
                     Currently targeting entire storefront item registry.
                   </span>
@@ -579,7 +592,7 @@ function Promotion() {
                     onClick={() => !hasProductsSelected && setIsCategoryOpen(!isCategoryOpen)}
                   >
                     {hasProductsSelected && <FiLock style={{ color: '#94a3b8', marginRight: '4px' }} />}
-                    {selectedTargets.filter(t => t.type === 'category').length === 0 ? (
+                    {selectedTargets.filter(t => t.startsWith('category:')).length === 0 ? (
                       <span style={{ color: '#94a3b8', fontSize: '13px' }}>
                         {hasProductsSelected ? 'Disabled (Products active)' : 'Select categories...'}
                       </span>
@@ -588,9 +601,9 @@ function Promotion() {
                         <span
                           key={target.id}
                           style={{ backgroundColor: '#fbcfe8', color: '#be185d', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={(e) => { e.stopPropagation(); handleToggleTarget('category', target.id, target.name); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
-                          {target.name}
+                          {getTargetLabel(target).replace('Category: ', '')}
                           <b style={{ color: '#9d174d' }}>×</b>
                         </span>
                       ))
@@ -614,7 +627,7 @@ function Promotion() {
                             const catId = cat.name;
                             const isChecked = isTargetChecked('category', catId);
                             return (
-                              <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget('category', catId, cat.name)}>
+                              <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
                                 <span>📦 {cat.name}</span>
                                 {isChecked && <span style={{ color: '#be185d', fontWeight: 'bold' }}>✓</span>}
                               </div>
@@ -640,7 +653,7 @@ function Promotion() {
                     onClick={() => !hasCategoriesSelected && setIsProductOpen(!isProductOpen)}
                   >
                     {hasCategoriesSelected && <FiLock style={{ color: '#94a3b8', marginRight: '4px' }} />}
-                    {selectedTargets.filter(t => t.type === 'product').length === 0 ? (
+                    {selectedTargets.filter(t => t.startsWith('product:')).length === 0 ? (
                       <span style={{ color: '#94a3b8', fontSize: '13px' }}>
                         {hasCategoriesSelected ? 'Disabled (Categories active)' : 'Select products...'}
                       </span>
@@ -649,9 +662,9 @@ function Promotion() {
                         <span
                           key={target.id}
                           style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={(e) => { e.stopPropagation(); handleToggleTarget('product', target.id, target.name); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
-                          {target.name}
+                          {getTargetLabel(target).replace('Product: ', '')}
                           <b style={{ color: '#3730a3' }}>×</b>
                         </span>
                       ))
@@ -672,10 +685,10 @@ function Promotion() {
                         {availableProducts
                           .filter(prod => prod.name?.toLowerCase().includes(productSearch.toLowerCase()))
                           .map(prod => {
-                            const prodId = prod._id || prod.id;
-                            const isChecked = isTargetChecked('product', prodId);
+                            const val = `product:${prod._id || prod.id}`;
+                            const isChecked = selectedTargets.includes(val);
                             return (
-                              <div key={prodId} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#e0e7ff' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget('product', prodId, prod.name)}>
+                              <div key={prod._id || prod.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#e0e7ff' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
                                 <span>💎 {prod.name}</span>
                                 {isChecked && <span style={{ color: '#4338ca', fontWeight: 'bold' }}>✓</span>}
                               </div>

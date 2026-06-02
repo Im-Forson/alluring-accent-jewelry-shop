@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle, Truck, Package, XCircle, User, Phone, MapPin } from "lucide-react";
+import { CheckCircle, Truck, Package, XCircle, User, Phone, MapPin, PackageOpen, PackageCheck, CheckCircle2 } from "lucide-react";
 import { useShop } from "../../utilities/ShopContext";
 
 export default function OrderProgress({showOrderTracker, setShowOrderTracker, setOrderIdInput, setOrderPhoneInput}) {
@@ -34,7 +34,7 @@ export default function OrderProgress({showOrderTracker, setShowOrderTracker, se
                                     Order: {trackingOrder.orderId}
                                 </h3>
                                 <p className="text-xs text-gray-500 text-center mb-4">
-                                    Estimated Delivery: 3 - 5 Days
+                                    {trackingOrder.isDelivered ? "Package Delivered" : "Estimated Delivery: 3 - 5 Days"}
                                 </p>
 
                                 {/* PRODUCT INFO */}
@@ -51,7 +51,7 @@ export default function OrderProgress({showOrderTracker, setShowOrderTracker, se
                                                         {product.name}
                                                     </h4>
                                                     <p className="text-xs text-gray-500">
-                                                        Product ID: {product.productId}
+                                                        Qty: {product.quantity}
                                                     </p>
                                                 </div>
                                             </div>
@@ -141,12 +141,41 @@ export default function OrderProgress({showOrderTracker, setShowOrderTracker, se
                                 </div>
 
                                 {/* DELIVERY STATUS */}
-                                <div className="mt-6 p-4 bg-gray-50 rounded-xl flex items-center gap-3">
-                                    <Truck className="text-pink-600 w-5 h-5" />
-                                    <p className="text-xs text-gray-600">
-                                        Your package is currently in transit to your location.
-                                    </p>
-                                </div>
+                                {
+                                    !trackingOrder.isProcessing ? (
+                                        <div className="mt-6 p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-3 shadow-[0_0_15px_rgba(236,72,153,0.03)] animate-pulse">
+                                            <PackageOpen className="text-pink-500 w-5 h-5 shrink-0" />
+                                            <p className="text-xs text-zinc-300 font-medium tracking-wide">
+                                                Your order has been successfully received and is awaiting processing.
+                                            </p>
+                                        </div>
+                                    ) :
+                                    !trackingOrder.isOutForDelivery ? (
+                                        <div className="mt-6 p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-3 shadow-[0_0_15px_rgba(236,72,153,0.03)]">
+                                            <PackageCheck className="text-pink-500 w-5 h-5 shrink-0" />
+                                            <p className="text-xs text-zinc-300 font-medium tracking-wide">
+                                                Your package is being packed and prepared for dispatch.
+                                            </p>
+                                        </div>
+                                    ) : 
+                                    !trackingOrder.isDelivered ? (
+                                        <div className="mt-6 p-4 bg-zinc-900 border border-pink-500/20 rounded-xl flex items-center gap-3 shadow-[0_0_15px_rgba(236,72,153,0.05)]">
+                                            <Truck className="text-pink-500 w-5 h-5 shrink-0 animate-bounce [animation-duration:2s]" />
+                                            <p className="text-xs text-zinc-300 font-medium tracking-wide">
+                                                Your package is out for delivery and currently in transit to your location.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-6 p-4 bg-pink-500/10 border border-pink-500/30 rounded-xl flex items-center gap-3 shadow-[0_0_20px_rgba(236,72,153,0.1)]">
+                                            <CheckCircle2 className="text-pink-400 w-5 h-5 shrink-0" />
+                                            <p className="text-xs text-zinc-800 font-semibold tracking-wide">
+                                                Your package has been delivered successfully. Thank you for shopping!
+                                            </p>
+                                        </div>
+                                    )
+                                }
+
+                                
                             </div>
                         </div>
                     

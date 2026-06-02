@@ -409,12 +409,10 @@ export default function Shop() {
 
                                     <div className="absolute top-2 inset-x-0 px-2 flex items-center justify-between pointer-events-none">
                                         <div>
-                                        {product.tag ? (
+                                        {product.tag !== 'null' && (
                                             <span className="bg-pink-600 text-white text-[11px] px-2 py-1 rounded shadow-sm pointer-events-auto">
                                             {product.tag}
                                             </span>
-                                        ) : (
-                                            <div />
                                         )}
                                         </div>
 
