@@ -29,15 +29,9 @@ function Promotion() {
   // DATA BACKEND MANAGEMENT STATES
   const [availableCategories, setAvailableCategories] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
-<<<<<<< HEAD
-  
-  // SEPARATE DROPDOWN CONTROL INTERFACES
-  const [selectedTargets, setSelectedTargets] = useState([]); // Array format: ["all"], ["category:Rings"], or ["product:XYZ"]
-=======
 
   // SEPARATE DROPDOWN CONTROL INTERFACES (NATIVE OBJECT ARRAYS)
   const [selectedTargets, setSelectedTargets] = useState([]);
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isProductOpen, setIsProductOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
@@ -50,15 +44,6 @@ function Promotion() {
 
   // Sync state data on mounting
   useEffect(() => {
-<<<<<<< HEAD
-    const storedPromos = JSON.parse(localStorage.getItem("storePromotions")) || [
-      { id: 1, title: 'Spring Sale', subtitle: '20% Off All Items', price: '346.00', stock: '21 in Stock', status: 'scheduled', type: 'percentage', value: '20', targets: ['all'], start: '2026-04-20', startTime: '00:00', end: '2026-04-25', endTime: '23:59' },
-      { id: 2, title: 'Flash Deal', subtitle: '30% Off Rings Today!', price: '750.00', stock: '12 in Stock', status: 'scheduled', type: 'percentage', value: '30', targets: ['category:Rings'], start: '2026-05-24', startTime: '08:00', end: '2026-05-25', endTime: '22:00' },
-      { id: 3, title: 'Holiday Clearance', subtitle: 'Selected Items Only', price: '726.00', stock: 'Out of Stock', status: 'paused', type: 'fixed', value: '100', targets: ['category:Necklaces'], start: '2026-05-01', startTime: '12:00', end: '2026-05-10', endTime: '18:00' }
-    ];
-    setPromos(storedPromos);
-    localStorage.setItem("storePromotions", JSON.stringify(storedPromos));
-=======
     const fetchPromotions = async () => {
       try {
         const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token") || localStorage.getItem("accessToken");
@@ -88,7 +73,6 @@ function Promotion() {
         setPromos(backupPromos);
       }
     };
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
 
     const fetchGlobalBanner = async () => {
       try {
@@ -196,18 +180,11 @@ function Promotion() {
       return;
     }
 
-<<<<<<< HEAD
-    let updated = selectedTargets.filter(item => item !== 'all');
-
-    if (updated.includes(targetValue)) {
-      updated = updated.filter(item => item !== targetValue);
-=======
     let updated = selectedTargets.filter(item => item.type !== 'all');
     const targetExists = updated.some(item => item.type === targetType && item.id === targetId);
 
     if (targetExists) {
       updated = updated.filter(item => !(item.type === targetType && item.id === targetId));
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
     } else {
       updated.push(targetValue);
     }
@@ -242,53 +219,6 @@ function Promotion() {
       return;
     }
 
-<<<<<<< HEAD
-    let updatedPromos;
-    const readableTargets = selectedTargets.map(t => getTargetLabel(t).replace('Category: ', '').replace('Product: ', ''));
-    const formattedSubtitle = discountType === 'percentage' 
-      ? `${discountValue}% Off ${readableTargets.join(', ')}`
-      : `GHC {discountValue} Off [${readableTargets.join(', ')}]`;
-
-    if (editingId) {
-      updatedPromos = promos.map(p => {
-        if (p.id === editingId) {
-          return {
-            ...p,
-            title: promoTitle,
-            subtitle: formattedSubtitle,
-            type: discountType,
-            value: discountValue,
-            targets: selectedTargets, 
-            start: startDate || p.start,
-            startTime: startTime || p.startTime || "00:00",
-            end: endDate || p.end,
-            endTime: endTime || p.endTime || "23:59",
-            status: p.status === 'paused' ? 'paused' : 'scheduled'
-          };
-        }
-        return p;
-      });
-      setEditingId(null);
-      toast.success("Campaign updated successfully!");
-    } else {
-      const newPromo = {
-        id: Date.now(),
-        title: promoTitle,
-        subtitle: formattedSubtitle,
-        price: '0.00', 
-        stock: 'In Stock',
-        status: 'scheduled', 
-        type: discountType,
-        value: discountValue,
-        targets: selectedTargets,
-        start: startDate || new Date().toISOString().split('T')[0],
-        startTime: startTime || "00:00",
-        end: endDate || new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
-        endTime: endTime || "23:59"
-      };
-      updatedPromos = [newPromo, ...promos];
-      toast.success("New promotional campaign launched!");
-=======
 
     const willCauseNegativePricing = availableProducts.filter(product => {
       if (selectedTargets.some(t => t.type === 'all')) return true;
@@ -304,7 +234,6 @@ function Promotion() {
     if (willCauseNegativePricing) {
       toast.error("Cannot save! One or more items have dropped into negative pricing structures.");
       return;
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
     }
 
     const payload = {
@@ -371,12 +300,6 @@ function Promotion() {
   const handleEditClick = (promo) => {
     setEditingId(promo._id || promo.id);
     setPromoTitle(promo.title);
-<<<<<<< HEAD
-    setDiscountType(promo.type);
-    setDiscountValue(promo.value);
-    setSelectedTargets(promo.targets || (promo.category ? [promo.category === 'all' ? 'all' : `category:${promo.category}`] : []));
-    setStartDate(promo.start);
-=======
     setDiscountType(promo.discountType || promo.type || 'percentage');
     setDiscountValue(promo.discountValue || promo.value || "");
 
@@ -392,7 +315,6 @@ function Promotion() {
     }
 
     setStartDate(promo.startDate || promo.start || "");
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
     setStartTime(promo.startTime || "");
     setEndDate(promo.endDate || promo.end || "");
     setEndTime(promo.endTime || "");
@@ -637,33 +559,13 @@ function Promotion() {
                 <input type="number" placeholder={discountType === 'percentage' ? "Discount Value (%) e.g. 25" : "Discount Value (GHC) e.g. 150"} className="panel-input" value={discountValue} onChange={(e) => setDiscountValue(e.target.value)} />
               </div>
 
-<<<<<<< HEAD
-              {/* ==========================================
-                  TARGETING CONTROLS (SEPARATED INTERFACES)
-                 ========================================== */}
-              
-              {/* MASTER FALLBACK ROW */}
-=======
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
               <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <button
                   type="button"
                   style={{
-<<<<<<< HEAD
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    border: '1px solid #be185d',
-                    backgroundColor: selectedTargets.includes('all') ? '#be185d' : '#ffffff',
-                    color: selectedTargets.includes('all') ? '#ffffff' : '#be185d',
-                    transition: 'all 0.2s ease'
-=======
                     padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: '1px solid #be185d',
                     backgroundColor: selectedTargets.some(t => t.type === 'all') ? '#be185d' : '#ffffff',
                     color: selectedTargets.some(t => t.type === 'all') ? '#ffffff' : '#be185d', transition: 'all 0.2s ease'
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                   }}
                   onClick={handleSetAllJewelry}
                 >
@@ -697,15 +599,9 @@ function Promotion() {
                         {hasProductsSelected ? 'Disabled (Products active)' : 'Select categories...'}
                       </span>
                     ) : (
-<<<<<<< HEAD
-                      selectedTargets.filter(t => t.startsWith('category:')).map(target => (
-                        <span 
-                          key={target} 
-=======
                       selectedTargets.filter(t => t.type === 'category').map(target => (
                         <span
                           key={target.id}
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                           style={{ backgroundColor: '#fbcfe8', color: '#be185d', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
                           onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
@@ -730,13 +626,8 @@ function Promotion() {
                         {availableCategories
                           .filter(cat => cat.name?.toLowerCase().includes(categorySearch.toLowerCase()))
                           .map(cat => {
-<<<<<<< HEAD
-                            const val = `category:${cat.name}`;
-                            const isChecked = selectedTargets.includes(val);
-=======
                             const catId = cat.name;
                             const isChecked = isTargetChecked('category', catId);
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                             return (
                               <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
                                 <span>📦 {cat.name}</span>
@@ -769,15 +660,9 @@ function Promotion() {
                         {hasCategoriesSelected ? 'Disabled (Categories active)' : 'Select products...'}
                       </span>
                     ) : (
-<<<<<<< HEAD
-                      selectedTargets.filter(t => t.startsWith('product:')).map(target => (
-                        <span 
-                          key={target} 
-=======
                       selectedTargets.filter(t => t.type === 'product').map(target => (
                         <span
                           key={target.id}
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                           style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
                           onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
@@ -832,15 +717,9 @@ function Promotion() {
             <div className="form-right-col">
               <div className="date-picker-block">
                 <label>Campaign Settings Preview</label>
-<<<<<<< HEAD
-                <div className="preview-card-box">
-                  <strong>Type:</strong> {discountType.toUpperCase()}<br/>
-                  <strong>Scope Targets:</strong> {selectedTargets.length > 0 ? selectedTargets.map(t => getTargetLabel(t)).join(', ') : 'None chosen yet'}<br/>
-=======
                 <div className="preview-card-box" style={{ lineHeight: '1.8', fontSize: '13px' }}>
                   <strong>Type:</strong> <span style={{ color: '#be185d', fontWeight: 'bold' }}>{discountType.toUpperCase()}</span><br/>
                   <strong>Scope Targets:</strong> {selectedTargets.length > 0 ? selectedTargets.map(t => t.name).join(', ') : 'None chosen yet'}<br/>
->>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                   <strong>Status:</strong> {editingId ? '⚠️ Editing' : '✨ New Entry'}
                   
                   <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px dashed #cbd5e1' }} />
