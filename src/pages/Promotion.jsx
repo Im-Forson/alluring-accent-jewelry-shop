@@ -251,7 +251,7 @@ function Promotion() {
         // LOCATION: Inside handleSavePromotion() -> if (editingId) block
         // CURRENT PATH: `${baseUrl}/promotion/update/${editingId}`
         // -------------------------------------------------------------------------
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
+        await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
         toast.success("Campaign updated successfully!");
       } else {
         // -------------------------------------------------------------------------
