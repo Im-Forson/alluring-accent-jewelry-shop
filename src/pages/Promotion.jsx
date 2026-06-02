@@ -253,7 +253,6 @@ function Promotion() {
       };
 
       if (editingId) {
-        console.log('is editting...')
         // -------------------------------------------------------------------------
         // 🔥 BOLD LABEL: API FOR UPDATING AN EXISTING PROMOTION (POST/PUT)
         // LOCATION: Inside handleSavePromotion() -> if (editingId) block
@@ -428,7 +427,6 @@ function Promotion() {
         { message: bannerText, isDisplay },
         { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } }
       );
-      localStorage.setItem("storefrontBannerConfig", JSON.stringify({ text: bannerText, isActive: isDisplay }));
       toast.success(isDisplay ? "Storefront global banner live on backend!" : "Storefront header banner deactivated.");
     } catch (error) {
       console.error(error);

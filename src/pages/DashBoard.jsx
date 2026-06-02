@@ -78,6 +78,9 @@ function DashBoard() {
   });
 
   const [liveOrdersList, setLiveOrdersList] = useState([]);
+  
+  // --- STATE ALLOCATIONS FOR DYNAMIC PROMOTIONS ENGINE ---
+  const [activePromotionsList, setActivePromotionsList] = useState([]);
 
   // --- NOTIFICATION BELL INTERACTIVE UI STATES ---
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -113,13 +116,14 @@ function DashBoard() {
         await Promise.all([
           fetchLiveCatalogMetrics(),
           fetchLiveTodayStats(),
-          fetchLiveRecentOrders()
+          fetchLiveRecentOrders(),
+          fetchLivePromotionsData() // Linked clean inside pipeline execution loop
         ]);
 
       } catch (err) {
         console.error("Dashboard master synchronization error:", err);
       } finally {
-        setLoadingDashboardData(false);
+        loadingDashboardData && setLoadingDashboardData(false);
       }
     };
 
@@ -168,6 +172,36 @@ function DashBoard() {
   };
 
   // =====================================================================
+  // 2. LIVE REFRESH LINK: REAL-TIME PROMOTIONS RUNTIME FILTER ENGINE
+  // =====================================================================
+  const fetchLivePromotionsData = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`);
+      console.log("RAW BACKEND PROMOS:", response.data);
+      const originalPromoArray = response.data || [];
+      
+      const currentTime = new Date();
+
+      // Compute status evaluations locally dynamically to match your exact panel architecture rules
+      const calculatedActivePromos = originalPromoArray.filter(p => {
+        // Drop manual administrative overrides instantly
+        if (p.status === 'paused') return false;
+
+        // Structure standard date time stamps using strict boundaries
+        const startObj = new Date(`${p.startDate || p.start}T${p.startTime || '00:00'}`);
+        const endObj = new Date(`${p.endDate || p.end}T${p.endTime || '23:59'}`);
+
+        return currentTime >= startObj && currentTime <= endObj;
+      });
+
+      setActivePromotionsList(calculatedActivePromos);
+    } catch (error) {
+      console.error("Dashboard engine failed to load fresh campaigns. Preserving local container defaults:", error);
+      setActivePromotionsList([]);
+    }
+  };
+
+  // =====================================================================
   // 🛠️ BACKEND DEVELOPER: INSERT TODAY'S STATS LINK HERE
   // Replace the placeholder URL below once your collaborator completes the endpoint.
   // =====================================================================
@@ -194,7 +228,6 @@ function DashBoard() {
         todaysSales: "0.00",
         totalOrdersCount: 0,
         pendingOrdersCount: 0,
-        newCustomersCount: 0
       });
     }
   };
@@ -410,23 +443,28 @@ function DashBoard() {
                 </ul>
               </div>
 
+              {/* DYNAMIC PROMOTIONS COMPONENT CARD */}
               <div className="dashboard-card promos-card">
-                <h3 className="card-title">Active Promotions</h3>
+                <h3 className="card-title">Active Promotions ({activePromotionsList.length})</h3>
                 <ul className="simple-list">
-                  <li>
-                    <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
-                      <span className="bullet yellow"></span>
-                      <span>Spring Sale – 20% Off All Jewelry</span>
-                    </div>
-                    <span className="arrow">›</span>
-                  </li>
-                  <li>
-                    <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
-                      <span className="bullet yellow"></span>
-                      <span>Flash Deal – 30% Off Diamond Rings</span>
-                    </div>
-                    <span className="arrow">›</span>
-                  </li>
+                  {activePromotionsList.length === 0 ? (
+                    <li style={{ color: '#64748b', fontStyle: 'italic', fontSize: '13px', padding: '20px 0', border: 'none', justifyContent: 'center' }}>
+                      No active store discounts running right now.
+                    </li>
+                  ) : (
+                    activePromotionsList.map((promo) => (
+                      <li key={promo._id || promo.id}>
+                        <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
+                          <span className="bullet yellow"></span>
+                          <span>
+                            {promo.title || promo.name} 
+                            {promo.discountValue && ` – ${promo.discountValue}% Off`}
+                          </span>
+                        </div>
+                        <span className="arrow">›</span>
+                      </li>
+                    ))
+                  )}
                 </ul>
                 <div className="card-action-right">
                   <NavLink
