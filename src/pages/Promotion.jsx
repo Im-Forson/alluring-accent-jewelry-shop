@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import '../Promotion.css';
-import { 
-  FiSearch, FiShoppingBag, FiChevronDown, FiEdit3, FiSliders, FiLock 
+import {
+  FiSearch, FiShoppingBag, FiChevronDown, FiEdit3, FiSliders, FiLock
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 import toast from 'react-hot-toast';
-import axios from 'axios'; 
+import axios from 'axios';
 
 function Promotion() {
   // ==========================================
@@ -15,35 +15,42 @@ function Promotion() {
   const [promos, setPromos] = useState([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   useAdminBackButton();
-  
+
   // Create New Promotion Form States
   const [promoTitle, setPromoTitle] = useState("");
   const [discountType, setDiscountType] = useState('percentage');
   const [discountValue, setDiscountValue] = useState("");
   const [startDate, setStartDate] = useState("");
-  const [startTime, setStartTime] = useState(""); 
+  const [startTime, setStartTime] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [endTime, setEndTime] = useState("");     
+  const [endTime, setEndTime] = useState("");
   const [editingId, setEditingId] = useState(null);
 
   // DATA BACKEND MANAGEMENT STATES
   const [availableCategories, setAvailableCategories] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
+<<<<<<< HEAD
   
   // SEPARATE DROPDOWN CONTROL INTERFACES
   const [selectedTargets, setSelectedTargets] = useState([]); // Array format: ["all"], ["category:Rings"], or ["product:XYZ"]
+=======
+
+  // SEPARATE DROPDOWN CONTROL INTERFACES (NATIVE OBJECT ARRAYS)
+  const [selectedTargets, setSelectedTargets] = useState([]);
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isProductOpen, setIsProductOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
   const [productSearch, setProductSearch] = useState("");
 
   // GLOBAL STOREFRONT HEADER BANNER STATES
-  const [isDisplay, setIsDisplay] = useState(false); 
+  const [isDisplay, setIsDisplay] = useState(false);
   const [bannerText, setBannerText] = useState("");
   const [isBannerSaving, setIsBannerSaving] = useState(false);
 
   // Sync state data on mounting
   useEffect(() => {
+<<<<<<< HEAD
     const storedPromos = JSON.parse(localStorage.getItem("storePromotions")) || [
       { id: 1, title: 'Spring Sale', subtitle: '20% Off All Items', price: '346.00', stock: '21 in Stock', status: 'scheduled', type: 'percentage', value: '20', targets: ['all'], start: '2026-04-20', startTime: '00:00', end: '2026-04-25', endTime: '23:59' },
       { id: 2, title: 'Flash Deal', subtitle: '30% Off Rings Today!', price: '750.00', stock: '12 in Stock', status: 'scheduled', type: 'percentage', value: '30', targets: ['category:Rings'], start: '2026-05-24', startTime: '08:00', end: '2026-05-25', endTime: '22:00' },
@@ -51,9 +58,45 @@ function Promotion() {
     ];
     setPromos(storedPromos);
     localStorage.setItem("storePromotions", JSON.stringify(storedPromos));
+=======
+    const fetchPromotions = async () => {
+      try {
+        const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token") || localStorage.getItem("accessToken");
+        const axiosConfig = {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        };
+
+        // -------------------------------------------------------------------------
+        // 🔥 BOLD LABEL: API FOR FETCHING ALL PROMOTIONS (GET)
+        // LOCATION: Inside mounting useEffect() block -> fetchPromotions()
+        // CURRENT PATH: `${baseUrl}/promotion/all`
+        // -------------------------------------------------------------------------
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/promotion/all`,
+          axiosConfig
+        );
+
+        if (response.data) {
+          setPromos(response.data);
+          localStorage.setItem("storePromotions", JSON.stringify(response.data));
+        }
+      } catch (error) {
+        console.error("Error fetching live database campaigns:", error);
+        const backupPromos = JSON.parse(localStorage.getItem("storePromotions")) || [];
+        setPromos(backupPromos);
+      }
+    };
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
 
     const fetchGlobalBanner = async () => {
       try {
+        // -------------------------------------------------------------------------
+        // 🔥 BOLD LABEL: API FOR FETCHING ANNOUNCEMENT BANNER (GET)
+        // LOCATION: Inside mounting useEffect() block -> fetchGlobalBanner()
+        // CURRENT PATH: `${baseUrl}/announcement/active`
+        // -------------------------------------------------------------------------
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/announcement/active`);
         if (response.data) {
           setBannerText(response.data.message || "");
@@ -72,9 +115,14 @@ function Promotion() {
 
     const fetchTargetingData = async () => {
       try {
+        // -------------------------------------------------------------------------
+        // 🔥 BOLD LABEL: API FOR FETCHING STORES INDIVIDUAL CATEGORIES & PRODUCTS (GET)
+        // LOCATION: Inside mounting useEffect() block -> fetchTargetingData()
+        // CURRENT PATHS: `${baseUrl}/category/all` AND `${baseUrl}/product/all`
+        // -------------------------------------------------------------------------
         const [categoriesRes, productsRes] = await Promise.all([
-          axios.get('https://alluring-accent-backend.onrender.com/api/category/all'),
-          axios.get('https://alluring-accent-backend.onrender.com/api/product/all')
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`)
         ]);
         if (categoriesRes.data) setAvailableCategories(categoriesRes.data);
         if (productsRes.data) setAvailableProducts(productsRes.data);
@@ -83,6 +131,8 @@ function Promotion() {
       }
     };
 
+    // Execute the queries
+    fetchPromotions();
     fetchGlobalBanner();
     fetchTargetingData();
 
@@ -111,8 +161,8 @@ function Promotion() {
   // METRIC COMPUTING INFRASTRUCTURES
   // ==========================================
   const getPromoTimestamps = (promo) => {
-    const startObj = new Date(`${promo.start}T${promo.startTime || '00:00'}`);
-    const endObj = new Date(`${promo.end}T${promo.endTime || '23:59'}`);
+    const startObj = new Date(`${promo.startDate || promo.start}T${promo.startTime || '00:00'}`);
+    const endObj = new Date(`${promo.endDate || promo.end}T${promo.endTime || '23:59'}`);
     return { startObj, endObj };
   };
 
@@ -146,10 +196,18 @@ function Promotion() {
       return;
     }
 
+<<<<<<< HEAD
     let updated = selectedTargets.filter(item => item !== 'all');
 
     if (updated.includes(targetValue)) {
       updated = updated.filter(item => item !== targetValue);
+=======
+    let updated = selectedTargets.filter(item => item.type !== 'all');
+    const targetExists = updated.some(item => item.type === targetType && item.id === targetId);
+
+    if (targetExists) {
+      updated = updated.filter(item => !(item.type === targetType && item.id === targetId));
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
     } else {
       updated.push(targetValue);
     }
@@ -175,15 +233,16 @@ function Promotion() {
   };
 
   // ==========================================
-  // CORE FORM SUBMISSION LOGIC
+  // CORE FORM SUBMISSION LOGIC (CREATE & UPDATE)
   // ==========================================
-  const handleSavePromotion = (e) => {
+  const handleSavePromotion = async (e) => {
     e.preventDefault();
     if (!promoTitle || !discountValue || selectedTargets.length === 0) {
       toast.error("Please provide a title, numerical value, and an active targeting element scope.");
       return;
     }
 
+<<<<<<< HEAD
     let updatedPromos;
     const readableTargets = selectedTargets.map(t => getTargetLabel(t).replace('Category: ', '').replace('Product: ', ''));
     const formattedSubtitle = discountType === 'percentage' 
@@ -229,51 +288,202 @@ function Promotion() {
       };
       updatedPromos = [newPromo, ...promos];
       toast.success("New promotional campaign launched!");
+=======
+
+    const willCauseNegativePricing = availableProducts.filter(product => {
+      if (selectedTargets.some(t => t.type === 'all')) return true;
+      if (selectedTargets.some(t => t.type === 'product' && t.id === (product._id || product.id))) return true;
+      if (selectedTargets.some(t => t.type === 'category' && t.id === product.category)) return true;
+      return false;
+    }).some(product => {
+      const orig = parseFloat(product.price || 0);
+      const disc = parseFloat(discountValue || 0);
+      return discountType === 'percentage' ? disc > 100 : (orig - disc) < 0;
+    });
+
+    if (willCauseNegativePricing) {
+      toast.error("Cannot save! One or more items have dropped into negative pricing structures.");
+      return;
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
     }
 
-    setPromos(updatedPromos);
-    localStorage.setItem("storePromotions", JSON.stringify(updatedPromos));
-    clearFormFields();
+    const payload = {
+      title: promoTitle,
+      discountType: discountType,
+      discountValue: discountValue,
+      startDate: startDate || new Date().toISOString().split('T')[0],
+      startTime: startTime || "00:00",
+      endDate: endDate || new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
+      endTime: endTime || "23:59",
+      targets: selectedTargets,
+      status: editingId ? "updated" : "active" 
+    };
+
+    const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
+    const axiosConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+    };
+
+    try {
+      const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/promotion/${editingId ? 'update' : 'create', editingId ? `/${editingId}` : ''}`;
+      const axiosConfig = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      };
+
+      if (editingId) {
+        console.log('is editting...')
+        // -------------------------------------------------------------------------
+        // 🔥 BOLD LABEL: API FOR UPDATING AN EXISTING PROMOTION (POST/PUT)
+        // LOCATION: Inside handleSavePromotion() -> if (editingId) block
+        // CURRENT PATH: `${baseUrl}/promotion/update/${editingId}`
+        // -------------------------------------------------------------------------
+        await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
+        toast.success("Campaign updated successfully!");
+      } else {
+        // -------------------------------------------------------------------------
+        // 🔥 BOLD LABEL: API FOR CREATING A NEW PROMOTION (POST)
+        // LOCATION: Inside handleSavePromotion() -> else block
+        // CURRENT PATH: `${baseUrl}/promotion/create`
+        // -------------------------------------------------------------------------
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/create`, payload, axiosConfig);
+        toast.success("New promotional campaign launched successfully!");
+      }
+
+      // Re-fetch dynamic server state clean-slate
+      const refreshResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, axiosConfig);
+      if (refreshResponse.data) {
+        setPromos(refreshResponse.data);
+        localStorage.setItem("storePromotions", JSON.stringify(refreshResponse.data));
+      }
+      clearFormFields();
+    } catch (error) {
+      console.error("Error dispatching promotion parameters:", error);
+      toast.error(error.response?.data?.message || "Failed to establish a network pathway to servers.");
+    }
   };
 
   const handleEditClick = (promo) => {
-    setEditingId(promo.id);
+    setEditingId(promo._id || promo.id);
     setPromoTitle(promo.title);
+<<<<<<< HEAD
     setDiscountType(promo.type);
     setDiscountValue(promo.value);
     setSelectedTargets(promo.targets || (promo.category ? [promo.category === 'all' ? 'all' : `category:${promo.category}`] : []));
     setStartDate(promo.start);
+=======
+    setDiscountType(promo.discountType || promo.type || 'percentage');
+    setDiscountValue(promo.discountValue || promo.value || "");
+
+    if (promo.targets && typeof promo.targets[0] === 'object') {
+      setSelectedTargets(promo.targets);
+    } else if (promo.category) {
+      setSelectedTargets(promo.category === 'all'
+        ? [{ type: 'all', id: 'all', name: 'All Jewelry' }]
+        : [{ type: 'category', id: promo.category, name: promo.category }]
+      );
+    } else {
+      setSelectedTargets([]);
+    }
+
+    setStartDate(promo.startDate || promo.start || "");
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
     setStartTime(promo.startTime || "");
-    setEndDate(promo.end);
+    setEndDate(promo.endDate || promo.end || "");
     setEndTime(promo.endTime || "");
     toast.loading("Editing promotion campaign...", { id: "edit-load", duration: 1000 });
   };
 
-  const handleTogglePause = (id) => {
-    let targetedStatus = "";
-    const updated = promos.map(p => {
-      if (p.id === id) {
-        const nextStatus = p.status === 'paused' ? 'scheduled' : 'paused';
-        targetedStatus = nextStatus;
-        return { ...p, status: nextStatus };
+  // ==========================================
+  // UPDATED PAUSE / RESUME API HANDLER
+  // ==========================================
+  const handleTogglePause = async (targetId) => {
+    if (!targetId) {
+      toast.error("Invalid tracker reference ID.");
+      return;
+    }
+
+    const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
+    const axiosConfig = { headers: { 'Authorization': token ? `Bearer ${token}` : '' } };
+    const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/promotion/action`;
+
+    const currentPromo = promos.find(p => (p._id || p.id) === targetId);
+    const isCurrentlyPaused = currentPromo?.status === 'paused';
+    
+    // Switch action endpoints automatically depending on current live status
+    const actionEndpoint = isCurrentlyPaused ? 'resume' : 'pause';
+
+    try {
+      // -------------------------------------------------------------------------
+      // 🔥 BOLD LABEL: API FOR PAUSING & RESUMING PROMOTIONS (PUT)
+      // LOCATION: Inside handleTogglePause() function
+      // CURRENT PATHS: `${baseUrl}/promotion/pause/${targetId}` OR `${baseUrl}/promotion/resume/${targetId}`
+      // -------------------------------------------------------------------------
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/promotion/${actionEndpoint}/${targetId}`, {}, axiosConfig);
+
+      const updated = promos.map(p => {
+        if ((p._id || p.id) === targetId) {
+          return { ...p, status: isCurrentlyPaused ? 'active' : 'paused' };
+        }
+        return p;
+      });
+      
+      setPromos(updated);
+      localStorage.setItem("storePromotions", JSON.stringify(updated));
+      
+      if (isCurrentlyPaused) {
+        toast.success("Campaign added back into active status!");
+      } else {
+        toast.error("Campaign paused successfully.");
       }
-      return p;
-    });
-    setPromos(updated);
-    localStorage.setItem("storePromotions", JSON.stringify(updated));
-    if (targetedStatus === 'scheduled') {
-      toast.success("Campaign added back into dynamic calendar queue!");
-    } else {
-      toast.error("Campaign paused successfully.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to sync pause state configuration changes on server.");
     }
   };
 
-  const handleDeleteClick = (id) => {
-    if(!window.confirm("Permanently delete this promotion code from your client storefront?")) return;
-    const updated = promos.filter(p => p.id !== id);
-    setPromos(updated);
-    localStorage.setItem("storePromotions", JSON.stringify(updated));
-    toast.success("Promotion successfully purged.");
+  // ==========================================
+  // CORE API DETACHMENT / DELETION PIPELINE
+  // ==========================================
+  const handleDeleteClick = async (id) => {
+    if (!id) {
+      toast.error("Invalid tracker reference ID. Refresh browser and retry.");
+      return;
+    }
+    if (!window.confirm("Permanently delete this promotion type?")) return;
+
+    const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
+    const axiosConfig = {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+    };
+
+    try {
+      // -------------------------------------------------------------------------
+      // 🔥 BOLD LABEL: API FOR DELETING A PROMOTION (DELETE)
+      // LOCATION: Inside handleDeleteClick() function
+      // CURRENT PATH: `${baseUrl}/promotion/delete/${id}`
+      // -------------------------------------------------------------------------
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/promotion/delete/${id}`,
+        axiosConfig
+      );
+      
+      const updated = promos.filter(p => p.id !== id && p._id !== id);
+      setPromos(updated);
+      localStorage.setItem("storePromotions", JSON.stringify(updated));
+      
+      toast.success("Promotion successfully purged from cloud servers.");
+    } catch (error) {
+      console.error("Error purging target promotion asset:", error);
+      toast.error(error.response?.data?.message || "Failed to drop promotion from database registry.");
+    }
   };
 
   const clearFormFields = () => {
@@ -298,8 +508,14 @@ function Promotion() {
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     try {
       setIsBannerSaving(true);
+
+      // -------------------------------------------------------------------------
+      // 🔥 BOLD LABEL: API FOR CREATING/UPDATING STOREFRONT ANNOUNCEMENT BANNER (POST)
+      // LOCATION: Inside handleSaveGlobalBanner() function
+      // CURRENT PATH: `${baseUrl}/announcement/create`
+      // -------------------------------------------------------------------------
       await axios.post(
-        'https://alluring-accent-backend.onrender.com/api/announcement/create',
+        `${import.meta.env.VITE_API_BASE_URL}/announcement/create`,
         { message: bannerText, isDisplay },
         { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } }
       );
@@ -314,7 +530,7 @@ function Promotion() {
   };
 
   const handleToggleSwitch = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (!isBannerSaving) setIsDisplay(prev => !prev);
   };
 
@@ -323,7 +539,6 @@ function Promotion() {
       <SideBar />
 
       <main className="main-content-area">
-        
         {/* Metric Cards Banner */}
         <section className="promo-metrics">
           <div className="promo-card active-card">
@@ -358,6 +573,7 @@ function Promotion() {
                   <tr><td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>No promotions logged.</td></tr>
                 ) : (
                   promos.map((promo) => {
+                    const currentPromoId = promo._id || promo.id;
                     const { startObj, endObj } = getPromoTimestamps(promo);
                     const isPaused = promo.status === 'paused';
                     const isUpcoming = currentTime < startObj;
@@ -369,16 +585,19 @@ function Promotion() {
                     else if (isUpcoming) { statusLabel = "Upcoming"; pillClass = "upcoming-pill"; }
                     else if (isExpired) { statusLabel = "Expired"; pillClass = "out-pill"; }
 
+                    const displayValue = promo.discountValue || promo.value || "0";
+                    const displayType = promo.discountType || promo.type || "percentage";
+
                     return (
-                      <tr key={promo.id} style={{ opacity: (isExpired || isPaused) ? 0.6 : 1 }}>
-                        <td><div className="promo-info-cell"><strong>{promo.title}</strong><span>{promo.subtitle}</span></div></td>
-                        <td className="price-bold">GHC {promo.value} ({promo.type === 'percentage' ? '%' : '₵'})</td>
+                      <tr key={currentPromoId} style={{ opacity: (isExpired || isPaused) ? 0.6 : 1 }}>
+                        <td><div className="promo-info-cell"><strong>{promo.title}</strong><span>{promo.subtitle || 'Custom Target Range Campaign'}</span></div></td>
+                        <td className="price-bold">GHC {displayValue} ({displayType === 'percentage' ? '%' : '₵'})</td>
                         <td><span className={`stock-pill ${pillClass}`}>{statusLabel}</span></td>
                         <td>
                           <div className="action-buttons-group">
                             <button className="action-btn edit-btn" onClick={() => handleEditClick(promo)}>Edit</button>
-                            <button className="action-btn pause-btn" style={{ backgroundColor: isPaused ? '#10b981' : '#f59e0b' }} onClick={() => handleTogglePause(promo.id)}>{isPaused ? 'Resume' : 'Pause'}</button>
-                            <button className="action-btn delete-btn" onClick={() => handleDeleteClick(promo.id)}>Delete</button>
+                            <button className="action-btn pause-btn" style={{ backgroundColor: isPaused ? '#10b981' : '#f59e0b' }} onClick={() => handleTogglePause(currentPromoId)}>{isPaused ? 'Resume' : 'Pause'}</button>
+                            <button className="action-btn delete-btn" onClick={() => handleDeleteClick(currentPromoId)}>Delete</button>
                           </div>
                         </td>
                       </tr>
@@ -393,10 +612,9 @@ function Promotion() {
         {/* Input Configuration Workstation */}
         <section className="content-panel form-panel">
           <h3 className="panel-title">{editingId ? 'Modify Configured Campaign' : 'Create New Promotion'}</h3>
-          
+
           <form className="create-promo-form" onSubmit={handleSavePromotion}>
             <div className="form-left-col">
-              
               <div className="form-field">
                 <input type="text" placeholder="Promotion Title (e.g., Akwaaba Discount)" className="panel-input" value={promoTitle} onChange={(e) => setPromoTitle(e.target.value)} />
               </div>
@@ -419,15 +637,19 @@ function Promotion() {
                 <input type="number" placeholder={discountType === 'percentage' ? "Discount Value (%) e.g. 25" : "Discount Value (GHC) e.g. 150"} className="panel-input" value={discountValue} onChange={(e) => setDiscountValue(e.target.value)} />
               </div>
 
+<<<<<<< HEAD
               {/* ==========================================
                   TARGETING CONTROLS (SEPARATED INTERFACES)
                  ========================================== */}
               
               {/* MASTER FALLBACK ROW */}
+=======
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
               <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <button
                   type="button"
                   style={{
+<<<<<<< HEAD
                     padding: '8px 16px',
                     borderRadius: '6px',
                     fontSize: '13px',
@@ -437,10 +659,15 @@ function Promotion() {
                     backgroundColor: selectedTargets.includes('all') ? '#be185d' : '#ffffff',
                     color: selectedTargets.includes('all') ? '#ffffff' : '#be185d',
                     transition: 'all 0.2s ease'
+=======
+                    padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: '1px solid #be185d',
+                    backgroundColor: selectedTargets.some(t => t.type === 'all') ? '#be185d' : '#ffffff',
+                    color: selectedTargets.some(t => t.type === 'all') ? '#ffffff' : '#be185d', transition: 'all 0.2s ease'
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                   }}
                   onClick={handleSetAllJewelry}
                 >
-                  ✨ Apply to All Jewelry (Storewide Default)
+                  ✨ Apply to All Jewelry
                 </button>
                 {selectedTargets.includes('all') && (
                   <span style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>
@@ -450,8 +677,6 @@ function Promotion() {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-                
-                {/* 1. SEPARATED CATEGORIES DROPDOWN */}
                 <div className="category-dropdown-container" style={{ position: 'relative' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>
                     Filter by Categories
@@ -472,9 +697,15 @@ function Promotion() {
                         {hasProductsSelected ? 'Disabled (Products active)' : 'Select categories...'}
                       </span>
                     ) : (
+<<<<<<< HEAD
                       selectedTargets.filter(t => t.startsWith('category:')).map(target => (
                         <span 
                           key={target} 
+=======
+                      selectedTargets.filter(t => t.type === 'category').map(target => (
+                        <span
+                          key={target.id}
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                           style={{ backgroundColor: '#fbcfe8', color: '#be185d', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
                           onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
@@ -499,8 +730,13 @@ function Promotion() {
                         {availableCategories
                           .filter(cat => cat.name?.toLowerCase().includes(categorySearch.toLowerCase()))
                           .map(cat => {
+<<<<<<< HEAD
                             const val = `category:${cat.name}`;
                             const isChecked = selectedTargets.includes(val);
+=======
+                            const catId = cat.name;
+                            const isChecked = isTargetChecked('category', catId);
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                             return (
                               <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
                                 <span>📦 {cat.name}</span>
@@ -513,7 +749,6 @@ function Promotion() {
                   )}
                 </div>
 
-                {/* 2. SEPARATED PRODUCTS DROPDOWN */}
                 <div className="product-dropdown-container" style={{ position: 'relative' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>
                     Filter by Individual Products
@@ -534,9 +769,15 @@ function Promotion() {
                         {hasCategoriesSelected ? 'Disabled (Categories active)' : 'Select products...'}
                       </span>
                     ) : (
+<<<<<<< HEAD
                       selectedTargets.filter(t => t.startsWith('product:')).map(target => (
                         <span 
                           key={target} 
+=======
+                      selectedTargets.filter(t => t.type === 'product').map(target => (
+                        <span
+                          key={target.id}
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                           style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
                           onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
@@ -574,10 +815,8 @@ function Promotion() {
                     </div>
                   )}
                 </div>
-
               </div>
 
-              {/* Dynamic Timeline Component Setup */}
               <div className="form-field campaign-schedule-grid">
                 <div className="schedule-group">
                   <div className="schedule-field"><label className="field-top-label">Start Date</label><input type="date" className="panel-input date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} /></div>
@@ -588,16 +827,107 @@ function Promotion() {
                   <div className="schedule-field"><label className="field-top-label">End Time</label><input type="time" className="panel-input time-input" value={endTime} onChange={(e) => setEndTime(e.target.value)} /></div>
                 </div>
               </div>
-
             </div>
 
             <div className="form-right-col">
               <div className="date-picker-block">
                 <label>Campaign Settings Preview</label>
+<<<<<<< HEAD
                 <div className="preview-card-box">
                   <strong>Type:</strong> {discountType.toUpperCase()}<br/>
                   <strong>Scope Targets:</strong> {selectedTargets.length > 0 ? selectedTargets.map(t => getTargetLabel(t)).join(', ') : 'None chosen yet'}<br/>
+=======
+                <div className="preview-card-box" style={{ lineHeight: '1.8', fontSize: '13px' }}>
+                  <strong>Type:</strong> <span style={{ color: '#be185d', fontWeight: 'bold' }}>{discountType.toUpperCase()}</span><br/>
+                  <strong>Scope Targets:</strong> {selectedTargets.length > 0 ? selectedTargets.map(t => t.name).join(', ') : 'None chosen yet'}<br/>
+>>>>>>> 3719dc140da18a2003bd102fe9c051758bc12728
                   <strong>Status:</strong> {editingId ? '⚠️ Editing' : '✨ New Entry'}
+                  
+                  <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px dashed #cbd5e1' }} />
+                  
+                  <div style={{ backgroundColor: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    <h4 style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#475569', fontWeight: 'bold' }}>Live Price Preview Mockup:</h4>
+                    
+                    {selectedTargets.length === 0 ? (
+                      <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Select a target asset scope to view pricing adjustments.</span>
+                    ) : (() => {
+                      const matchedProducts = availableProducts.filter(product => {
+                        if (selectedTargets.some(t => t.type === 'all')) return true;
+                        if (selectedTargets.some(t => t.type === 'product' && t.id === (product._id || product.id))) return true;
+                        if (selectedTargets.some(t => t.type === 'category' && t.id === product.category)) return true;
+                        return false;
+                      });
+
+                      if (matchedProducts.length === 0) {
+                        return <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>No products found matching selection.</span>;
+                      }
+
+                      const triggersNegativePricing = matchedProducts.some(product => {
+                        const originalPrice = parseFloat(product.price || 0);
+                        const discountNum = parseFloat(discountValue || 0);
+                        if (discountType === 'percentage') {
+                          return discountNum > 100;
+                        } else {
+                          return (originalPrice - discountNum) < 0;
+                        }
+                      });
+
+                      const groupedProducts = matchedProducts.reduce((groups, product) => {
+                        const categoryName = product.category || 'Uncategorized';
+                        if (!groups[categoryName]) {
+                          groups[categoryName] = [];
+                        }
+                        groups[categoryName].push(product);
+                        return groups;
+                      }, {});
+
+                      return (
+                        <div style={{ maxHeight: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          {triggersNegativePricing && (
+                            <div style={{ backgroundColor: '#fef2f2', border: '1px solid #f87171', color: '#991b1b', padding: '8px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', lineHeight: '1.4' }}>
+                              ⚠️ <strong>Critical Pricing Alert:</strong> Your current discount value forces one or more jewelry items into a negative or zero balance! Please adjust your numbers.
+                            </div>
+                          )}
+
+                          {Object.keys(groupedProducts).map(categoryGroup => (
+                            <div key={categoryGroup} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', marginTop: '2px' }}>
+                                📦 {categoryGroup}
+                              </div>
+                              
+                              {groupedProducts[categoryGroup].map(product => {
+                                const originalPrice = parseFloat(product.price || 0);
+                                const discountNum = parseFloat(discountValue || 0);
+                                let calculatedNewPrice = originalPrice;
+
+                                if (discountType === 'percentage' && discountNum > 0) {
+                                  calculatedNewPrice = originalPrice - (originalPrice * (discountNum / 100));
+                                } else if (discountType === 'fixed' && discountNum > 0) {
+                                  calculatedNewPrice = originalPrice - discountNum;
+                                }
+
+                                const isThisProductNegative = calculatedNewPrice <= 0;
+
+                                return (
+                                  <div key={product._id || product.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid #f1f5f9', padding: '2px 4px' }}>
+                                    <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#334155' }}>
+                                      💎 {product.name}
+                                    </span>
+                                    <span>
+                                      <span style={{ textDecoration: 'line-through', color: '#94a3b8', marginRight: '6px' }}>₵{originalPrice.toFixed(2)}</span>
+                                      <strong style={{ color: isThisProductNegative ? '#dc2626' : '#10b981' }}>
+                                        ₵{calculatedNewPrice.toFixed(2)}
+                                      </strong>
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -605,13 +935,15 @@ function Promotion() {
             <div className="form-footer-actions">
               <div className="submit-buttons" style={{ marginLeft: 'auto' }}>
                 {editingId && <button type="button" className="btn-save-promo cancel-btn" onClick={clearFormFields}>Cancel</button>}
-                <button type="submit" className="btn-save-promo">{editingId ? 'Update Campaign' : 'Save Promotion'}</button>
+                <button type="submit" className="btn-save-promo">
+                  {editingId ? 'Save Update' : 'Save Promotion'}
+                </button>
               </div>
             </div>
           </form>
         </section>
 
-        {/* CLOUD GLOBAL STOREFRONT HEADER BANNER CONTROLLER */}
+        {/* Global Storefront Banner Controller */}
         <section className="content-panel form-panel" style={{ marginTop: '24px' }}>
           <h3 className="panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiSliders size={18} /> Customer Storefront Banner</h3>
           <form className="create-promo-form" onSubmit={handleSaveGlobalBanner}>
@@ -634,7 +966,6 @@ function Promotion() {
             </div>
           </form>
         </section>
-
       </main>
     </div>
   );
