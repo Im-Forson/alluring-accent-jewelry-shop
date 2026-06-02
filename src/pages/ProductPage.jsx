@@ -18,8 +18,8 @@ export default function ProductPage() {
   const { pathname } = useLocation();
   const location = useLocation();
   const navigationSource = (location.state).source;
-  
-  const { id, name, description, price, oldPrice, colors, preferedColor, minimumOrder, purchaseQty, images, isUseMOQ, belowMOQPrice, } = viewingProduct
+
+  const { id, name, description, price, oldPrice, colors, preferedColor, minimumOrder, purchaseQty, images, isAllowBelowMOQ, isUseMOQ, belowMOQPrice, } = viewingProduct
     const [isOpenPurchaseOrderSummary, setIsOpenPurchaseOrderSummary] = useState(false);
     const [selectedColor, setSelectedColor] = useState();
     const [isUseMOQSelected, setIsUseMOQSelected] = useState();
@@ -111,6 +111,7 @@ export default function ProductPage() {
       const order =[ {
         id: viewingProduct.id,
         name: viewingProduct.name,
+        image: viewingProduct.images[0],
         price: productPrice,
         quantity: quantity,
         totalPrice: quantity * productPrice,
@@ -252,16 +253,20 @@ export default function ProductPage() {
                                             <div className="">
                                                 <p className={`${isUseMOQSelected ? '':'line-through '} text-xs text-zinc-400 font-mono font-bold mb-1`}>Minimum Order: {minimumOrder}</p>
 
-                                                <div className="flex items-center active:opacity-25"
-                                                    onClick={()=>{
-                                                        setIsUseMOQSelected(!isUseMOQSelected);
-                                                        setQuantity(minimumOrder);
-                                                        setProductPrice(!isUseMOQSelected ? price : belowMOQPrice)
-                                                    }}
-                                                >
-                                                    {isUseMOQSelected ? <Square className="h-4 ml-[-5px] text-zinc-400"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-400"/>}
-                                                    <p className="text-xs text-zinc-400 font-mono font-bold">Order less</p>
-                                                </div>
+                                                {
+                                                    isAllowBelowMOQ && (
+                                                        <div className="flex items-center active:opacity-25"
+                                                            onClick={()=>{
+                                                                setIsUseMOQSelected(!isUseMOQSelected);
+                                                                setQuantity(minimumOrder);
+                                                                setProductPrice(!isUseMOQSelected ? price : belowMOQPrice)
+                                                            }}
+                                                        >
+                                                            {isUseMOQSelected ? <Square className="h-4 ml-[-5px] text-zinc-400"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-400"/>}
+                                                            <p className="text-xs text-zinc-400 font-mono font-bold">Order less</p>
+                                                        </div>
+                                                    )
+                                                }
                                             </div>
                                         </div>
                                     </div>

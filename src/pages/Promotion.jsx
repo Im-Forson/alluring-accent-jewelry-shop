@@ -30,10 +30,8 @@ function Promotion() {
   const [availableCategories, setAvailableCategories] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
   
-  // SEPARATE DROPDOWN CONTROL INTERFACES (NATIVE OBJECT ARRAYS)
-  // Structure: [{ type: 'all', id: 'all', name: 'All Jewelry' }] 
-  // or [{ type: 'category', id: 'Rings', name: 'Rings' }]
-  const [selectedTargets, setSelectedTargets] = useState([]); 
+  // SEPARATE DROPDOWN CONTROL INTERFACES
+  const [selectedTargets, setSelectedTargets] = useState([]); // Array format: ["all"], ["category:Rings"], or ["product:XYZ"]
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isProductOpen, setIsProductOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState("");
@@ -47,9 +45,9 @@ function Promotion() {
   // Sync state data on mounting
   useEffect(() => {
     const storedPromos = JSON.parse(localStorage.getItem("storePromotions")) || [
-      { id: 1, title: 'Spring Sale', subtitle: '20% Off All Items', price: '346.00', stock: '21 in Stock', status: 'scheduled', type: 'percentage', value: '20', targets: [{ type: 'all', id: 'all', name: 'All Jewelry' }], start: '2026-04-20', startTime: '00:00', end: '2026-04-25', endTime: '23:59' },
-      { id: 2, title: 'Flash Deal', subtitle: '30% Off Rings Today!', price: '750.00', stock: '12 in Stock', status: 'scheduled', type: 'percentage', value: '30', targets: [{ type: 'category', id: 'Rings', name: 'Rings' }], start: '2026-05-24', startTime: '08:00', end: '2026-05-25', endTime: '22:00' },
-      { id: 3, title: 'Holiday Clearance', subtitle: 'Selected Items Only', price: '726.00', stock: 'Out of Stock', status: 'paused', type: 'fixed', value: '100', targets: [{ type: 'category', id: 'Necklaces', name: 'Necklaces' }], start: '2026-05-01', startTime: '12:00', end: '2026-05-10', endTime: '18:00' }
+      { id: 1, title: 'Spring Sale', subtitle: '20% Off All Items', price: '346.00', stock: '21 in Stock', status: 'scheduled', type: 'percentage', value: '20', targets: ['all'], start: '2026-04-20', startTime: '00:00', end: '2026-04-25', endTime: '23:59' },
+      { id: 2, title: 'Flash Deal', subtitle: '30% Off Rings Today!', price: '750.00', stock: '12 in Stock', status: 'scheduled', type: 'percentage', value: '30', targets: ['category:Rings'], start: '2026-05-24', startTime: '08:00', end: '2026-05-25', endTime: '22:00' },
+      { id: 3, title: 'Holiday Clearance', subtitle: 'Selected Items Only', price: '726.00', stock: 'Out of Stock', status: 'paused', type: 'fixed', value: '100', targets: ['category:Necklaces'], start: '2026-05-01', startTime: '12:00', end: '2026-05-10', endTime: '18:00' }
     ];
     setPromos(storedPromos);
     localStorage.setItem("storePromotions", JSON.stringify(storedPromos));
@@ -88,9 +86,14 @@ function Promotion() {
     fetchGlobalBanner();
     fetchTargetingData();
 
+    // Click outside handler to collapse open menus safely
     const closeDropdownOutside = (e) => {
-      if (!e.target.closest('.category-dropdown-container')) setIsCategoryOpen(false);
-      if (!e.target.closest('.product-dropdown-container')) setIsProductOpen(false);
+      if (!e.target.closest('.category-dropdown-container')) {
+        setIsCategoryOpen(false);
+      }
+      if (!e.target.closest('.product-dropdown-container')) {
+        setIsProductOpen(false);
+      }
     };
     document.addEventListener('click', closeDropdownOutside);
 
@@ -132,39 +135,43 @@ function Promotion() {
   }).length;
 
   // ==========================================
-  // OBJECT SELECTION ENGINE & LOCKOUT MECHANISMS
+  // SEGREGATED SELECTION ENGINE & LOCKOUTS
   // ==========================================
-  const hasCategoriesSelected = selectedTargets.some(t => t.type === 'category');
-  const hasProductsSelected = selectedTargets.some(t => t.type === 'product');
+  const hasCategoriesSelected = selectedTargets.some(t => t.startsWith('category:'));
+  const hasProductsSelected = selectedTargets.some(t => t.startsWith('product:'));
 
-  const handleToggleTarget = (targetType, targetId, targetName) => {
-    if (targetType === 'all') {
-      setSelectedTargets([{ type: 'all', id: 'all', name: 'All Jewelry' }]);
+  const handleToggleTarget = (targetValue) => {
+    if (targetValue === 'all') {
+      setSelectedTargets(['all']);
       return;
     }
 
-    // Filter out 'all' automatically when specific scope items are clicked
-    let updated = selectedTargets.filter(item => item.type !== 'all');
+    let updated = selectedTargets.filter(item => item !== 'all');
 
-    // Deep check if the object selection already exists inside state
-    const targetExists = updated.some(item => item.type === targetType && item.id === targetId);
-
-    if (targetExists) {
-      updated = updated.filter(item => !(item.type === targetType && item.id === targetId));
+    if (updated.includes(targetValue)) {
+      updated = updated.filter(item => item !== targetValue);
     } else {
-      updated.push({ type: targetType, id: targetId, name: targetName });
+      updated.push(targetValue);
     }
 
+    // Fall back automatically to empty state if array drains clean
     setSelectedTargets(updated);
   };
 
   const handleSetAllJewelry = () => {
-    setSelectedTargets([{ type: 'all', id: 'all', name: 'All Jewelry' }]);
+    setSelectedTargets(['all']);
     toast.success("Targeting applied to full jewelry collection storewide.");
   };
 
-  const isTargetChecked = (targetType, targetId) => {
-    return selectedTargets.some(item => item.type === targetType && item.id === targetId);
+  const getTargetLabel = (value) => {
+    if (value === 'all') return 'All Jewelry';
+    if (value.startsWith('category:')) return `Category: ${value.replace('category:', '')}`;
+    if (value.startsWith('product:')) {
+      const prodId = value.replace('product:', '');
+      const item = availableProducts.find(p => (p._id === prodId || p.id === prodId));
+      return item ? `Product: ${item.name}` : 'Selected Product';
+    }
+    return value;
   };
 
   // ==========================================
@@ -177,16 +184,11 @@ function Promotion() {
       return;
     }
 
-    console.log("=== API Payload Check ===");
-  console.log("Data Type of targets:", typeof selectedTargets);
-  console.log("Is it an Array?", Array.isArray(selectedTargets));
-  console.log("Actual Targets Array Contents:", selectedTargets);
-
     let updatedPromos;
-    const readableNames = selectedTargets.map(t => t.name);
+    const readableTargets = selectedTargets.map(t => getTargetLabel(t).replace('Category: ', '').replace('Product: ', ''));
     const formattedSubtitle = discountType === 'percentage' 
-      ? `${discountValue}% Off ${readableNames.join(', ')}`
-      : `GHC ${discountValue} Off [${readableNames.join(', ')}]`;
+      ? `${discountValue}% Off ${readableTargets.join(', ')}`
+      : `GHC {discountValue} Off [${readableTargets.join(', ')}]`;
 
     if (editingId) {
       updatedPromos = promos.map(p => {
@@ -197,7 +199,7 @@ function Promotion() {
             subtitle: formattedSubtitle,
             type: discountType,
             value: discountValue,
-            targets: selectedTargets, // Saving clean programmatic objects array directly
+            targets: selectedTargets, 
             start: startDate || p.start,
             startTime: startTime || p.startTime || "00:00",
             end: endDate || p.end,
@@ -239,19 +241,7 @@ function Promotion() {
     setPromoTitle(promo.title);
     setDiscountType(promo.type);
     setDiscountValue(promo.value);
-    
-    // Fallback normalizer in case legacy flat-string campaigns still reside in storage
-    if (promo.targets && typeof promo.targets[0] === 'object') {
-      setSelectedTargets(promo.targets);
-    } else if (promo.category) {
-      setSelectedTargets(promo.category === 'all' 
-        ? [{ type: 'all', id: 'all', name: 'All Jewelry' }]
-        : [{ type: 'category', id: promo.category, name: promo.category }]
-      );
-    } else {
-      setSelectedTargets([]);
-    }
-    
+    setSelectedTargets(promo.targets || (promo.category ? [promo.category === 'all' ? 'all' : `category:${promo.category}`] : []));
     setStartDate(promo.start);
     setStartTime(promo.startTime || "");
     setEndDate(promo.end);
@@ -429,7 +419,11 @@ function Promotion() {
                 <input type="number" placeholder={discountType === 'percentage' ? "Discount Value (%) e.g. 25" : "Discount Value (GHC) e.g. 150"} className="panel-input" value={discountValue} onChange={(e) => setDiscountValue(e.target.value)} />
               </div>
 
-              {/* MASTER FALLBACK BUTTON */}
+              {/* ==========================================
+                  TARGETING CONTROLS (SEPARATED INTERFACES)
+                 ========================================== */}
+              
+              {/* MASTER FALLBACK ROW */}
               <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <button
                   type="button"
@@ -440,15 +434,15 @@ function Promotion() {
                     fontWeight: '600',
                     cursor: 'pointer',
                     border: '1px solid #be185d',
-                    backgroundColor: selectedTargets.some(t => t.type === 'all') ? '#be185d' : '#ffffff',
-                    color: selectedTargets.some(t => t.type === 'all') ? '#ffffff' : '#be185d',
+                    backgroundColor: selectedTargets.includes('all') ? '#be185d' : '#ffffff',
+                    color: selectedTargets.includes('all') ? '#ffffff' : '#be185d',
                     transition: 'all 0.2s ease'
                   }}
                   onClick={handleSetAllJewelry}
                 >
                   ✨ Apply to All Jewelry (Storewide Default)
                 </button>
-                {selectedTargets.some(t => t.type === 'all') && (
+                {selectedTargets.includes('all') && (
                   <span style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>
                     Currently targeting entire storefront item registry.
                   </span>
@@ -473,18 +467,18 @@ function Promotion() {
                     onClick={() => !hasProductsSelected && setIsCategoryOpen(!isCategoryOpen)}
                   >
                     {hasProductsSelected && <FiLock style={{ color: '#94a3b8', marginRight: '4px' }} />}
-                    {selectedTargets.filter(t => t.type === 'category').length === 0 ? (
+                    {selectedTargets.filter(t => t.startsWith('category:')).length === 0 ? (
                       <span style={{ color: '#94a3b8', fontSize: '13px' }}>
                         {hasProductsSelected ? 'Disabled (Products active)' : 'Select categories...'}
                       </span>
                     ) : (
-                      selectedTargets.filter(t => t.type === 'category').map(target => (
+                      selectedTargets.filter(t => t.startsWith('category:')).map(target => (
                         <span 
-                          key={target.id} 
+                          key={target} 
                           style={{ backgroundColor: '#fbcfe8', color: '#be185d', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={(e) => { e.stopPropagation(); handleToggleTarget('category', target.id, target.name); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
-                          {target.name}
+                          {getTargetLabel(target).replace('Category: ', '')}
                           <b style={{ color: '#9d174d' }}>×</b>
                         </span>
                       ))
@@ -505,10 +499,10 @@ function Promotion() {
                         {availableCategories
                           .filter(cat => cat.name?.toLowerCase().includes(categorySearch.toLowerCase()))
                           .map(cat => {
-                            const catId = cat.name; // Using name as identifier matching logic
-                            const isChecked = isTargetChecked('category', catId);
+                            const val = `category:${cat.name}`;
+                            const isChecked = selectedTargets.includes(val);
                             return (
-                              <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget('category', catId, cat.name)}>
+                              <div key={cat._id || cat.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#fbcfe8' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
                                 <span>📦 {cat.name}</span>
                                 {isChecked && <span style={{ color: '#be185d', fontWeight: 'bold' }}>✓</span>}
                               </div>
@@ -535,18 +529,18 @@ function Promotion() {
                     onClick={() => !hasCategoriesSelected && setIsProductOpen(!isProductOpen)}
                   >
                     {hasCategoriesSelected && <FiLock style={{ color: '#94a3b8', marginRight: '4px' }} />}
-                    {selectedTargets.filter(t => t.type === 'product').length === 0 ? (
+                    {selectedTargets.filter(t => t.startsWith('product:')).length === 0 ? (
                       <span style={{ color: '#94a3b8', fontSize: '13px' }}>
                         {hasCategoriesSelected ? 'Disabled (Categories active)' : 'Select products...'}
                       </span>
                     ) : (
-                      selectedTargets.filter(t => t.type === 'product').map(target => (
+                      selectedTargets.filter(t => t.startsWith('product:')).map(target => (
                         <span 
-                          key={target.id} 
+                          key={target} 
                           style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontSize: '12px', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={(e) => { e.stopPropagation(); handleToggleTarget('product', target.id, target.name); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleTarget(target); }}
                         >
-                          {target.name}
+                          {getTargetLabel(target).replace('Product: ', '')}
                           <b style={{ color: '#3730a3' }}>×</b>
                         </span>
                       ))
@@ -567,10 +561,10 @@ function Promotion() {
                         {availableProducts
                           .filter(prod => prod.name?.toLowerCase().includes(productSearch.toLowerCase()))
                           .map(prod => {
-                            const prodId = prod._id || prod.id;
-                            const isChecked = isTargetChecked('product', prodId);
+                            const val = `product:${prod._id || prod.id}`;
+                            const isChecked = selectedTargets.includes(val);
                             return (
-                              <div key={prodId} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#e0e7ff' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget('product', prodId, prod.name)}>
+                              <div key={prod._id || prod.id} style={{ padding: '6px 8px', borderRadius: '4px', cursor: 'pointer', backgroundColor: isChecked ? '#e0e7ff' : 'transparent', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }} onClick={() => handleToggleTarget(val)}>
                                 <span>💎 {prod.name}</span>
                                 {isChecked && <span style={{ color: '#4338ca', fontWeight: 'bold' }}>✓</span>}
                               </div>
@@ -602,7 +596,7 @@ function Promotion() {
                 <label>Campaign Settings Preview</label>
                 <div className="preview-card-box">
                   <strong>Type:</strong> {discountType.toUpperCase()}<br/>
-                  <strong>Scope Targets:</strong> {selectedTargets.length > 0 ? selectedTargets.map(t => t.name).join(', ') : 'None chosen yet'}<br/>
+                  <strong>Scope Targets:</strong> {selectedTargets.length > 0 ? selectedTargets.map(t => getTargetLabel(t)).join(', ') : 'None chosen yet'}<br/>
                   <strong>Status:</strong> {editingId ? '⚠️ Editing' : '✨ New Entry'}
                 </div>
               </div>

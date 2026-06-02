@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useShop } from '../../utilities/ShopContext';
 import OrderProgress from './OrderProgress';
 import OrderNotFound from './OrderNotFound';
+import axios from 'axios';
 
 export default function TrackYourOrder() {
     const { successfulOrders, loadTrackingOrder } = useShop();
@@ -16,20 +17,46 @@ export default function TrackYourOrder() {
     const [showOrderNotFound, setshowOrderNotFound] = useState(false);
 
     
-    function handleTrackOrder() {
-        if (orderIdInput.trim() === '' || orderPhoneInput.trim() === '') {
+    async function handleTrackOrder() {
+        if (orderIdInput.trim() === '' && orderPhoneInput.trim() === '') {
             return toast.error('Enter order details', {duration: 2000})
         };
-        
-        const isExist = successfulOrders.find(order => order.orderId === orderIdInput);
-        // console.log(isExist)
 
-        if (!isExist) {
+        if (orderIdInput.trim() === '') {
+            return toast.error('Enter Order ID', {duration: 2000})
+        };
+
+        if (orderPhoneInput.trim() === '') {
+            return toast.error('Enter Phone Number', {duration: 2000})
+        };
+
+        const loadid =  toast.loading('Fetching order details...')
+
+        try {
+            const orderId = orderIdInput.toUpperCase();
+    
+            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/${orderId}`)
+            
+            if (res.status !== 200) {
+                toast.dismiss(loadid);
+                return setshowOrderNotFound(true);
+            }
+    
+            const order = res.data;
+
+            if (orderPhoneInput.trim() !== order.phone) {
+                toast.dismiss(loadid);
+                return setshowOrderNotFound(true);
+            };
+    
+            loadTrackingOrder(order);
+            setShowOrderTracker(true);
+            toast.dismiss(loadid);
+
+        } catch (error) {
+            toast.dismiss(loadid);
             return setshowOrderNotFound(true);
         }
-
-        loadTrackingOrder(isExist);
-        setShowOrderTracker(true);
     }
 
     return(
@@ -74,7 +101,7 @@ export default function TrackYourOrder() {
                                 <label className="text-[10px] text-gray-600 font-semibold tracking-wider">PHONE NUMBER</label>
                                 <input
                                     type="tel"
-                                    placeholder="+233..."
+                                    placeholder="024..."
                                     className="w-full mt-1 border border-gray-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-[#fafafa]"
                                     value={orderPhoneInput}
                                     onChange={(e) => setOrderPhoneInput(e.target.value)}
@@ -130,7 +157,7 @@ export default function TrackYourOrder() {
 
                             {/* Email Option */}
                             <a 
-                                href="mailto:support@yourdomain.com"
+                                href="mailto:info.alluringaccent@gmail.com"
                                 className="flex items-center gap-4 p-3.5 bg-white border border-gray-200 rounded-xl hover:border-pink-200 active:scale-[0.99] transition-all group shadow-sm cursor-pointer"
                             >
                                 <div className="p-2.5 bg-pink-50 text-pink-500 rounded-lg group-hover:bg-pink-100 transition-colors">
