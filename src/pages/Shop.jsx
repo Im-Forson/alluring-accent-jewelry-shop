@@ -409,7 +409,7 @@ export default function Shop() {
 
                                     <div className="absolute top-2 inset-x-0 px-2 flex items-center justify-between pointer-events-none">
                                         <div>
-                                        {product.tag !== 'null' && (
+                                        {product.tag !== '' && (
                                             <span className="bg-pink-600 text-white text-[11px] px-2 py-1 rounded shadow-sm pointer-events-auto">
                                             {product.tag}
                                             </span>
@@ -450,9 +450,9 @@ export default function Shop() {
 
                                         {
                                             product.isPromotion && (
-                                                <div className="mt-2.5 flex items-center justify-between gap-1.5 border border-pink-500/20 bg-pink-500/5 px-2 py-1 rounded-md text-[10px] font-bold text-pink-400 uppercase tracking-wider animate-pulse">
+                                                <div className="mt-2.5 flex items-center justify-between gap-1.5 border border-pink-500/20 bg-pink-500/5 px-2 py-1 rounded-md text-[10px] font-bold text-pink-400 uppercase tracking-wider animate-puls">
                                                     <span>Limited Time Offer</span>
-                                                    <span className="text-white bg-pink-600 px-1 rounded text-[9px]">SAVE</span>
+                                                    <span className="text-white bg-pink-600 px-1 rounded text-[9px]">SAVE {product.promoDesc}</span>
                                                 </div>
                                             )
                                         }
