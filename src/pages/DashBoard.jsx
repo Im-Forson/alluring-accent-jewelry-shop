@@ -78,7 +78,7 @@ function DashBoard() {
   });
 
   const [liveOrdersList, setLiveOrdersList] = useState([]);
-  
+
   // --- STATE ALLOCATIONS FOR DYNAMIC PROMOTIONS ENGINE ---
   const [activePromotionsList, setActivePromotionsList] = useState([]);
 
@@ -111,7 +111,7 @@ function DashBoard() {
     const synchronizeDashboard = async () => {
       try {
         setLoadingDashboardData(true);
-        
+
         // Fire all endpoints parallel to maximize pipeline speed
         await Promise.all([
           fetchLiveCatalogMetrics(),
@@ -136,7 +136,7 @@ function DashBoard() {
   const fetchLiveCatalogMetrics = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
-      
+
       // Adapt safely based on array wrappers
       const storedItems = response.data.products || response.data || [];
 
@@ -176,27 +176,50 @@ function DashBoard() {
   // =====================================================================
   const fetchLivePromotionsData = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`);
-      console.log("RAW BACKEND PROMOS:", response.data);
-      const originalPromoArray = response.data || [];
-      
+      // 1. Add authorization headers so the backend doesn't reject the request
+      const token = localStorage.getItem("ACCESS_TOKEN");
+      const config = token ? { headers: { authorization: `Bearer ${token}` } } : {};
+
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, config);
+
+      // 2. Extract data safely whether it's raw or wrapped in a 'promotions' key
+      const originalPromoArray = response.data?.promotions || response.data || [];
+
+      if (!Array.isArray(originalPromoArray)) {
+        console.warn("Promotions data returned from server is not an array:", originalPromoArray);
+        setActivePromotionsList([]);
+        return;
+      }
+
       const currentTime = new Date();
 
-      // Compute status evaluations locally dynamically to match your exact panel architecture rules
       const calculatedActivePromos = originalPromoArray.filter(p => {
-        // Drop manual administrative overrides instantly
+        // Drop explicitly paused items immediately
         if (p.status === 'paused') return false;
 
-        // Structure standard date time stamps using strict boundaries
-        const startObj = new Date(`${p.startDate || p.start}T${p.startTime || '00:00'}`);
-        const endObj = new Date(`${p.endDate || p.end}T${p.endTime || '23:59'}`);
+        // Extract values
+        const startDate = p.startDate || p.start;
+        const endDate = p.endDate || p.end;
 
+        if (!startDate || !endDate) return false;
+
+        // 3. Clean Date Formatting: Ensure standard 'YYYY-MM-DD' split to prevent timezone shifting quirks
+        const cleanStartDate = startDate.split('T')[0];
+        const cleanEndDate = endDate.split('T')[0];
+
+        const startTime = p.startTime || '00:00';
+        const endTime = p.endTime || '23:59';
+
+        const startObj = new Date(`${cleanStartDate}T${startTime}`);
+        const endObj = new Date(`${cleanEndDate}T${endTime}`);
+
+        // Check if current system time falls between start and end boundaries
         return currentTime >= startObj && currentTime <= endObj;
       });
 
       setActivePromotionsList(calculatedActivePromos);
     } catch (error) {
-      console.error("Dashboard engine failed to load fresh campaigns. Preserving local container defaults:", error);
+      console.error("Dashboard engine failed to load fresh campaigns:", error);
       setActivePromotionsList([]);
     }
   };
@@ -238,21 +261,37 @@ function DashBoard() {
   // =====================================================================
   const fetchLiveRecentOrders = async () => {
     try {
-      // PLUG REAL URL PATH HERE:
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/orders/recent`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/all`, {
         headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
       });
 
       const ordersData = response.data.orders || response.data || [];
 
       // Structure database entries into UI table row mapping params cleanly
-      const unifiedOrders = ordersData.map(order => ({
-        id: order._id || order.id || "N/A",
-        name: order.customerName || order.name || "Anonymous User",
-        amount: order.totalAmount || order.amount || 0,
-        color: order.statusColor || '#f1f5f9', // fallback background styling color
-        time: order.formattedTime || order.createdAt || order.date || "Just Now"
-      }));
+      const unifiedOrders = ordersData.map(order => {
+        // 1. Calculate the total dynamically from the products array if a top-level price is missing
+        let calculatedTotal = 0;
+
+        if (Array.isArray(order.products) && order.products.length > 0) {
+          calculatedTotal = order.products.reduce((sum, item) => {
+            // Adapt to whatever price and quantity keys your product objects use (e.g., item.price or item.product?.price)
+            const itemPrice = parseFloat(item.price || item.product?.price || 0);
+            const itemQty = parseInt(item.quantity || item.qty || 1);
+            return sum + (itemPrice * itemQty);
+          }, 0);
+        }
+
+        return {
+          id: order.orderId || order._id || order.id || "N/A",
+          name: order.recipient || order.customerName || order.name || "Anonymous User",
+
+          // 2. Use the database total if it somehow exists, otherwise use our calculated sum!
+          amount: order.total || order.totalPrice || order.totalAmount || order.amount || calculatedTotal,
+
+          // color: order.statusColor || '#f1f5f9',
+          // time: order.formattedTime || order.createdAt || order.date || "Just Now"
+        };
+      });
 
       setLiveOrdersList(unifiedOrders);
     } catch (error) {
@@ -260,7 +299,6 @@ function DashBoard() {
       setLiveOrdersList([]);
     }
   };
-
   // Total alert notifications combining out of stock and low stock warnings
   const totalAlertNotificationsCount = productMetrics.outOfStockCount + productMetrics.lowStockCount;
 
@@ -340,7 +378,7 @@ function DashBoard() {
             )}
 
             <div>
-              
+
             </div>
           </div>
         </header>
@@ -392,15 +430,17 @@ function DashBoard() {
                 </div>
               </div>
 
-              <div className="dashboard-card recent-orders">
+              {/* RECENT ORDERS COMPONENT CARD */}
+              <div className="dashboard-card recent-orders" style={{ display: 'flex', flexDirection: 'column' }}>
                 <h3 className="card-title">Recent Orders</h3>
-                <div className="orders-list">
+                <div className="orders-list" style={{ flexGrow: 1 }}>
                   {liveOrdersList.length === 0 ? (
                     <div style={{ padding: '30px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', width: '100%' }}>
                       No active user orders found. Waiting for incoming data...
                     </div>
                   ) : (
-                    liveOrdersList.map(order => (
+                    // Slices data array down to exactly 5 items
+                    liveOrdersList.slice(0, 5).map(order => (
                       <div className="order-item" key={order.id}>
                         <div className="order-user-wrapper">
                           <FiUser className="order-user-icon" />
@@ -418,6 +458,21 @@ function DashBoard() {
                       </div>
                     ))
                   )}
+                </div>
+
+                {/* View All Orders Button Layout Section */}
+                <div className="card-action-right" style={{ marginTop: '14px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
+                  <NavLink
+                    to="/order"
+                    className="manage-btn"
+                    style={{
+                      display: "inline-block",
+                      textDecoration: "none",
+                      textAlign: "center"
+                    }}
+                  >
+                    View All Orders
+                  </NavLink>
                 </div>
               </div>
             </section>
@@ -457,7 +512,7 @@ function DashBoard() {
                         <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left' }}>
                           <span className="bullet yellow"></span>
                           <span>
-                            {promo.title || promo.name} 
+                            {promo.title || promo.name}
                             {promo.discountValue && ` – ${promo.discountValue}% Off`}
                           </span>
                         </div>

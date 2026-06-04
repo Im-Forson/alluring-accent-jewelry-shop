@@ -120,6 +120,17 @@ export default function SideBar() {
             Category
           </NavLink>
 
+            {/* <NavLink
+            to="/collection"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <span className="icon"><FontAwesomeIcon icon={faPlus} /></span>
+            Collection
+          </NavLink> */}
+
           <NavLink
             to="/addproduct"
             onClick={closeMenu}
