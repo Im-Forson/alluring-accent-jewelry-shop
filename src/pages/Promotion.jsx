@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../Promotion.css';
 import {
-  FiSearch, FiShoppingBag, FiChevronDown, FiEdit3, FiSliders, FiLock
+  FiSearch, FiShoppingBag, FiChevronDown, FiSliders, FiLock 
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
@@ -13,24 +13,18 @@ function Promotion() {
   // STATE MANAGEMENT & INITIALIZATION
   // ==========================================
   const [promos, setPromos] = useState([]);
-  const [currentTime, setCurrentTime] = useState(new Date());
   useAdminBackButton();
 
   // Create New Promotion Form States
   const [promoTitle, setPromoTitle] = useState("");
   const [discountType, setDiscountType] = useState('percentage');
   const [discountValue, setDiscountValue] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [editingId, setEditingId] = useState(null);
 
   // DATA BACKEND MANAGEMENT STATES
   const [availableCategories, setAvailableCategories] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
 
-  // SEPARATE DROPDOWN CONTROL INTERFACES (NATIVE OBJECT ARRAYS)
+  // SEPARATE DROPDOWN CONTROL INTERFACES
   const [selectedTargets, setSelectedTargets] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isProductOpen, setIsProductOpen] = useState(false);
@@ -100,7 +94,6 @@ function Promotion() {
       }
     };
 
-    // Execute the queries
     fetchPromotions();
     fetchGlobalBanner();
     fetchTargetingData();
@@ -111,42 +104,20 @@ function Promotion() {
     };
     document.addEventListener('click', closeDropdownOutside);
 
-    const timerInterval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000); 
-
     return () => {
       document.removeEventListener('click', closeDropdownOutside);
-      clearInterval(timerInterval);
     };
   }, []);
 
   // ==========================================
   // METRIC COMPUTING INFRASTRUCTURES
   // ==========================================
-  const getPromoTimestamps = (promo) => {
-    const startObj = new Date(`${promo.startDate || promo.start}T${promo.startTime || '00:00'}`);
-    const endObj = new Date(`${promo.endDate || promo.end}T${promo.endTime || '23:59'}`);
-    return { startObj, endObj };
-  };
+  const activeCount = promos.filter(p => p.status === 'active').length;
+  const upcomingCount = promos.filter(p => p.status === 'saved' || p.status === 'inactive' || p.status === 'updated').length;
+  const expiredCount = promos.filter(p => p.status === 'stopped' || p.status === 'ended').length;
 
-  const activeCount = promos.filter(p => {
-    if (p.status === 'paused' || p.status === 'inactive') return false;
-    const { startObj, endObj } = getPromoTimestamps(p);
-    return currentTime >= startObj && currentTime <= endObj;
-  }).length;
-
-  const upcomingCount = promos.filter(p => {
-    if (p.status === 'paused' || p.status === 'inactive') return false;
-    const { startObj } = getPromoTimestamps(p);
-    return currentTime < startObj;
-  }).length;
-
-  const expiredCount = promos.filter(p => {
-    if (p.status === 'paused' || p.status === 'inactive') return true;
-    const { endObj } = getPromoTimestamps(p);
-    return currentTime > endObj;
-  }).length;
+  // Global Check: Is there any promotion currently active/live?
+  const hasActivePromo = promos.some(p => p.status === 'active');
 
   // ==========================================
   // OBJECT SELECTION ENGINE & LOCKOUT MECHANISMS
@@ -182,7 +153,7 @@ function Promotion() {
   };
 
   // ==========================================
-  // CORE FORM SUBMISSION LOGIC (CREATE & UPDATE)
+  // API PIPELINE 1: CREATE PROMOTION (Draft Mode)
   // ==========================================
   const handleSavePromotion = async (e) => {
     e.preventDefault();
@@ -207,19 +178,14 @@ function Promotion() {
       return;
     }
 
+    // Force all freshly created configurations to status "saved"
     const payload = {
       title: promoTitle,
       discountType: discountType,
       discountValue: discountValue,
-      startDate: startDate || new Date().toISOString().split('T')[0],
-      startTime: startTime || "00:00",
-      endDate: endDate || new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
-      endTime: endTime || "23:59",
       targets: selectedTargets,
-      status: editingId ? "updated" : "active" 
+      status: "saved" 
     };
-
-    console.log(payload)
 
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     const axiosConfig = {
@@ -230,13 +196,8 @@ function Promotion() {
     };
 
     try {
-      if (editingId) {
-        await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
-        toast.success("Campaign updated successfully!");
-      } else {
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/create`, payload, axiosConfig);
-        toast.success("New promotional campaign launched successfully!");
-      }
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/create`, payload, axiosConfig);
+      toast.success("New promotion initialized under Saved / Upcoming!");
 
       const refreshResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, axiosConfig);
       if (refreshResponse.data) {
@@ -246,12 +207,49 @@ function Promotion() {
       clearFormFields();
     } catch (error) {
       console.error("Error dispatching promotion parameters:", error);
-      toast.error(error.response?.data?.message || "Failed to establish a network pathway to servers.");
+      toast.error(error.response?.data?.message || "Failed to establish database pipeline connection.");
     }
   };
 
   // ==========================================
-  // UPDATED STOP API HANDLER
+  // API PIPELINE 2: START LIVE CAMPAIGN
+  // ==========================================
+  const handleToggleStart = async (targetId) => {
+    if (!targetId) {
+      toast.error("Invalid tracker reference ID.");
+      return;
+    }
+
+    // Secondary UI Guard checking running structures
+    if (hasActivePromo) {
+      toast.error("Another promotion is currently active. Please stop it first.");
+      return;
+    }
+
+    const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
+    const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
+
+    try {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/start/${targetId}`, { status: 'active' }, axiosConfig);
+
+      const updated = promos.map(p => {
+        if ((p._id || p.id) === targetId) {
+          return { ...p, status: 'active' };
+        }
+        return p;
+      });
+
+      setPromos(updated);
+      localStorage.setItem("storePromotions", JSON.stringify(updated));
+      toast.success("Promotional campaign is now LIVE across the storefront!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to activate promotion campaign.");
+    }
+  };
+
+  // ==========================================
+  // API PIPELINE 3: MANUALLY STOP CAMPAIGN
   // ==========================================
   const handleTogglePause = async (targetId) => {
     if (!targetId) {
@@ -263,41 +261,36 @@ function Promotion() {
     const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
 
     try {
-      // Use the generic update route to change promotion status to a backend-supported value
-      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/promotion/stop/${targetId}`, { status: 'inactive' }, axiosConfig);
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/promotion/stop/${targetId}`, { status: 'stopped' }, axiosConfig);
 
       const updated = promos.map(p => {
         if ((p._id || p.id) === targetId) {
-          return { ...p, status: 'inactive' };
+          return { ...p, status: 'stopped' };
         }
         return p;
       });
       
       setPromos(updated);
       localStorage.setItem("storePromotions", JSON.stringify(updated));
-      toast.success("Campaign stopped and marked as inactive successfully.");
+      toast.success("Campaign stopped and moved to Expired / Ended.");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to Stop. Delete instead.");
+      toast.error("Failed to end promotional sequence.");
     }
   };
 
   // ==========================================
-  // CORE API DETACHMENT / DELETION PIPELINE
+  // API PIPELINE 4: PERMANENTLY DELETE PROMOTION
   // ==========================================
   const handleDeleteClick = async (id) => {
     if (!id) {
-      toast.error("Invalid tracker reference ID. Refresh browser and retry.");
+      toast.error("Invalid tracker reference ID.");
       return;
     }
     if (!window.confirm("Permanently delete this promotion type?")) return;
 
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
-    const axiosConfig = {
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      }
-    };
+    const axiosConfig = { headers: { 'Authorization': token ? `Bearer ${token}` : '' } };
 
     try {
       await axios.delete(
@@ -309,7 +302,7 @@ function Promotion() {
       setPromos(updated);
       localStorage.setItem("storePromotions", JSON.stringify(updated));
       
-      toast.success("Promotion successfully purged from cloud servers.");
+      toast.success("Promotion completely removed from system registries.");
     } catch (error) {
       console.error("Error purging target promotion asset:", error);
       toast.error(error.response?.data?.message || "Failed to drop promotion from database registry.");
@@ -322,11 +315,6 @@ function Promotion() {
     setSelectedTargets([]);
     setCategorySearch("");
     setProductSearch("");
-    setStartDate("");
-    setStartTime("");
-    setEndDate("");
-    setEndTime("");
-    setEditingId(null);
   };
 
   const handleSaveGlobalBanner = async (e) => {
@@ -370,15 +358,15 @@ function Promotion() {
           </div>
           <div className="promo-card">
             <div className="promo-icon-box blue-bg">📅</div>
-            <div className="promo-card-data"><span>Upcoming Promotions</span><h3>{upcomingCount}</h3></div>
+            <div className="promo-card-data"><span>Saved / Upcoming</span><h3>{upcomingCount}</h3></div>
           </div>
           <div className="promo-card">
             <div className="promo-icon-box gray-bg">🕒</div>
-            <div className="promo-card-data"><span>Expired Promotions</span><h3>{expiredCount}</h3></div>
+            <div className="promo-card-data"><span>Expired / Ended</span><h3>{expiredCount}</h3></div>
           </div>
         </section>
 
-        {/* Current Promotions Data View */}
+        {/* Current Promotions Data View Table */}
         <section className="content-panel">
           <h3 className="panel-title">Current Promotions</h3>
           <div className="promo-table-wrapper">
@@ -387,7 +375,7 @@ function Promotion() {
                 <tr>
                   <th>Product / Campaign</th>
                   <th>Value/Price</th>
-                  <th>Dynamic Timeline Status</th>
+                  <th>Manual Lifecycle Status</th>
                   <th className="actions-header">Actions</th>
                 </tr>
               </thead>
@@ -397,46 +385,82 @@ function Promotion() {
                 ) : (
                   promos.map((promo) => {
                     const currentPromoId = promo._id || promo.id;
-                    const { startObj, endObj } = getPromoTimestamps(promo);
-                    const isStopped = promo.status === 'stopped' || promo.status === 'inactive';
-                    const isUpcoming = currentTime < startObj;
-                    const isExpired = currentTime > endObj;
+                    const isActive = promo.status === 'active';
+                    const isInactive = promo.status === 'inactive';
+                    const isUpcoming = promo.status === 'upcoming';
+                    
                     let statusLabel = "Live & Active";
                     let pillClass = "";
 
-                    if (isStopped) { statusLabel = "Inactive"; pillClass = "out-pill"; }
+                    if (isActive) { statusLabel = "Live & Active"; pillClass = "live-pill"; }
                     else if (isUpcoming) { statusLabel = "Upcoming"; pillClass = "upcoming-pill"; }
-                    else if (isExpired) { statusLabel = "Expired"; pillClass = "out-pill"; }
+                    else if (isInactive) { statusLabel = "Ended"; pillClass = "out-pill"; }
 
                     const displayValue = promo.discountValue || promo.value || "0";
                     const displayType = promo.discountType || promo.type || "percentage";
 
                     return (
-                      <tr key={currentPromoId} style={{ opacity: (isExpired || isStopped) ? 0.6 : 1 }}>
+                      <tr key={currentPromoId} style={{ opacity: isInactive ? 0.6 : 1 }}>
                         <td><div className="promo-info-cell"><strong>{promo.title}</strong><span>{promo.subtitle || 'Custom Target Range Campaign'}</span></div></td>
                         <td className="price-bold">GHC {displayValue} ({displayType === 'percentage' ? '%' : '₵'})</td>
                         <td><span className={`stock-pill ${pillClass}`}>{statusLabel}</span></td>
                         <td>
                           <div className="action-buttons-group">
-                            {/* Stop button is faded and disabled for upcoming promotions */}
-                            <button 
-                              className="action-btn pause-btn" 
-                              style={{ 
-                                backgroundColor: '#f59e0b',
-                                opacity: isUpcoming ? 0.4 : 1,
-                                pointerEvents: isUpcoming ? 'none' : 'auto',
-                                cursor: isUpcoming ? 'not-allowed' : 'pointer'
-                              }} 
-                              onClick={isUpcoming ? null : () => handleTogglePause(currentPromoId)}
-                            >
-                              Stop
-                            </button>
-                            
-                            {/* Delete button is hidden when live and active, only displayed if upcoming, stopped, or expired */}
-                            {(!isStopped && !isUpcoming && !isExpired) ? null : (
-                              <button className="action-btn delete-btn" onClick={() => handleDeleteClick(currentPromoId)}>
-                                Delete
+                            {/* CASE 1: SAVED/UPCOMING -> SHOWS START AND DELETE */}
+                            {isUpcoming && (
+                              <>
+                                <button 
+                                  className="action-btn start-btn" 
+                                  style={{ 
+                                    backgroundColor: hasActivePromo ? '#cbd5e1' : '#10b981', 
+                                    color: hasActivePromo ? '#94a3b8' : '#fff', 
+                                    cursor: hasActivePromo ? 'not-allowed' : 'pointer',
+                                    opacity: hasActivePromo ? 0.6 : 1
+                                  }} 
+                                  disabled={hasActivePromo}
+                                  onClick={() => handleToggleStart(currentPromoId)}
+                                  title={hasActivePromo ? "End the currently active promotion to start this one" : "Start Campaign"}
+                                >
+                                  Start
+                                </button>
+                                <button className="action-btn delete-btn" onClick={() => handleDeleteClick(currentPromoId)}>
+                                  Delete
+                                </button>
+                              </>
+                            )}
+
+                            {/* CASE 2: LIVE ACTIVE CAMPAIGNS -> SHOWS ONLY STOP */}
+                            {isActive && (
+                              <button 
+                                className="action-btn pause-btn" 
+                                style={{ backgroundColor: '#f59e0b', color: '#fff', cursor: 'pointer' }} 
+                                onClick={() => handleTogglePause(currentPromoId)}
+                              >
+                                Stop
                               </button>
+                            )}
+                            
+                            {/* CASE 3: EXPIRED / MANUALLY ENDED CAMPAIGNS -> SHOWS ONLY DELETE */}
+                            {isInactive && (
+                              <>
+                                <button 
+                                  className="action-btn start-btn" 
+                                  style={{ 
+                                    backgroundColor: hasActivePromo ? '#cbd5e1' : '#10b981', 
+                                    color: hasActivePromo ? '#94a3b8' : '#fff', 
+                                    cursor: hasActivePromo ? 'not-allowed' : 'pointer',
+                                    opacity: hasActivePromo ? 0.6 : 1
+                                  }} 
+                                  disabled={hasActivePromo}
+                                  onClick={() => handleToggleStart(currentPromoId)}
+                                  title={hasActivePromo ? "End the currently active promotion to start this one" : "Start Campaign"}
+                                >
+                                  Restart
+                                </button>
+                                <button className="action-btn delete-btn" onClick={() => handleDeleteClick(currentPromoId)}>
+                                  Delete
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
@@ -449,9 +473,9 @@ function Promotion() {
           </div>
         </section>
 
-       {/* Input Configuration Workstation */}
+        {/* Input Configuration Workstation */}
         <section className="content-panel form-panel">
-          <h3 className="panel-title">{editingId ? 'Modify Configured Campaign' : 'Create New Promotion'}</h3>
+          <h3 className="panel-title">Create New Promotion</h3>
 
           <form className="create-promo-form" onSubmit={handleSavePromotion}>
             <div className="form-left-col">
@@ -528,7 +552,7 @@ function Promotion() {
                         </span>
                       ))
                     )}
-                    <FiChevronDown style={{ position: 'absolute', right: '12px', top: '38px', color: '#64748b', transform: `rotate(${isCategoryOpen ? '180deg' : '0deg'})`, transition: 'transform 0.2s' }} />
+                    <FiChevronDown style={{ position: 'absolute', right: '12px', top: '14px', color: '#64748b', transform: `rotate(${isCategoryOpen ? '180deg' : '0deg'})`, transition: 'transform 0.2s' }} />
                   </div>
 
                   {isCategoryOpen && (
@@ -589,7 +613,7 @@ function Promotion() {
                         </span>
                       ))
                     )}
-                    <FiChevronDown style={{ position: 'absolute', right: '12px', top: '38px', color: '#64748b', transform: `rotate(${isProductOpen ? '180deg' : '0deg'})`, transition: 'transform 0.2s' }} />
+                    <FiChevronDown style={{ position: 'absolute', right: '12px', top: '14px', color: '#64748b', transform: `rotate(${isProductOpen ? '180deg' : '0deg'})`, transition: 'transform 0.2s' }} />
                   </div>
 
                   {isProductOpen && (
@@ -619,17 +643,6 @@ function Promotion() {
                   )}
                 </div>
               </div>
-
-              <div className="form-field campaign-schedule-grid">
-                <div className="schedule-group">
-                  <div className="schedule-field"><label className="field-top-label">Start Date</label><input type="date" className="panel-input date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} /></div>
-                  <div className="schedule-field"><label className="field-top-label">Start Time</label><input type="time" className="panel-input time-input" value={startTime} onChange={(e) => setStartTime(e.target.value)} /></div>
-                </div>
-                <div className="schedule-group">
-                  <div className="schedule-field"><label className="field-top-label">End Date</label><input type="date" className="panel-input date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} /></div>
-                  <div className="schedule-field"><label className="field-top-label">End Time</label><input type="time" className="panel-input time-input" value={endTime} onChange={(e) => setEndTime(e.target.value)} /></div>
-                </div>
-              </div>
             </div>
 
             <div className="form-right-col">
@@ -638,7 +651,7 @@ function Promotion() {
                 <div className="preview-card-box" style={{ lineHeight: '1.8', fontSize: '13px' }}>
                   <strong>Type:</strong> <span style={{ color: '#be185d', fontWeight: 'bold' }}>{discountType.toUpperCase()}</span><br/>
                   <strong>Scope Targets:</strong> {selectedTargets.length > 0 ? selectedTargets.map(t => t.name).join(', ') : 'None chosen yet'}<br/>
-                  <strong>Status:</strong> {editingId ? '⚠️ Editing' : '✨ New Entry'}
+                  <strong>Status:</strong> <span style={{ color: '#2563eb', fontWeight: 'bold' }}>Saved Setup (Draft)</span>
                   
                   <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px dashed #cbd5e1' }} />
                   
@@ -731,9 +744,8 @@ function Promotion() {
 
             <div className="form-footer-actions">
               <div className="submit-buttons" style={{ marginLeft: 'auto' }}>
-                {editingId && <button type="button" className="btn-save-promo cancel-btn" onClick={clearFormFields}>Cancel</button>}
                 <button type="submit" className="btn-save-promo">
-                  {editingId ? 'Save Update' : 'Save Promotion'}
+                  Save Promotion
                 </button>
               </div>
             </div>
@@ -746,7 +758,6 @@ function Promotion() {
           <form className="create-promo-form" onSubmit={handleSaveGlobalBanner}>
             <div className="form-left-col" style={{ width: '100%', flex: 'none' }}>
               <div className="form-field banner-statement-block">
-                <label className="field-top-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#be185d' }}><FiEdit3 size={14} /> Storefront Announcement Text</label>
                 <textarea rows="2" className="panel-input" placeholder="Enter custom text to stream across the storefront's master header..." style={{ resize: 'none', minHeight: '65px', paddingTop: '10px' }} disabled={isBannerSaving} value={bannerText} onChange={(e) => setBannerText(e.target.value)} />
               </div>
               <div className="form-footer-actions" style={{ marginTop: '16px', padding: 0, border: 'none' }}>
