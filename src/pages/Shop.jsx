@@ -272,7 +272,7 @@ export default function Shop() {
                         <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-6 sm:pb-8 md:pt-8 md:pb-10 ">
                             <div className="w-full bg-pink-50 border border-stone-200/60 shadow-sm p-2 sm:p-6 rounded-lg">
                                 {/* ✅ GRID DEFINED AS 2 COLUMNS ON MOBILE, 5 COLUMNS ON DESKTOP */}
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-4 items-end">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 items-end">
                                 
                                 {/* Category Filter */}
                                 <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
@@ -342,7 +342,7 @@ export default function Shop() {
                                 </div>
 
                                 {/* Collection Filter */}
-                                <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
+                                {/* <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
                                     <label className="text-[9px] md:text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans pl-1">
                                     Collection
                                     </label>
@@ -362,11 +362,11 @@ export default function Shop() {
                                         <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                                     </div>
                                     </div>
-                                </div>
+                                </div> */}
 
                                 {/* Filter Button */}
                                 {/* ✅ SPANS ACROSS BOTH COLUMNS ON MOBILE, RESETS TO 1 COLUMN ON DESKTOP */}
-                                <div className="col-span-2 sm:col-span-1">
+                                <div className="col-span-1 sm:col-span-1">
                                     <button className="w-full h-9 sm:h-11 bg-pink-600 hover:bg-pink-700 active:scale-[0.98] flex items-center justify-center gap-2 rounded-xl sm:rounded-xl md:rounded-full shadow-sm hover:shadow transition-all duration-200 group cursor-pointer"
                                     onClick={filterProducts}
                                     >
@@ -450,7 +450,7 @@ export default function Shop() {
 
                                         {
                                             product.isPromotion && (
-                                                <div className="mt-2.5 flex items-center justify-between gap-1.5 border border-pink-500/20 bg-pink-500/5 px-2 py-1 rounded-md text-[10px] font-bold text-pink-400 uppercase tracking-wider animate-puls">
+                                                <div className="mt-2.5 flex items-center justify-between gap-1.5 border border-pink-500/20 bg-pink-500/5 px-2 py-1 rounded-md text-[10px] font-bold text-pink-400 uppercase tracking-wider">
                                                     <span>Limited Time Offer</span>
                                                     <span className="text-white bg-pink-600 px-1 rounded text-[9px]">SAVE {product.promoDesc}</span>
                                                 </div>
