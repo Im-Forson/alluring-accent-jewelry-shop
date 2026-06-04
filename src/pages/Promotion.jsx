@@ -234,6 +234,8 @@ function Promotion() {
       status: editingId ? "updated" : "active" 
     };
 
+    console.log(payload)
+
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     const axiosConfig = {
       headers: {
@@ -251,7 +253,7 @@ function Promotion() {
         // LOCATION: Inside handleSavePromotion() -> if (editingId) block
         // CURRENT PATH: `${baseUrl}/promotion/update/${editingId}`
         // -------------------------------------------------------------------------
-        await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
+        // await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
         toast.success("Campaign updated successfully!");
       } else {
         // -------------------------------------------------------------------------
@@ -259,17 +261,17 @@ function Promotion() {
         // LOCATION: Inside handleSavePromotion() -> else block
         // CURRENT PATH: `${baseUrl}/promotion/create`
         // -------------------------------------------------------------------------
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/create`, payload, axiosConfig);
+        // await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/create`, payload, axiosConfig);
         toast.success("New promotional campaign launched successfully!");
       }
 
       // Re-fetch dynamic server state clean-slate
-      const refreshResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, axiosConfig);
-      if (refreshResponse.data) {
-        setPromos(refreshResponse.data);
-        localStorage.setItem("storePromotions", JSON.stringify(refreshResponse.data));
-      }
-      clearFormFields();
+      // const refreshResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, axiosConfig);
+      // if (refreshResponse.data) {
+      //   setPromos(refreshResponse.data);
+      //   localStorage.setItem("storePromotions", JSON.stringify(refreshResponse.data));
+      // }
+      // clearFormFields();
     } catch (error) {
       console.error("Error dispatching promotion parameters:", error);
       toast.error(error.response?.data?.message || "Failed to establish a network pathway to servers.");

@@ -127,28 +127,37 @@ export default function BestSellers() {
 
                             {/* INFO */}
                             <div className="p-3">
-                            <h3 className="text-xs md:text-sm font-bold capitalize text-stone-800">
-                                {product.name}
-                            </h3>
+                                <h3 className="text-xs md:text-sm font-bold capitalize text-stone-800">
+                                    {product.name}
+                                </h3>
 
-                            <div className="flex gap-3">
-                                {product.oldPrice > product.price && (
-                                <p className="text-xs md:text-sm font-semibold mt-1 line-through text-[grey]">
-                                    Gh₵ {product.oldPrice}
-                                </p>
-                                )}
-                                <p className="text-xs md:text-sm font-semibold mt-1 text-stone-900">
-                                Gh₵ {product.price}
-                                </p>
-                            </div>
+                                <div className="flex gap-3">
+                                    {product.oldPrice > product.price && (
+                                    <p className="text-xs md:text-sm font-semibold mt-1 line-through text-[grey]">
+                                        Gh₵ {product.oldPrice}
+                                    </p>
+                                    )}
+                                    <p className="text-xs md:text-sm font-semibold mt-1 text-stone-900">
+                                    Gh₵ {product.price}
+                                    </p>
+                                </div>
+
+                                {
+                                    product.isPromotion && (
+                                        <div className="mt-2.5 flex items-center justify-between gap-1.5 border border-pink-500/20 bg-pink-500/5 px-2 py-1 rounded-md text-[10px] font-bold text-pink-400 uppercase tracking-wider animate-pulse">
+                                            <span>Limited Time Offer</span>
+                                            <span className="text-white bg-pink-600 px-1 rounded text-[9px]">SAVE</span>
+                                        </div>
+                                    )
+                                }
                             </div>
 
                             {/* VIEW PRODUCT */}
                             <button
-                            className="w-full text-xs md-text-sm py-[5px] font-bold border-t border-zinc-200 text-zinc-400 active:bg-zinc-600 active:text-white cursor-pointer hover:bg-zinc-50"
+                            className="w-full text-xs py-[8px] font-bold border-t border-zinc-200 text-zinc-400 hover:text-white hover:bg-zinc-800 active:bg-pink-600 transition-all cursor-pointer uppercase tracking-wider"
                             onClick={() => viewProduct(product, 'bestsellers')}
                             >
-                            View
+                            View Product
                             </button>
                         </div>
                         ))}
