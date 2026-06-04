@@ -666,9 +666,9 @@ function ManageProduct() {
                                     <button onClick={() => toggleProductStatus(product.id)} style={dropdownItemStyle}>
                                       <FiCheck style={{ marginRight: '8px' }} /> Toggle Stock Status
                                     </button>
-                                    <button onClick={() => duplicateProduct(product)} style={dropdownItemStyle}>
+                                    {/* <button onClick={() => duplicateProduct(product)} style={dropdownItemStyle}>
                                       <FiCopy style={{ marginRight: '8px' }} /> Duplicate Template
-                                    </button>
+                                    </button> */}
                                   </div>
                                 )}
                               </div>
@@ -911,10 +911,11 @@ function ManageProduct() {
                     onChange={(e) => {
                       if (e.target.files) {
                         const addedFiles = Array.from(e.target.files);
-                        setEditingProduct({
-                          ...editingProduct,
-                          media: getUniqueFiles([...(editingProduct.media || []), ...addedFiles])
-                        });
+                        setEditingProduct((prev) => ({
+                          ...prev,
+                          media: getUniqueFiles([...(prev.media || []), ...addedFiles])
+                        }));
+                        e.target.value = '';
                       }
                     }}
                     style={inputStyle}

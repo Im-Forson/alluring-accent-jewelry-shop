@@ -53,11 +53,6 @@ function Promotion() {
           }
         };
 
-        // -------------------------------------------------------------------------
-        // 🔥 BOLD LABEL: API FOR FETCHING ALL PROMOTIONS (GET)
-        // LOCATION: Inside mounting useEffect() block -> fetchPromotions()
-        // CURRENT PATH: `${baseUrl}/promotion/all`
-        // -------------------------------------------------------------------------
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/promotion/all`,
           axiosConfig
@@ -76,11 +71,6 @@ function Promotion() {
 
     const fetchGlobalBanner = async () => {
       try {
-        // -------------------------------------------------------------------------
-        // 🔥 BOLD LABEL: API FOR FETCHING ANNOUNCEMENT BANNER (GET)
-        // LOCATION: Inside mounting useEffect() block -> fetchGlobalBanner()
-        // CURRENT PATH: `${baseUrl}/announcement/active`
-        // -------------------------------------------------------------------------
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/announcement/active`);
         if (response.data) {
           setBannerText(response.data.message || "");
@@ -99,11 +89,6 @@ function Promotion() {
 
     const fetchTargetingData = async () => {
       try {
-        // -------------------------------------------------------------------------
-        // 🔥 BOLD LABEL: API FOR FETCHING STORES INDIVIDUAL CATEGORIES & PRODUCTS (GET)
-        // LOCATION: Inside mounting useEffect() block -> fetchTargetingData()
-        // CURRENT PATHS: `${baseUrl}/category/all` AND `${baseUrl}/product/all`
-        // -------------------------------------------------------------------------
         const [categoriesRes, productsRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`),
           axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`)
@@ -146,19 +131,19 @@ function Promotion() {
   };
 
   const activeCount = promos.filter(p => {
-    if (p.status === 'paused') return false;
+    if (p.status === 'paused' || p.status === 'inactive') return false;
     const { startObj, endObj } = getPromoTimestamps(p);
     return currentTime >= startObj && currentTime <= endObj;
   }).length;
 
   const upcomingCount = promos.filter(p => {
-    if (p.status === 'paused') return false;
+    if (p.status === 'paused' || p.status === 'inactive') return false;
     const { startObj } = getPromoTimestamps(p);
     return currentTime < startObj;
   }).length;
 
   const expiredCount = promos.filter(p => {
-    if (p.status === 'paused') return true;
+    if (p.status === 'paused' || p.status === 'inactive') return true;
     const { endObj } = getPromoTimestamps(p);
     return currentTime > endObj;
   }).length;
@@ -243,27 +228,14 @@ function Promotion() {
     };
 
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL;
-      
       if (editingId) {
-        // -------------------------------------------------------------------------
-        // 🔥 BOLD LABEL: API FOR UPDATING AN EXISTING PROMOTION (POST/PUT)
-        // LOCATION: Inside handleSavePromotion() -> if (editingId) block
-        // CURRENT PATH: `${baseUrl}/promotion/update/${editingId}`
-        // -------------------------------------------------------------------------
         await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/promotion/update/${editingId}`, payload, axiosConfig);
         toast.success("Campaign updated successfully!");
       } else {
-        // -------------------------------------------------------------------------
-        // 🔥 BOLD LABEL: API FOR CREATING A NEW PROMOTION (POST)
-        // LOCATION: Inside handleSavePromotion() -> else block
-        // CURRENT PATH: `${baseUrl}/promotion/create`
-        // -------------------------------------------------------------------------
         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/create`, payload, axiosConfig);
         toast.success("New promotional campaign launched successfully!");
       }
 
-      // Re-fetch dynamic server state clean-slate
       const refreshResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, axiosConfig);
       if (refreshResponse.data) {
         setPromos(refreshResponse.data);
@@ -276,32 +248,8 @@ function Promotion() {
     }
   };
 
-  const handleEditClick = (promo) => {
-    setEditingId(promo._id || promo.id);
-    setPromoTitle(promo.title);
-    setDiscountType(promo.discountType || promo.type || 'percentage');
-    setDiscountValue(promo.discountValue || promo.value || "");
-
-    if (promo.targets && typeof promo.targets[0] === 'object') {
-      setSelectedTargets(promo.targets);
-    } else if (promo.category) {
-      setSelectedTargets(promo.category === 'all'
-        ? [{ type: 'all', id: 'all', name: 'All Jewelry' }]
-        : [{ type: 'category', id: promo.category, name: promo.category }]
-      );
-    } else {
-      setSelectedTargets([]);
-    }
-
-    setStartDate(promo.startDate || promo.start || "");
-    setStartTime(promo.startTime || "");
-    setEndDate(promo.endDate || promo.end || "");
-    setEndTime(promo.endTime || "");
-    toast.loading("Editing promotion campaign...", { id: "edit-load", duration: 1000 });
-  };
-
   // ==========================================
-  // UPDATED PAUSE / RESUME API HANDLER
+  // UPDATED STOP API HANDLER
   // ==========================================
   const handleTogglePause = async (targetId) => {
     if (!targetId) {
@@ -310,41 +258,25 @@ function Promotion() {
     }
 
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
-    const axiosConfig = { headers: { 'Authorization': token ? `Bearer ${token}` : '' } };
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-
-    const currentPromo = promos.find(p => (p._id || p.id) === targetId);
-    const isCurrentlyPaused = currentPromo?.status === 'paused';
-    
-    // Switch action endpoints automatically depending on current live status
-    const actionEndpoint = isCurrentlyPaused ? 'resume' : 'pause';
+    const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
 
     try {
-      // -------------------------------------------------------------------------
-      // 🔥 BOLD LABEL: API FOR PAUSING & RESUMING PROMOTIONS (PUT)
-      // LOCATION: Inside handleTogglePause() function
-      // CURRENT PATHS: `${baseUrl}/promotion/pause/${targetId}` OR `${baseUrl}/promotion/resume/${targetId}`
-      // -------------------------------------------------------------------------
-      await axios.put(`${baseUrl}/promotion/${actionEndpoint}/${targetId}`, {}, axiosConfig);
+      // Use the generic update route to change promotion status to a backend-supported value
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/promotion/stop/${targetId}`, { status: 'inactive' }, axiosConfig);
 
       const updated = promos.map(p => {
         if ((p._id || p.id) === targetId) {
-          return { ...p, status: isCurrentlyPaused ? 'active' : 'paused' };
+          return { ...p, status: 'inactive' };
         }
         return p;
       });
       
       setPromos(updated);
       localStorage.setItem("storePromotions", JSON.stringify(updated));
-      
-      if (isCurrentlyPaused) {
-        toast.success("Campaign added back into active status!");
-      } else {
-        toast.error("Campaign paused successfully.");
-      }
+      toast.success("Campaign stopped and marked as inactive successfully.");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to sync pause state configuration changes on server.");
+      toast.error("Failed to Stop. Delete instead.");
     }
   };
 
@@ -366,11 +298,6 @@ function Promotion() {
     };
 
     try {
-      // -------------------------------------------------------------------------
-      // 🔥 BOLD LABEL: API FOR DELETING A PROMOTION (DELETE)
-      // LOCATION: Inside handleDeleteClick() function
-      // CURRENT PATH: `${baseUrl}/promotion/delete/${id}`
-      // -------------------------------------------------------------------------
       await axios.delete(
         `${import.meta.env.VITE_API_BASE_URL}/promotion/delete/${id}`,
         axiosConfig
@@ -409,12 +336,6 @@ function Promotion() {
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     try {
       setIsBannerSaving(true);
-
-      // -------------------------------------------------------------------------
-      // 🔥 BOLD LABEL: API FOR CREATING/UPDATING STOREFRONT ANNOUNCEMENT BANNER (POST)
-      // LOCATION: Inside handleSaveGlobalBanner() function
-      // CURRENT PATH: `${baseUrl}/announcement/create`
-      // -------------------------------------------------------------------------
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/announcement/create`,
         { message: bannerText, isDisplay },
@@ -475,13 +396,13 @@ function Promotion() {
                   promos.map((promo) => {
                     const currentPromoId = promo._id || promo.id;
                     const { startObj, endObj } = getPromoTimestamps(promo);
-                    const isPaused = promo.status === 'paused';
+                    const isStopped = promo.status === 'stopped' || promo.status === 'inactive';
                     const isUpcoming = currentTime < startObj;
                     const isExpired = currentTime > endObj;
                     let statusLabel = "Live & Active";
                     let pillClass = "";
 
-                    if (isPaused) { statusLabel = "Paused"; pillClass = "out-pill"; }
+                    if (isStopped) { statusLabel = "Inactive"; pillClass = "out-pill"; }
                     else if (isUpcoming) { statusLabel = "Upcoming"; pillClass = "upcoming-pill"; }
                     else if (isExpired) { statusLabel = "Expired"; pillClass = "out-pill"; }
 
@@ -489,15 +410,32 @@ function Promotion() {
                     const displayType = promo.discountType || promo.type || "percentage";
 
                     return (
-                      <tr key={currentPromoId} style={{ opacity: (isExpired || isPaused) ? 0.6 : 1 }}>
+                      <tr key={currentPromoId} style={{ opacity: (isExpired || isStopped) ? 0.6 : 1 }}>
                         <td><div className="promo-info-cell"><strong>{promo.title}</strong><span>{promo.subtitle || 'Custom Target Range Campaign'}</span></div></td>
                         <td className="price-bold">GHC {displayValue} ({displayType === 'percentage' ? '%' : '₵'})</td>
                         <td><span className={`stock-pill ${pillClass}`}>{statusLabel}</span></td>
                         <td>
                           <div className="action-buttons-group">
-                            <button className="action-btn edit-btn" onClick={() => handleEditClick(promo)}>Edit</button>
-                            <button className="action-btn pause-btn" style={{ backgroundColor: isPaused ? '#10b981' : '#f59e0b' }} onClick={() => handleTogglePause(currentPromoId)}>{isPaused ? 'Resume' : 'Pause'}</button>
-                            <button className="action-btn delete-btn" onClick={() => handleDeleteClick(currentPromoId)}>Delete</button>
+                            {/* Stop button is faded and disabled for upcoming promotions */}
+                            <button 
+                              className="action-btn pause-btn" 
+                              style={{ 
+                                backgroundColor: '#f59e0b',
+                                opacity: isUpcoming ? 0.4 : 1,
+                                pointerEvents: isUpcoming ? 'none' : 'auto',
+                                cursor: isUpcoming ? 'not-allowed' : 'pointer'
+                              }} 
+                              onClick={isUpcoming ? null : () => handleTogglePause(currentPromoId)}
+                            >
+                              Stop
+                            </button>
+                            
+                            {/* Delete button is hidden when live and active, only displayed if upcoming, stopped, or expired */}
+                            {(!isStopped && !isUpcoming && !isExpired) ? null : (
+                              <button className="action-btn delete-btn" onClick={() => handleDeleteClick(currentPromoId)}>
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -509,7 +447,7 @@ function Promotion() {
           </div>
         </section>
 
-        {/* Input Configuration Workstation */}
+       {/* Input Configuration Workstation */}
         <section className="content-panel form-panel">
           <h3 className="panel-title">{editingId ? 'Modify Configured Campaign' : 'Create New Promotion'}</h3>
 

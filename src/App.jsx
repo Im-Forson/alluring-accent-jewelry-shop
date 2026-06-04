@@ -23,6 +23,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 
 
+
 const appRouter = createBrowserRouter([
   { path: '/', element: <HomePage/> },
   { path: '/shop', element: <Shop/> },
@@ -42,6 +43,7 @@ const appRouter = createBrowserRouter([
       { path: '/promotion', element: <Promotion/> },
       { path: '/manageproduct', element: <ManageProduct/> },
       { path: '/category', element: <Category/> }
+
     ]
   },
   { path: '/*', element: <NotFound/> }
