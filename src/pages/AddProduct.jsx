@@ -4,7 +4,7 @@ import { FiCamera, FiChevronDown, FiX, FiMenu } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 import toast from 'react-hot-toast'; 
-import axios from 'axios'; // Linked: Added axios import for backend communication
+import axios from 'axios'; 
 import { Loader2 } from 'lucide-react';
 import { useShop } from '../../utilities/ShopContext';
 
@@ -20,7 +20,10 @@ function AddProduct() {
   const [selectedPreview, setSelectedPreview] = useState(null);
   const [mainIndex, setMainIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAllowBelowMOQ, setAllowBelowMoq] = useState(false);
+
+  // MOQ state management
+  const [moq, setMoq] = useState(6);
+  const [isModifyingMoq, setIsModifyingMoq] = useState(false);
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -97,7 +100,6 @@ function AddProduct() {
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`,
-            // "Content-Type": ""
           }
         }
       );
@@ -115,6 +117,21 @@ function AddProduct() {
     setAvailableCategories([...availableCategories, categoryInput.trim()]);
     setIsCategoryDropdownOpen(false);
   }
+
+  // MOQ Increment and Decrement Handlers
+  const handleIncrementMOQ = () => {
+    setMoq(prev => prev + 1);
+  };
+
+  const handleDecrementMOQ = () => {
+    setMoq(prev => (prev > 1 ? prev - 1 : 1));
+  };
+
+  // Reset MOQ handler
+  const handleResetMoq = () => {
+    setMoq(6);
+    setIsModifyingMoq(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -149,17 +166,6 @@ function AddProduct() {
       const form = e.target;
       const formData = new FormData(form);
 
-      if (isAllowBelowMOQ) {
-        const productPrice = parseFloat(formData.get('price'));
-        const belowMoqPrice = parseFloat(formData.get('belowMOQPrice'));
-        if (belowMoqPrice < productPrice) {
-          toast.dismiss(loadId);
-          toast.error('Below MOQ price cannot be less than actual price!', {duration: 3000});
-          setSubmitting(false);
-          return;
-        }
-      }
-
       if (colors.length === 0) {
         toast.dismiss(loadId);
         toast.error('Color is required!', {duration: 3000});
@@ -167,7 +173,8 @@ function AddProduct() {
         return;
       }
 
-      formData.set("isAllowBelowMOQ", isAllowBelowMOQ);
+      // Explicitly append the precise numeric MOQ value from controlled state
+      formData.set("WholesaleMOQ", moq);
 
       colors.forEach(color => {
         formData.append("colors", color);
@@ -177,9 +184,6 @@ function AddProduct() {
         formData.append("images", file);
       });
 
-      if (tagInput.trim() === "") {
-        formData.set("tag", "null")
-      }
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/product/create`, 
@@ -194,7 +198,7 @@ function AddProduct() {
 
       if (response.status === 201) {
         toast.dismiss(loadId);
-        toast.success('Product Publised', {duration: 2000});
+        toast.success('Product Published', {duration: 2000});
 
         setColors([]);
         setColor('');
@@ -203,16 +207,17 @@ function AddProduct() {
         setProductsArray(null);
         setMainIndex(0);
         setSidebarOpen(false);
-        setAllowBelowMoq(false);
         setTagInput('');
         setCategoryInput('');
+        setMoq(6); 
+        setIsModifyingMoq(false);
         setSubmitting(false);
         form.reset()
       }
 
     } catch (error) {
       toast.dismiss(loadId);
-      toast.error("Pubish Unsuccessful!", {duration: 2000});
+      toast.error("Publish Unsuccessful!", {duration: 2000});
       setSubmitting(false);
     }
   };
@@ -376,7 +381,8 @@ function AddProduct() {
                         className="preview-media"
                         onClick={() => setSelectedPreview({ url: previewUrl, type: 'video' })}
                       />
-                    )}
+                    )
+                    }
 
                     <button
                       type="button"
@@ -408,7 +414,11 @@ function AddProduct() {
           </div>
 
           <div className="input-group">
-            <input type="number" name="price" placeholder="Price (₵)" className="form-input" required />
+            <input type="number" name="wholesalePrice" placeholder="Wholesale Price (₵)" className="form-input" required />
+          </div>
+
+          <div className="input-group">
+            <input type="number" name="retailPrice" placeholder="Retail Price (₵)" className="form-input" required />
           </div>
 
           <div className="input-group select-wrapper" ref={categoryDropdownRef}>
@@ -448,7 +458,6 @@ function AddProduct() {
                     {catItem.name}
                   </li>
                 ))}
-                
               </ul>
             )}
           </div>
@@ -477,27 +486,57 @@ function AddProduct() {
             </div>
           </div>
 
-          <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <input type="number" min="1" name="minimumOrder" placeholder="Enter Minimum Order Quantity (MOQ)" className="form-input" required />
-            
-            {
-              isAllowBelowMOQ && (
-                <input type="number" min="1" name="belowMOQPrice" placeholder="Enter Below (MOQ) Price" className="form-input" required />
-              )
-            }
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 6px' }}>
+          {/* MOQ Adaptive Control Section */}
+          <div className="input-group">
+            <label style={{ display: 'block', fontSize: '13px', color: '#64748b', marginBottom: '6px', fontWeight: '500' }}>
+              Minimum Order Quantity (WholesaleMOQ)
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isModifyingMoq && (
+                <button 
+                  type="button" 
+                  onClick={handleDecrementMOQ}
+                  style={{ width: '44px', height: '44px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer', color: '#334155' }}
+                >
+                  -
+                </button>
+              )}
+              
               <input 
-                type="checkbox" 
-                name="isAllowBelowMOQ"
-                id="allowBelowMoq" 
-                checked={isAllowBelowMOQ}
-                onChange={(e) => setAllowBelowMoq(e.target.checked)}
-                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#e11d48', margin: 0 }} 
+                type="number" 
+                name="WholesaleMOQ"
+                value={moq} 
+                readOnly 
+                className="form-input" 
+                style={{ textAlign: 'center', width: '80px', fontWeight: '600', margin: 0 }} 
               />
-              <label htmlFor="allowBelowMoq" style={{ fontSize: '13px', color: '#64748b', cursor: 'pointer', userSelect: 'none', fontWeight: '500' }}>
-                Allow orders below minimum quantity threshold
-              </label>
+              
+              {isModifyingMoq ? (
+                <>
+                  <button 
+                    type="button" 
+                    onClick={handleIncrementMOQ}
+                    style={{ width: '44px', height: '44px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer', color: '#334155' }}
+                  >
+                    +
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleResetMoq}
+                    style={{ height: '44px', padding: '0 16px', backgroundColor: '#64748b', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+                  >
+                    Reset
+                  </button>
+                </>
+              ) : (
+                <button 
+                  type="button" 
+                  onClick={() => setIsModifyingMoq(true)}
+                  style={{ height: '44px', padding: '0 16px', backgroundColor: '#e11d48', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+                >
+                  Modify
+                </button>
+              )}
             </div>
           </div>
 
