@@ -113,18 +113,24 @@ export default function ProductPage() {
     }
 
     const prepareOrder = () => {
-      const order =[ {
-        id: viewingProduct.id,
-        name: viewingProduct.name,
-        image: viewingProduct.images[0],
-        price: productPrice,
-        quantity: quantity,
-        totalPrice: quantity * productPrice,
-      }];
+        let buyingPrice = productPrice;
 
-    //   console.log(order)
+        if (!isBuyAtWholesale && quantity >= WholesaleMOQ) {
+            buyingPrice = wholesalePrice;
+            setProductPrice(buyingPrice)
+            setBuyAtWholesale(true);
+        }
 
-      addOrder(order);
+        const order =[ {
+            id: viewingProduct.id,
+            name: viewingProduct.name,
+            image: viewingProduct.images[0],
+            price: buyingPrice,
+            quantity: quantity,
+            totalPrice: quantity * buyingPrice,
+        }];
+
+        addOrder(order);
     }
 
     return (

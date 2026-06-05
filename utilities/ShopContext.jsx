@@ -5,6 +5,8 @@ const ShopContext = createContext(undefined);
 
 // Structural Wrapper Component Provider
 export function ShopProvider({ children }) {
+    const [wholesaleMinOrderQty, setWholesaleMinOrderQty] = useState(6);
+
     const [allProducts, setAllProducts] = useState([]);
     const [viewingProduct, setViewingProduct] = useState({});
 
@@ -160,7 +162,7 @@ export function ShopProvider({ children }) {
             const newFavorites = favorites.filter(
                 (item, index) => item.id !== updatedAllProduct[productIndex].id
             );
-            
+
             setFavorites(newFavorites);
         }
     };
@@ -218,6 +220,8 @@ export function ShopProvider({ children }) {
     return (
         <ShopContext.Provider 
             value={{
+                wholesaleMinOrderQty,
+                
                 ishomeDataLoading,
                 setHomeDataLoading,
                 isShopDataLoading,

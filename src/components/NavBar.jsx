@@ -12,7 +12,7 @@ import PurchaseOrderSummary from "./PurchaseOrderSummary"
 const colors= []
 
 export default function NavBar({ activePage, favoriteCount, cartCount, setFavorites, bestSellers, setBestSellers }) {
-    const { allProducts, addOrder, cart, addToCart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement } = useShop();
+    const { wholesaleMinOrderQty, allProducts, addOrder, cart, addToCart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement } = useShop();
     const navigate = useNavigate();
 
     // Drawer Interface Visibility States
@@ -102,16 +102,57 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
 
     function proceedToPayment() {
         const orders = cart.map(item => {
+            let buyingPrice = item.purchasingPrice;
+
+            if (!item.isBuyWholesale && item.purchaseQty >= wholesaleMinOrderQty) {
+                buyingPrice = item.wholesalePrice
+            }
+
             const order = {
                 id: item.id,
+                category: item.category,
                 name: item.name,
-                price: item.purchasingPrice,
+                price: buyingPrice,
+                wholesalePrice: item.wholesalePrice,
                 quantity: item.purchaseQty,
-                totalPrice: item.purchasingPrice * item.purchaseQty,
+                totalPrice: buyingPrice * item.purchaseQty,
             };
 
             return order;
         });
+
+        // count same categories
+        const categories = [];
+
+        orders.map((order) => {
+            const category = order.category;
+
+            let isNew = true;
+
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].name === category) {
+                    categories[i].count = categories[i].count + 1;
+                    isNew = false;
+                    break;
+                }
+            }
+
+            if (isNew) {
+                categories.push({name: category, count: 1});
+            }
+        })
+
+        // change prices to wholesale if quantity is 6 or more
+        for (let i = 0; i < categories.length; i++) {
+            if (categories[i].count >= wholesaleMinOrderQty) {
+                orders.map(order => {
+                    if (order.category === categories[i].name) {
+                        order.price = order.wholesalePrice;
+                        order.totalPrice = order.wholesalePrice * order.quantity;
+                    }
+                })
+            }
+        }
 
         addOrder(orders);
         openPaymentSummary(true);
