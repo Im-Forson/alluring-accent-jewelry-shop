@@ -136,6 +136,21 @@ function AddProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Dynamic extraction of input numbers for commercial margin guarding
+    const wholesale = parseFloat(formData.get("wholesalePrice")) || 0;
+    const retail = parseFloat(formData.get("retailPrice")) || 0;
+
+    if (wholesale >= retail) {
+      toast.error("Wholesale Prices must always be less than Retail Prices!", {
+        duration: 4000,
+        position: "top-center"
+      });
+      return;
+    }
+
     setSubmitting(true);
     const loadId = toast.loading("Processing and uploading product...");
 
@@ -162,9 +177,6 @@ function AddProduct() {
       if (categoryInput.trim() && !categoryExactExists) {
         setAvailableCategories(prev => [...prev, categoryInput.trim()]);
       }
-
-      const form = e.target;
-      const formData = new FormData(form);
 
       if (colors.length === 0) {
         toast.dismiss(loadId);
@@ -488,60 +500,6 @@ function AddProduct() {
               ))}
             </div>
           </div>
-
-          {/* MOQ Adaptive Control Section */}
-          {/* <div className="input-group">
-            <label style={{ display: 'block', fontSize: '13px', color: '#64748b', marginBottom: '6px', fontWeight: '500' }}>
-              Minimum Order Quantity (WholesaleMOQ)
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {isModifyingMoq && (
-                <button 
-                  type="button" 
-                  onClick={handleDecrementMOQ}
-                  style={{ width: '44px', height: '44px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer', color: '#334155' }}
-                >
-                  -
-                </button>
-              )}
-              
-              <input 
-                type="number" 
-                name="WholesaleMOQ"
-                value={moq} 
-                readOnly 
-                className="form-input" 
-                style={{ textAlign: 'center', width: '80px', fontWeight: '600', margin: 0 }} 
-              />
-              
-              {isModifyingMoq ? (
-                <>
-                  <button 
-                    type="button" 
-                    onClick={handleIncrementMOQ}
-                    style={{ width: '44px', height: '44px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer', color: '#334155' }}
-                  >
-                    +
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={handleResetMoq}
-                    style={{ height: '44px', padding: '0 16px', backgroundColor: '#64748b', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
-                  >
-                    Reset
-                  </button>
-                </>
-              ) : (
-                <button 
-                  type="button" 
-                  onClick={() => setIsModifyingMoq(true)}
-                  style={{ height: '44px', padding: '0 16px', backgroundColor: '#e11d48', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
-                >
-                  Modify
-                </button>
-              )}
-            </div>
-          </div> */}
 
           <div className="input-group">
             <input type="number" name="stock" placeholder="Stock Quantity" className="form-input" required />
