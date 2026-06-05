@@ -97,10 +97,21 @@ export function ShopProvider({ children }) {
 
     const updateCartItemUseMOQ = (index) => {
         const updated = [...cart];
+
+        let isBuyWholesalePrice = updated[index].isBuyWholesale;
+        isBuyWholesalePrice = !isBuyWholesalePrice;
+
+        updated[index].isBuyWholesale = isBuyWholesalePrice;
+
+        if (isBuyWholesalePrice) {
+            updated[index].purchaseQty = updated[index].WholesaleMOQ;
+            updated[index].purchasingPrice = updated[index].wholesalePrice;
+        }
+        else {
+            updated[index].purchaseQty = 1;
+            updated[index].purchasingPrice = updated[index].retailPrice;
+        }
                                             
-        updated[index].isUseMOQ = !updated[index].isUseMOQ;
-        updated[index].purchaseQty = updated[index].minimumOrder;
-        updated[index].purchasingPrice = !updated[index].isUseMOQ ? updated[index].belowMOQPrice : updated[index].price;
         setCart(updated);
     }
 
@@ -149,6 +160,7 @@ export function ShopProvider({ children }) {
             const newFavorites = favorites.filter(
                 (item, index) => item.id !== updatedAllProduct[productIndex].id
             );
+            
             setFavorites(newFavorites);
         }
     };

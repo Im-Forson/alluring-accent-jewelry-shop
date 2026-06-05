@@ -54,9 +54,9 @@ export default function AllBestSellers() {
             products.map((product) => {
                 product.isFavorite = false
                 product.preferedColor = product.colors[0]
-                product.purchaseQty = product.minimumOrder
-                product.orderQty = product.minimumOrder
-                product.isUseMOQ = true
+                product.purchaseQty = 1 // product.minimumOrder
+                product.orderQty = 1 // product.minimumOrder
+                product.isBuyWholesale = false
                 product.purchasingPrice = product.sellingPrice
             })
 
@@ -158,25 +158,9 @@ export default function AllBestSellers() {
         return matchCat && matchColl && matchMaterial && matchPrice;
       });
 
-    function viewProduct(product) {
-        const details = {
-            productId: product.id,
-            title: product.title, 
-            description: product.description, 
-            images: product.images,
-            sellingPrice: product.sellingPrice,
-            oldSellingPrice: product.oldSellingPrice,
-            colors: product.colors,
-            preferedColor: product.preferedColor,
-            minimumOrder: product.minimumOrder,
-            purchaseQty: product.purchaseQty,
-            isUseMOQ: product.isUseMOQ,
-            // belowMOQPrice: product.belowMOQPrice,
-            // price: product.price,
-        }
-
-        setViewingProductDetails(details);
-        navigate('/product'); 
+    function viewProduct(product, source) {
+        setViewingProductDetails(product);
+        navigate('/product', {state: {source: source}}); 
     }
 
     const filterProducts = () => {
@@ -308,10 +292,10 @@ export default function AllBestSellers() {
 
                                     {/* VIEW PRODUCT */}
                                     <button
-                                    className="w-full text-xs md-text-sm py-[5px] font-bold border-t border-zinc-200 text-zinc-400 active:bg-zinc-600 active:text-white"
-                                    onClick={() => viewProduct(product)}
+                                    className="w-full text-xs py-[8px] font-bold border-t border-zinc-200 text-zinc-400 hover:text-white hover:bg-zinc-800 active:bg-pink-600 transition-all cursor-pointer uppercase tracking-wider"
+                                    onClick={() => viewProduct(product, 'all-bestsellers')}
                                     >
-                                    View
+                                    View Product
                                     </button>
                                 </div>
                                 ))}

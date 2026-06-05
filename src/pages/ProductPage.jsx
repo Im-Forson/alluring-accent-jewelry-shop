@@ -19,16 +19,16 @@ export default function ProductPage() {
   const location = useLocation();
   const navigationSource = (location.state).source;
 
-  const { id, name, description, retailPrice, wholesalePrice, sellingPrice, colors, preferedColor, WholesaleMOQ, purchaseQty, images, isUseWholesale, } = viewingProduct;
+  const { id, name, description, retailPrice, wholesalePrice, purchasingPrice, colors, preferedColor, WholesaleMOQ, purchaseQty, images, isBuyWholesale, } = viewingProduct;
 
     const [isOpenPurchaseOrderSummary, setIsOpenPurchaseOrderSummary] = useState(false);
 
     const [selectedColor, setSelectedColor] = useState();
     const [productPrice, setProductPrice] = useState();
-    const [quantity, setQuantity] = useState();
+    const [quantity, setQuantity] = useState(1);
     const [activeImg, setActiveImg] = useState();
 
-    const [isWholesale, setWholesale] = useState(false);
+    const [isBuyAtWholesale, setBuyAtWholesale] = useState(false);
 
     const [isError, setError] = useState(false);
     
@@ -45,9 +45,9 @@ export default function ProductPage() {
     useEffect(() => {
       setIsOpenPurchaseOrderSummary(false);
       setSelectedColor(preferedColor);
-      setWholesale(isUseWholesale);
-      setProductPrice(sellingPrice);
-      setQuantity(1);
+      setBuyAtWholesale(isBuyWholesale);
+      setProductPrice(purchasingPrice);
+      setQuantity(purchaseQty);
       viewingProduct.hasOwnProperty('images') ? setActiveImg(images[0]) : setActiveImg();
 
     }, [viewingProduct])
@@ -56,7 +56,7 @@ export default function ProductPage() {
     const handleIncrement = () => setQuantity(prev => prev + 1);
     
     const handleDecrement = () => {
-      if (isWholesale) {
+      if (isBuyAtWholesale) {
         return setQuantity(prev => (prev === WholesaleMOQ ? prev : prev -1))
       }
 
@@ -78,14 +78,14 @@ export default function ProductPage() {
 
     const handleInputBlur = () => {
         if (quantity === '') {
-          if (isWholesale) {
+          if (isBuyAtWholesale) {
             return setQuantity(WholesaleMOQ);
           }
 
           return setQuantity(1);
         }
 
-        if (isWholesale && quantity < WholesaleMOQ) {
+        if (isBuyAtWholesale && quantity < WholesaleMOQ) {
           return setQuantity(WholesaleMOQ);
         }
     }
@@ -105,7 +105,8 @@ export default function ProductPage() {
       foundProduct.purchasingPrice = productPrice;
       foundProduct.purchaseQty = quantity;
       foundProduct.preferedColor = selectedColor;
-      foundProduct.isUseMOQ = isWholesale;
+      foundProduct.isBuyWholesale = isBuyAtWholesale;
+
       addToCart(foundProduct);
 
       toast.success('Added to cart', {duration: 2000});
@@ -120,6 +121,8 @@ export default function ProductPage() {
         quantity: quantity,
         totalPrice: quantity * productPrice,
       }];
+
+    //   console.log(order)
 
       addOrder(order);
     }
@@ -137,7 +140,7 @@ export default function ProductPage() {
                             isOpen={isOpenPurchaseOrderSummary}
                             setIsOpen={setIsOpenPurchaseOrderSummary}
                         />
-                        {/* <OrderSuccessModal/> */}
+                        <OrderSuccessModal/>
 
                         <div className="min-h-screen bg-white text-zinc-800 font-sans pt-20 pb-16">
                             <div className="px-8 mb-5">
@@ -259,25 +262,25 @@ export default function ProductPage() {
 
                                                 <div className="flex items-center mb-1 active:opacity-25"
                                                     onClick={()=>{
-                                                        const isWholesaleSelected = !isWholesale
+                                                        const isWholesaleSelected = !isBuyAtWholesale
 
                                                         if (isWholesaleSelected) {
-                                                            setWholesale(true);
+                                                            setBuyAtWholesale(true);
                                                             setQuantity(WholesaleMOQ);
                                                             setProductPrice(wholesalePrice)
                                                         }
                                                         else {
-                                                            setWholesale(false);
+                                                            setBuyAtWholesale(false);
                                                             setQuantity(1);
                                                             setProductPrice(retailPrice)
                                                         }
                                                         
                                                     }}
                                                 >
-                                                    {!isWholesale ? <Square className="h-4 ml-[-5px] text-zinc-500"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-500"/>}
+                                                    {!isBuyAtWholesale ? <Square className="h-4 ml-[-5px] text-zinc-500"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-500"/>}
                                                     <p className="text-xs text-zinc-500 font-mono font-bold">₵{wholesalePrice} @ wholesale</p>
                                                 </div>
-                                                <p className={`${isWholesale ? '':'line-throug '} pl-5 text-xs text-zinc-500 font-mono font-bold`}>minimum order: {WholesaleMOQ}</p>
+                                                <p className={`${isBuyAtWholesale ? '':'line-throug '} pl-5 text-xs text-zinc-500 font-mono font-bold`}>minimum order: {WholesaleMOQ}</p>
                                                 {/* {
                                                     isAllowBelowMOQ && (
                                                         <div className="flex items-center active:opacity-25"

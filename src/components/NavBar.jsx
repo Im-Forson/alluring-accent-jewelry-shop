@@ -281,7 +281,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
-                                            <p className="text-sm text-pink-600 font-sans font-bold mt-0.5">Gh₵ {item.price.toLocaleString()}</p>
+                                            <p className="text-sm text-pink-600 font-sans font-bold mt-0.5">Gh₵ {item.sellingPrice.toLocaleString()}</p>
                                             <div className="flex gap-3 items-center mt-2">
                                                 <button onClick={() => moveToCart(item)} className="bg-zinc-800 text-white text-[10px] font-bold px-3 py-1 rounded-md hover:bg-pink-500 transition-colors cursor-pointer active:opacity-25">
                                                     Add To Cart
@@ -362,7 +362,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
 
                                                             let subValue = -1;
 
-                                                            if (item.isUseMOQ && item.purchaseQty <= item.minimumOrder) {subValue = 0}
+                                                            if (item.isBuyWholesale && item.purchaseQty <= item.WholesaleMOQ) {subValue = 0}
 
                                                             updateCartItemQty(item.id, subValue)
                                                             
@@ -391,8 +391,6 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                                 </div>
 
                                                 <div className="">
-                                                    <p className={`${item.isUseMOQ ? '':'line-through'} text-zinc-500 text-xs font-mono font-bld mb-1`}>minimum order: {item.minimumOrder}</p>
-
                                                     <div 
                                                         onClick={() => {
                                                             if (activePage === 'product') {
@@ -402,11 +400,13 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                                             updateCartItemUseMOQ(index);
                                                         }}
 
-                                                        className={`flex items-center cursor-pointer ${activePage === 'product' ? 'active:opacity-100' : 'active:opacity-25'}`}
+                                                        className={`flex items-center cursor-pointer ${activePage === 'product' ? 'active:opacity-100' : 'active:opacity-25'} mb-1`}
                                                     >
-                                                        {item.isUseMOQ ? <Square className="h-3 ml-[-5px]"/>:<CheckSquare className="h-3 ml-[-5px]"/>}
-                                                        <p className="text-xs text-zinc-500 font-mono font-old">order less</p>
+                                                        {!item.isBuyWholesale ? <Square className="h-3 ml-[-5px]"/>:<CheckSquare className="h-3 ml-[-5px]"/>}
+                                                        <p className="text-xs text-zinc-500 font-mono">₵{item.wholesalePrice} @ wholesale</p>
                                                     </div>
+
+                                                    <p className={`${item.isBuyWholesale ? '':'line-throug'} text-zinc-500 text-xs pl-5 font-mono font-bld`}>minimum order: {item.WholesaleMOQ}</p>
                                                 </div>
                                             </div>
                                             

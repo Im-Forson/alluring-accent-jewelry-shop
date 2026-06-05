@@ -93,10 +93,10 @@ export default function HomePage() {
             products.map((product) => {
                 product.isFavorite = false
                 product.preferedColor = product.colors[0]
-                product.purchaseQty = product.minimumOrder
-                product.orderQty = product.minimumOrder
-                product.isUseWholesale = false
-                product.purchasingPrice = product.price
+                product.purchaseQty = 1 // product.minimumOrder
+                product.orderQty = 1 // product.minimumOrder
+                product.isBuyWholesale = false
+                product.purchasingPrice = product.sellingPrice
             })
 
             loadAllProducts(products);

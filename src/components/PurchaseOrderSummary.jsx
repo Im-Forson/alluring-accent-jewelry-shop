@@ -77,7 +77,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
     if (orders.length > 1) {
       return clearCart();
     }
-    
+
     orders.map((item) => {
       removeCartItem(item.id);
     })
