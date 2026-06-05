@@ -77,7 +77,7 @@ export default function Shop() {
             products.map((product) => {
                 product.isFavorite = false
                 product.preferedColor = product.colors[0]
-                product.purchaseQty = product.minimumOrder
+                // product.purchaseQty = product.minimumOrder
                 product.orderQty = product.minimumOrder
                 product.isUseWholesale = false
                 product.purchasingPrice = product.sellingPrice

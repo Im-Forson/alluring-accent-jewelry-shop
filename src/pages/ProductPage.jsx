@@ -47,13 +47,14 @@ export default function ProductPage() {
       setSelectedColor(preferedColor);
       setWholesale(isUseWholesale);
       setProductPrice(sellingPrice);
-      setQuantity(purchaseQty);
+      setQuantity(1);
       viewingProduct.hasOwnProperty('images') ? setActiveImg(images[0]) : setActiveImg();
 
     }, [viewingProduct])
 
     // Quantity modifiers
     const handleIncrement = () => setQuantity(prev => prev + 1);
+    
     const handleDecrement = () => {
       if (isWholesale) {
         return setQuantity(prev => (prev === WholesaleMOQ ? prev : prev -1))
@@ -73,7 +74,6 @@ export default function ProductPage() {
       let parsedQty = parseInt(numericValue, 10);
 
       setQuantity(parsedQty);
-      // console.log('val:', numericValue)
     };
 
     const handleInputBlur = () => {
@@ -259,15 +259,25 @@ export default function ProductPage() {
 
                                                 <div className="flex items-center mb-1 active:opacity-25"
                                                     onClick={()=>{
-                                                        setWholesale(!isWholesale);
-                                                        setQuantity(!isWholesale ? 1 : WholesaleMOQ);
-                                                        setProductPrice(!isWholesale ? retailPrice : wholesalePrice)
+                                                        const isWholesaleSelected = !isWholesale
+
+                                                        if (isWholesaleSelected) {
+                                                            setWholesale(true);
+                                                            setQuantity(WholesaleMOQ);
+                                                            setProductPrice(wholesalePrice)
+                                                        }
+                                                        else {
+                                                            setWholesale(false);
+                                                            setQuantity(1);
+                                                            setProductPrice(retailPrice)
+                                                        }
+                                                        
                                                     }}
                                                 >
-                                                    {isWholesale ? <Square className="h-4 ml-[-5px] text-zinc-400"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-400"/>}
-                                                    <p className="text-xs text-zinc-400 font-mono font-bold">₵{wholesalePrice} @ wholesale</p>
+                                                    {!isWholesale ? <Square className="h-4 ml-[-5px] text-zinc-500"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-500"/>}
+                                                    <p className="text-xs text-zinc-500 font-mono font-bold">₵{wholesalePrice} @ wholesale</p>
                                                 </div>
-                                                <p className={`${isWholesale ? '':'line-throug '} pl-5 text-xs text-zinc-400 font-mono font-bold`}>minimum order: {WholesaleMOQ}</p>
+                                                <p className={`${isWholesale ? '':'line-throug '} pl-5 text-xs text-zinc-500 font-mono font-bold`}>minimum order: {WholesaleMOQ}</p>
                                                 {/* {
                                                     isAllowBelowMOQ && (
                                                         <div className="flex items-center active:opacity-25"
