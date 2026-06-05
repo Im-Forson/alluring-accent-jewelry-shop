@@ -57,7 +57,7 @@ export default function AllBestSellers() {
                 product.purchaseQty = product.minimumOrder
                 product.orderQty = product.minimumOrder
                 product.isUseMOQ = true
-                product.purchasingPrice = product.price
+                product.purchasingPrice = product.sellingPrice
             })
 
             loadAllProducts(products); 
@@ -151,9 +151,9 @@ export default function AllBestSellers() {
       
         const matchPrice =
           activePrice === "All Prices" ||
-          (activePrice === "Under GHC 300" && product.price < 300) ||
-          (activePrice === "GHC 300 - GHC 500" && product.price >= 300 && product.price <= 500) ||
-          (activePrice === "Over GHC 500" && product.price > 500);
+          (activePrice === "Under GHC 300" && product.sellingPrice < 300) ||
+          (activePrice === "GHC 300 - GHC 500" && product.sellingPrice >= 300 && product.sellingPrice <= 500) ||
+          (activePrice === "Over GHC 500" && product.sellingPrice > 500);
       
         return matchCat && matchColl && matchMaterial && matchPrice;
       });
@@ -164,14 +164,14 @@ export default function AllBestSellers() {
             title: product.title, 
             description: product.description, 
             images: product.images,
-            price: product.price,
-            oldPrice: product.oldPrice,
+            sellingPrice: product.sellingPrice,
+            oldSellingPrice: product.oldSellingPrice,
             colors: product.colors,
             preferedColor: product.preferedColor,
             minimumOrder: product.minimumOrder,
             purchaseQty: product.purchaseQty,
             isUseMOQ: product.isUseMOQ,
-            belowMOQPrice: product.belowMOQPrice,
+            // belowMOQPrice: product.belowMOQPrice,
             // price: product.price,
         }
 
@@ -295,13 +295,13 @@ export default function AllBestSellers() {
                                     </h3>
 
                                     <div className="flex gap-3">
-                                        {product.oldPrice > product.price && (
+                                        {product.oldSellingPrice > product.sellingPrice && (
                                         <p className="text-xs md:text-sm font-semibold mt-1 line-through text-[grey]">
-                                            Gh₵ {product.oldPrice}
+                                            Gh₵ {product.oldSellingPrice}
                                         </p>
                                         )}
                                         <p className="text-xs md:text-sm font-semibold mt-1">
-                                        Gh₵ {product.price}
+                                        Gh₵ {product.sellingPrice}
                                         </p>
                                     </div>
                                     </div>

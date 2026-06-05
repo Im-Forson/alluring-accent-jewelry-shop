@@ -95,7 +95,7 @@ export default function HomePage() {
                 product.preferedColor = product.colors[0]
                 product.purchaseQty = product.minimumOrder
                 product.orderQty = product.minimumOrder
-                product.isUseMOQ = true
+                product.isUseWholesale = false
                 product.purchasingPrice = product.price
             })
 

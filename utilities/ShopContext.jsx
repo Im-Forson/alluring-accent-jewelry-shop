@@ -124,6 +124,10 @@ export function ShopProvider({ children }) {
         setCart(cart.filter(item => item.id !== id));
     };
 
+    const clearCart = (id) => {
+        setCart([]);
+    };
+
     const manageFavorite = (id) => {
         const updatedAllProduct = [...allProducts];
         let productIndex = -1;
@@ -237,6 +241,7 @@ export function ShopProvider({ children }) {
                 updateCartItemUseMOQ,
                 updateCartItemQty,
                 updateCartItemColor,
+                clearCart,
 
                 favorites, 
                 manageFavorite,

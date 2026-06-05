@@ -19,15 +19,19 @@ export default function ProductPage() {
   const location = useLocation();
   const navigationSource = (location.state).source;
 
-  const { id, name, description, price, oldPrice, colors, preferedColor, minimumOrder, purchaseQty, images, isAllowBelowMOQ, isUseMOQ, belowMOQPrice, } = viewingProduct
+  const { id, name, description, retailPrice, wholesalePrice, sellingPrice, colors, preferedColor, WholesaleMOQ, purchaseQty, images, isUseWholesale, } = viewingProduct;
+
     const [isOpenPurchaseOrderSummary, setIsOpenPurchaseOrderSummary] = useState(false);
+
     const [selectedColor, setSelectedColor] = useState();
-    const [isUseMOQSelected, setIsUseMOQSelected] = useState();
     const [productPrice, setProductPrice] = useState();
     const [quantity, setQuantity] = useState();
     const [activeImg, setActiveImg] = useState();
 
+    const [isWholesale, setWholesale] = useState(false);
+
     const [isError, setError] = useState(false);
+    
     useEffect(() => {
         if (!viewingProduct.hasOwnProperty('name')) {
             setError(true);
@@ -41,8 +45,8 @@ export default function ProductPage() {
     useEffect(() => {
       setIsOpenPurchaseOrderSummary(false);
       setSelectedColor(preferedColor);
-      setIsUseMOQSelected(isUseMOQ);
-      setProductPrice(isUseMOQ ? price : belowMOQPrice);
+      setWholesale(isUseWholesale);
+      setProductPrice(sellingPrice);
       setQuantity(purchaseQty);
       viewingProduct.hasOwnProperty('images') ? setActiveImg(images[0]) : setActiveImg();
 
@@ -51,8 +55,8 @@ export default function ProductPage() {
     // Quantity modifiers
     const handleIncrement = () => setQuantity(prev => prev + 1);
     const handleDecrement = () => {
-      if (isUseMOQSelected) {
-        return setQuantity(prev => (prev === minimumOrder ? prev : prev -1))
+      if (isWholesale) {
+        return setQuantity(prev => (prev === WholesaleMOQ ? prev : prev -1))
       }
 
       setQuantity(prev => (prev > 1 ? prev - 1 : 1))
@@ -74,15 +78,15 @@ export default function ProductPage() {
 
     const handleInputBlur = () => {
         if (quantity === '') {
-          if (isUseMOQSelected) {
-            return setQuantity(minimumOrder);
+          if (isWholesale) {
+            return setQuantity(WholesaleMOQ);
           }
 
           return setQuantity(1);
         }
 
-        if (isUseMOQSelected && quantity < minimumOrder) {
-          return setQuantity(minimumOrder);
+        if (isWholesale && quantity < WholesaleMOQ) {
+          return setQuantity(WholesaleMOQ);
         }
     }
 
@@ -101,7 +105,7 @@ export default function ProductPage() {
       foundProduct.purchasingPrice = productPrice;
       foundProduct.purchaseQty = quantity;
       foundProduct.preferedColor = selectedColor;
-      foundProduct.isUseMOQ = isUseMOQSelected;
+      foundProduct.isUseMOQ = isWholesale;
       addToCart(foundProduct);
 
       toast.success('Added to cart', {duration: 2000});
@@ -251,22 +255,33 @@ export default function ProductPage() {
                                             </div>
 
                                             <div className="">
-                                                <p className={`${isUseMOQSelected ? '':'line-through '} text-xs text-zinc-400 font-mono font-bold mb-1`}>Minimum Order: {minimumOrder}</p>
+                                                
 
-                                                {
+                                                <div className="flex items-center mb-1 active:opacity-25"
+                                                    onClick={()=>{
+                                                        setWholesale(!isWholesale);
+                                                        setQuantity(!isWholesale ? 1 : WholesaleMOQ);
+                                                        setProductPrice(!isWholesale ? retailPrice : wholesalePrice)
+                                                    }}
+                                                >
+                                                    {isWholesale ? <Square className="h-4 ml-[-5px] text-zinc-400"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-400"/>}
+                                                    <p className="text-xs text-zinc-400 font-mono font-bold">₵{wholesalePrice} @ wholesale</p>
+                                                </div>
+                                                <p className={`${isWholesale ? '':'line-throug '} pl-5 text-xs text-zinc-400 font-mono font-bold`}>minimum order: {WholesaleMOQ}</p>
+                                                {/* {
                                                     isAllowBelowMOQ && (
                                                         <div className="flex items-center active:opacity-25"
                                                             onClick={()=>{
                                                                 setIsUseMOQSelected(!isUseMOQSelected);
                                                                 setQuantity(minimumOrder);
-                                                                setProductPrice(!isUseMOQSelected ? price : belowMOQPrice)
+                                                                setProductPrice(!isUseMOQSelected ? sellingPrice : belowMOQPrice)
                                                             }}
                                                         >
                                                             {isUseMOQSelected ? <Square className="h-4 ml-[-5px] text-zinc-400"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-400"/>}
                                                             <p className="text-xs text-zinc-400 font-mono font-bold">Order less</p>
                                                         </div>
                                                     )
-                                                }
+                                                } */}
                                             </div>
                                         </div>
                                     </div>

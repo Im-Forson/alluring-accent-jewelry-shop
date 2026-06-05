@@ -132,13 +132,13 @@ export default function BestSellers() {
                                 </h3>
 
                                 <div className="flex gap-3">
-                                    {product.oldPrice > product.price && (
+                                    {product.oldSellingPrice > product.sellingPrice && (
                                     <p className="text-xs md:text-sm font-semibold mt-1 line-through text-[grey]">
-                                        Gh₵ {product.oldPrice}
+                                        Gh₵ {product.oldSellingPrice}
                                     </p>
                                     )}
                                     <p className="text-xs md:text-sm font-semibold mt-1 text-stone-900">
-                                    Gh₵ {product.price}
+                                    Gh₵ {product.sellingPrice}
                                     </p>
                                 </div>
 

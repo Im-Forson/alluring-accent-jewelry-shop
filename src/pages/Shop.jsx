@@ -79,8 +79,8 @@ export default function Shop() {
                 product.preferedColor = product.colors[0]
                 product.purchaseQty = product.minimumOrder
                 product.orderQty = product.minimumOrder
-                product.isUseMOQ = true
-                product.purchasingPrice = product.price
+                product.isUseWholesale = false
+                product.purchasingPrice = product.sellingPrice
             })
 
             loadAllProducts(products); 
@@ -175,9 +175,9 @@ export default function Shop() {
       
         const matchPrice =
           activePrice === "All Prices" ||
-          (activePrice === "Under GHC 300" && product.price < 300) ||
-          (activePrice === "GHC 300 - GHC 500" && product.price >= 300 && product.price <= 500) ||
-          (activePrice === "Over GHC 500" && product.price > 500);
+          (activePrice === "Under GHC 300" && product.sellingPrice < 300) ||
+          (activePrice === "GHC 300 - GHC 500" && product.sellingPrice >= 300 && product.sellingPrice <= 500) ||
+          (activePrice === "Over GHC 500" && product.sellingPrice > 500);
       
         return matchCat && matchColl && matchMaterial && matchPrice;
       });
@@ -438,13 +438,13 @@ export default function Shop() {
                                         </h3>
 
                                         <div className="flex gap-3">
-                                            {product.oldPrice > product.price && (
+                                            {product.oldSellingPrice > product.sellingPrice && (
                                             <p className="text-xs md:text-sm font-semibold mt-1 line-through text-[grey]">
-                                                Gh₵ {Number(product.oldPrice).toFixed(2)}
+                                                Gh₵ {Number(product.oldSellingPrice).toFixed(2)}
                                             </p>
                                             )}
                                             <p className="text-xs md:text-sm font-semibold mt-1">
-                                            Gh₵ {Number(product.price).toFixed(2)}
+                                            Gh₵ {Number(product.sellingPrice).toFixed(2)}
                                             </p>
                                         </div>
 

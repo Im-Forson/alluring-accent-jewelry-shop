@@ -10,7 +10,7 @@ import { useShop } from '../../utilities/ShopContext';
 import toast from 'react-hot-toast';
 
 export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
-  const { orders, addOrder, loadOrderReceipt, cart, removeCartItem, updateIsOrderSuccess, paystackResponse, loadPaystackResponse, setProcessOverlay } = useShop();
+  const { orders, addOrder, loadOrderReceipt, cart, clearCart, removeCartItem, updateIsOrderSuccess, paystackResponse, loadPaystackResponse, setProcessOverlay } = useShop();
   const navigate = useNavigate();
   const location = useLocation();
   // console.log(orders)
@@ -18,6 +18,8 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
   const [isAlert, setAlert] = useState(false);
 
   const [isProcessReceipt, setProcessReceipt] = useState(false);
+  const [isSendEmail, setSendEmail] = useState(false);
+  const [] = useState(false);
   const [] = useState(false);
 
   // 1. Initialize Controlled Form Input State Fields
@@ -72,6 +74,10 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
   };
 
   const handleRemoveOrdersFromCart = () => {
+    if (orders.length > 1) {
+      return clearCart();
+    }
+    
     orders.map((item) => {
       removeCartItem(item.id);
     })
@@ -112,6 +118,31 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       
     }
   };
+
+  const sendEmail_Sms = async (orderInfo) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/email`,
+        {...orderInfo},
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/sms`,
+        {...orderInfo},
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const processReceipt = async () => {
     try {
@@ -164,6 +195,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         addOrder([])
         updateIsOrderSuccess(true); // show upon transaction onsuccess
   
+        sendEmail_Sms(receipt);
       }
       else {
         setProcessOverlay(false);
