@@ -121,7 +121,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
   const sendEmail_Sms = async (orderInfo) => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/email`,
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/email`,
         {...orderInfo},
         {
           headers: {
@@ -130,7 +130,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         }
       );
 
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/sms`,
+      await axios.post(`${import.meta.env.VITE_API_BASE_URLL}/order/sms`,
         {...orderInfo},
         {
           headers: {
@@ -163,8 +163,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       formData.products = orders
   
       const res = await axios.post(
-        
-        `${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/create`,
+        `${import.meta.env.VITE_API_BASE_URL}/order/create`,
           {
             recipient: formData.recipient,
             phone: formData.phone,

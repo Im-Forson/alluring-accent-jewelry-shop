@@ -184,6 +184,9 @@ function AddProduct() {
         formData.append("images", file);
       });
 
+      if (tagInput.trim() === "") {
+        formData.delete('tag');
+      }
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/product/create`, 
@@ -487,7 +490,7 @@ function AddProduct() {
           </div>
 
           {/* MOQ Adaptive Control Section */}
-          <div className="input-group">
+          {/* <div className="input-group">
             <label style={{ display: 'block', fontSize: '13px', color: '#64748b', marginBottom: '6px', fontWeight: '500' }}>
               Minimum Order Quantity (WholesaleMOQ)
             </label>
@@ -538,7 +541,7 @@ function AddProduct() {
                 </button>
               )}
             </div>
-          </div>
+          </div> */}
 
           <div className="input-group">
             <input type="number" name="stock" placeholder="Stock Quantity" className="form-input" required />
