@@ -305,13 +305,13 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                     required
                     className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa] cursor-pointer"
                   >
-                    <option value="Accra">Ahafo Region</option>
+                    <option value="Ahafo">Ahafo Region</option>
                     <option value="Ashanti">Ashanti Region</option>
                     <option value="Bono East">Bono East Region</option>
                     <option value="Bono">Bono Region</option>
                     <option value="Central">Central Region</option>
                     <option value="Eastern">Eastern Region</option>
-                    <option value="Accra">Graeter Accra Region</option>
+                    <option value="Accra">Greater Accra Region</option>
                     <option value="North East">North East Region</option>
                     <option value="Nothern">Nothern Region</option>
                     <option value="Oti">Oti Region</option>
