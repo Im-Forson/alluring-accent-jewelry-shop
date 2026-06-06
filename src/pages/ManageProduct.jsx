@@ -318,9 +318,6 @@ function ManageProduct() {
       formData.append('wholesalePrice', parseFloat(editingProduct.wholesalePrice));
       formData.append('retailPrice', parseFloat(editingProduct.retailPrice));
 
-      
-      
-
       // Appending multi-value color form parameters sequentially to match the endpoint schema
       const colors = editingProduct.colors || [];
       const updatedColors = colors.filter((color) => color.trim() !== "");
@@ -365,7 +362,6 @@ function ManageProduct() {
           }
         }
       );
-
 
       toast.dismiss(loadId);
       toast.success("Product parameters updated successfully.");
@@ -566,7 +562,8 @@ function ManageProduct() {
                       <th>Product</th>
                       <th>Category</th>
                       <th>Stock</th>
-                      <th>Selling Price</th>
+                      <th>Retail Price</th>
+                      <th>Wholesale Price</th>
                       <th>Status</th>
                       <th className="center-header">Actions</th>
                     </tr>
@@ -596,6 +593,7 @@ function ManageProduct() {
                             </span>
                           </td>
                           <td className="price-text-bold">GHC {product.retailPrice}</td>
+                          <td className="price-text-bold text-slate-600">GHC {product.wholesalePrice}</td>
                           <td>
                             <span className={`status-pill ${!isOutOfStock ? 'pill-active' : 'pill-inactive'}`}>
                               {isOutOfStock ? 'Inactive' : 'Active'}
@@ -606,14 +604,14 @@ function ManageProduct() {
                               <button className="row-btn edit-row-btn" onClick={() => handleOpenEditModal(product)}>Edit</button>
                               <button className="row-btn delete-row-btn" onClick={() => handleDeleteProduct(product.id)}>Delete</button>
                               
-                              <div style={{ display: 'inline-block' }} ref={activeDropdownId === product.id ? dropdownRef : null}>
+                              {/* <div style={{ display: 'inline-block' }} ref={activeDropdownId === product.id ? dropdownRef : null}>
                                 <button className="row-dropdown-toggle" onClick={(e) => toggleDropdown(product.id, e)}><FiChevronDown /></button>
                                 {activeDropdownId === product.id && (
                                   <div className="custom-dropdown-menu" style={actionDropdownMenuStyle}>
                                     <button onClick={() => toggleProductStatus(product.id)} style={dropdownItemStyle}>Toggle Stock Status</button>
                                   </div>
                                 )}
-                              </div>
+                              </div> */}
                             </div>
                           </td>
                         </tr>
@@ -638,7 +636,7 @@ function ManageProduct() {
         </section>
       </main>
 
-      {/* --- EDITED OVERLAY MODAL TO ACCURATELY MIMIC ADDPRODUCT FIELDS IN SCREENSHOT_21_2.PNG --- */}
+      {/* --- EDITED OVERLAY MODAL TO ACCURATELY MIMIC ADDPRODUCT FIELDS --- */}
       {isModalOpen && editingProduct && (
         <div className="modal-overlay-backdrop p-5" style={modalOverlayStyle}>
           <div className="modal-content-car w-full md:w-1/2 h-full" style={modalContentStyle}>
