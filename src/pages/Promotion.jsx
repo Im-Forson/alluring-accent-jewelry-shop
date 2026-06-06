@@ -165,12 +165,12 @@ function Promotion() {
     const willCauseNegativePricing = availableProducts.filter(product => {
       if (selectedTargets.some(t => t.type === 'all')) return true;
       if (selectedTargets.some(t => t.type === 'product' && t.id === (product._id || product.id))) return true;
-      if (selectedTargets.some(t => t.type === 'category' && t.id === product.category)) return true;
+      if (selectedTargets.some(t => t.type === 'category' && (t.id === product.category || t.name === product.category))) return true;
       return false;
     }).some(product => {
-      const orig = parseFloat(product.price || 0);
+      const orig = parseFloat(product.retailPrice || 0);
       const disc = parseFloat(discountValue || 0);
-      return discountType === 'percentage' ? disc > 100 : (orig - disc) < 0;
+      return discountType === 'percentage' ? disc >= 100 : (orig - disc) <= 0;
     });
 
     if (willCauseNegativePricing) {
@@ -664,7 +664,7 @@ function Promotion() {
                       const matchedProducts = availableProducts.filter(product => {
                         if (selectedTargets.some(t => t.type === 'all')) return true;
                         if (selectedTargets.some(t => t.type === 'product' && t.id === (product._id || product.id))) return true;
-                        if (selectedTargets.some(t => t.type === 'category' && t.id === product.category)) return true;
+                        if (selectedTargets.some(t => t.type === 'category' && (t.id === product.category || t.name === product.category))) return true;
                         return false;
                       });
 
@@ -672,13 +672,14 @@ function Promotion() {
                         return <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>No products found matching selection.</span>;
                       }
 
+                      const discountNum = parseFloat(discountValue) || 0;
+
                       const triggersNegativePricing = matchedProducts.some(product => {
-                        const originalPrice = parseFloat(product.price || 0);
-                        const discountNum = parseFloat(discountValue || 0);
+                        const originalPrice = parseFloat(product.retailPrice || 0);
                         if (discountType === 'percentage') {
-                          return discountNum > 100;
+                          return discountNum >= 100;
                         } else {
-                          return (originalPrice - discountNum) < 0;
+                          return (originalPrice - discountNum) <= 0;
                         }
                       });
 
@@ -706,8 +707,7 @@ function Promotion() {
                               </div>
                               
                               {groupedProducts[categoryGroup].map(product => {
-                                const originalPrice = parseFloat(product.price || 0);
-                                const discountNum = parseFloat(discountValue || 0);
+                                const originalPrice = parseFloat(product.retailPrice || 0);
                                 let calculatedNewPrice = originalPrice;
 
                                 if (discountType === 'percentage' && discountNum > 0) {
@@ -716,7 +716,11 @@ function Promotion() {
                                   calculatedNewPrice = originalPrice - discountNum;
                                 }
 
-                                const isThisProductNegative = calculatedNewPrice <= 0;
+                                if (calculatedNewPrice < 0) {
+                                  calculatedNewPrice = 0;
+                                }
+
+                                const isThisProductNegative = calculatedNewPrice <= 0 && discountNum > 0;
 
                                 return (
                                   <div key={product._id || product.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid #f1f5f9', padding: '2px 4px' }}>
