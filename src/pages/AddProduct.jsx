@@ -9,7 +9,7 @@ import { Loader2 } from 'lucide-react';
 import { useShop } from '../../utilities/ShopContext';
 
 function AddProduct() {
-  const { categories } = useShop();
+  const { categories, loadCategories } = useShop();
   useAdminBackButton();
 
   const [color, setColor] = useState("");
@@ -45,6 +45,34 @@ function AddProduct() {
   const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState("environment");
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+
+  useEffect(() => {
+      const fetchCategories = async () => {
+      const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+
+      if (categoryResponse.status === 200) {
+          const allCategories = categoryResponse.data;
+          const filteredCategories = allCategories.filter(cat => {
+              const catName = cat.name.toLowerCase();
+              if (catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets') {
+                  return cat;
+              }
+          })
+
+          loadCategories(filteredCategories);
+          setAvailableCategories(filteredCategories)
+      }
+      else {
+          loadCategories(['All Jewellery'])
+      }
+
+    }
+
+    if (categories.length === 0) {
+      fetchCategories()
+    }
+    
+  }, [])
 
   const filteredTags = availableTags.filter((tag) =>
     tag.toLowerCase().includes(tagInput.toLowerCase())
