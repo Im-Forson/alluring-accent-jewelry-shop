@@ -38,7 +38,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
     title: "Rose Gold Infinity Ring",
     purchasingPrice: 450.00,
     purchaseQty: 1,
-    shippingFee: formData.region === 'Accra' ? 15.00 : 30.00, // Dynamic location pricing calculations
+    shippingFee: formData.region === 'Accra' ? 0.00 : 15.00, // Dynamic location pricing calculations
     currency: "GH₵"
   };
 
@@ -305,10 +305,22 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                     required
                     className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa] cursor-pointer"
                   >
-                    <option value="Accra">Greater Accra (Accra)</option>
-                    <option value="Kumasi">Ashanti (Kumasi)</option>
-                    <option value="Takoradi">Western (Takoradi)</option>
-                    <option value="Takoradi">Eastern (Koforidua)</option>
+                    <option value="Accra">Ahafo Region</option>
+                    <option value="Ashanti">Ashanti Region</option>
+                    <option value="Bono East">Bono East Region</option>
+                    <option value="Bono">Bono Region</option>
+                    <option value="Central">Central Region</option>
+                    <option value="Eastern">Eastern Region</option>
+                    <option value="Accra">Graeter Accra Region</option>
+                    <option value="North East">North East Region</option>
+                    <option value="Nothern">Nothern Region</option>
+                    <option value="Oti">Oti Region</option>
+                    <option value="Savannah">Savannah Region</option>
+                    <option value="Upper East">Upper East Region</option>
+                    <option value="Upper West">Upper West Region</option>
+                    <option value="Volta">Volta Region</option>
+                    <option value="Western North">Western North Region</option>
+                    <option value="Western">Western Region</option>
                   </select>
                 </div>
 
