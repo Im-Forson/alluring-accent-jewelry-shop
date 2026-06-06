@@ -19,7 +19,7 @@ import {
   faUserShield
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function SideBar() {
+export default function SideBar({ isModalOpen, editingProduct }) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -77,16 +77,19 @@ export default function SideBar() {
   return (
     <>
       {/* Mobile Topbar */}
-      <div className="mobile-topbar">
-        <h2 className="mobile-logo">Admin Panel</h2>
-        <button
-          className="menu-toggle"
-          aria-label="Toggle Side Navigation"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? <FontAwesomeIcon icon={faXmark} /> : <FontAwesomeIcon icon={faBars} />}
-        </button>
-      </div>
+      {
+        isModalOpen && editingProduct ? <></> : 
+        <div className="mobile-topbar">
+          <h2 className="mobile-logo">Admin Panel</h2>
+          <button
+            className="menu-toggle"
+            aria-label="Toggle Side Navigation"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <FontAwesomeIcon icon={faXmark} /> : <FontAwesomeIcon icon={faBars} />}
+          </button>
+        </div>
+      }
 
       {/* Overlay */}
       {menuOpen && (

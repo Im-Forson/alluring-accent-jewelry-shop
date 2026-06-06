@@ -303,6 +303,7 @@ function ManageProduct() {
   // --- SYNCED DATABASE UPDATE CONTROLLER MATCHING THE SCREENSHOT SPEC ---
   const handleUpdateProductSubmit = async (e) => {
     e.preventDefault();
+
     const loadId = toast.loading("Synchronizing updates with backend database...");
 
     try {
@@ -312,36 +313,47 @@ function ManageProduct() {
       formData.append('name', editingProduct.name);
       formData.append('description', editingProduct.description);
       formData.append('category', editingProduct.category);
-      formData.append('WholesaleMOQ', parseInt(editingProduct.WholesaleMOQ || 1));
-      formData.append('stock', parseInt(editingProduct.stock || 0));
-      formData.append('wholesalePrice', parseFloat(editingProduct.wholesalePrice || 0));
-      formData.append('retailPrice', parseFloat(editingProduct.retailPrice || 0));
-      formData.append('tag', editingProduct.tag);
+      formData.append('WholesaleMOQ', parseInt(editingProduct.WholesaleMOQ));
+      formData.append('stock', parseInt(editingProduct.stock));
+      formData.append('wholesalePrice', parseFloat(editingProduct.wholesalePrice));
+      formData.append('retailPrice', parseFloat(editingProduct.retailPrice));
+
+      
+      
 
       // Appending multi-value color form parameters sequentially to match the endpoint schema
       const colors = editingProduct.colors || [];
-      colors.forEach((color) => {
-        if (color.trim() !== "") {
-          formData.append('colors', color.trim());
-        }
-      });
+      const updatedColors = colors.filter((color) => color.trim() !== "");
 
       // Handle raw multimedia file uploads
       const newFileUploads = editingProduct.media || [];
+      const existingImages = editingProduct.existingImages;
+
+      if (existingImages.length === 0 && newFileUploads.length === 0) {
+        toast.dismiss(loadId);
+        toast.error('Images required', {duration: 2000});
+        return;
+      }
+      
+      const targetId = editingProduct.id;
+      
+      if (editingProduct.tag !== '') {
+        formData.append('tag', editingProduct.tag);
+      }
+
+      colors.forEach(color => {
+        formData.append("colors[]", color);
+      });
+
+      existingImages.forEach((url) => {
+        formData.append('existingImages[]', url)
+      });
+
       newFileUploads.forEach((file) => {
         if (file instanceof File) {
           formData.append('images', file);
         }
       });
-
-      // Retain already saved images
-      if (editingProduct.existingImages && editingProduct.existingImages.length > 0) {
-        editingProduct.existingImages.forEach((url) => {
-          formData.append('existingImages', url);
-        });
-      }
-
-      const targetId = editingProduct.id || editingProduct._id;
 
       await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/product/update/${targetId}`,
@@ -354,12 +366,15 @@ function ManageProduct() {
         }
       );
 
+
       toast.dismiss(loadId);
       toast.success("Product parameters updated successfully.");
       setIsModalOpen(false);
       setEditingProduct(null);
       loadProducts();
+
     } catch (error) {
+      console.log(error)
       toast.dismiss(loadId);
       toast.error(error.response?.data?.message || "Failed to save updated parameters.");
     }
@@ -412,7 +427,7 @@ function ManageProduct() {
 
   return (
     <div className="admin-layout">
-      <SideBar />
+      <SideBar isModalOpen={isModalOpen} editingProduct={editingProduct} />
 
       <main className="inventory-main">
         {/* Header Section */}
@@ -625,8 +640,8 @@ function ManageProduct() {
 
       {/* --- EDITED OVERLAY MODAL TO ACCURATELY MIMIC ADDPRODUCT FIELDS IN SCREENSHOT_21_2.PNG --- */}
       {isModalOpen && editingProduct && (
-        <div className="modal-overlay-backdrop" style={modalOverlayStyle}>
-          <div className="modal-content-card" style={modalContentStyle}>
+        <div className="modal-overlay-backdrop p-5" style={modalOverlayStyle}>
+          <div className="modal-content-car w-full md:w-1/2 h-full" style={modalContentStyle}>
             <div className="modal-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #edf2f7', paddingBottom: '12px' }}>
               <h2 style={{ fontSize: '1.25rem', color: '#1a202c', margin: 0 }}>Edit Product Parameters</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#718096' }}><FiX /></button>
@@ -672,6 +687,7 @@ function ManageProduct() {
                   <label style={labelStyle}>Wholesale MOQ (WholesaleMOQ)</label>
                   <input
                     type="number"
+                    readOnly
                     value={editingProduct.WholesaleMOQ}
                     onChange={(e) => setEditingProduct({ ...editingProduct, WholesaleMOQ: e.target.value })}
                     style={inputStyle} required
@@ -816,8 +832,11 @@ const statusIndicatorStyle = { width: '8px', height: '8px', borderRadius: '50%',
 const dropdownItemStyle = { padding: '10px 16px', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '13px', color: '#4a5568', display: 'flex', alignItems: 'center' };
 const filterDropdownStyle = { position: 'absolute', left: 0, top: '45px', backgroundColor: '#fff', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', borderRadius: '6px', padding: '6px 0', zIndex: 110, minWidth: '180px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
 const actionDropdownMenuStyle = { position: 'absolute', right: 0, top: '35px', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: '6px', padding: '6px 0', zIndex: 100, minWidth: '160px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
-const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
-const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', width: '100%', maxWidth: '520px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', maxHeight: '90vh', overflowY: 'auto' };
+
+const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', zIndex: 1001 };
+
+const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', overflowY: 'auto' };
+
 const inputGroupStyle = { display: 'flex', flexDirection: 'column', gap: '6px' };
 const labelStyle = { fontSize: '13px', fontWeight: '600', color: '#334155' };
 const inputStyle = { padding: '10px 14px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '14px', outline: 'none' };
