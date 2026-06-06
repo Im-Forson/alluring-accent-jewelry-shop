@@ -196,7 +196,7 @@ function Promotion() {
     };
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/promotion/create`, payload, axiosConfig);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/create`, payload, axiosConfig);
       toast.success("New promotion initialized under Saved / Upcoming!");
 
       const refreshResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, axiosConfig);
@@ -230,7 +230,7 @@ function Promotion() {
     const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/promotion/start/${targetId}`, { status: 'active' }, axiosConfig);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/promotion/start/${targetId}`, { status: 'active' }, axiosConfig);
 
       const updated = promos.map(p => {
         if ((p._id || p.id) === targetId) {
@@ -261,7 +261,7 @@ function Promotion() {
     const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
 
     try {
-      await axios.put(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/promotion/stop/${targetId}`, { status: 'stopped' }, axiosConfig);
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/promotion/stop/${targetId}`, { status: 'stopped' }, axiosConfig);
 
       const updated = promos.map(p => {
         if ((p._id || p.id) === targetId) {
