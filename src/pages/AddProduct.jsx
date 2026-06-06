@@ -71,7 +71,7 @@ function AddProduct() {
     if (categories.length === 0) {
       fetchCategories()
     }
-    
+
   }, [])
 
   const filteredTags = availableTags.filter((tag) =>
