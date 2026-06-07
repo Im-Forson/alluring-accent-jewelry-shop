@@ -66,7 +66,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       },
   
       onClose: function () {
-        console.log("Payment closed");
+        toast.error('Payment cancelled', {duration: 2000})
       },
     });
   

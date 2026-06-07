@@ -87,14 +87,18 @@ export function ShopProvider({ children }) {
     }
 
     const addToCart = (product) => {
-        setCart((prevCart) => {
-        const existingItem = prevCart.find((item) => item.id === product.id);
-        if (existingItem) {
-            return prevCart;
+        try {
+            setCart((prevCart) => {
+            const existingItem = prevCart.find((item) => item.id === product.id);
+            if (existingItem) {
+                return prevCart;
+            }
+            removeFavorite(product.id);
+            return [...prevCart, product];
+            });
+        } catch (error) {
+            console.log(error)
         }
-        removeFavorite(product.id);
-        return [...prevCart, product];
-        });
     };
 
     const updateCartItemUseMOQ = (index) => {
@@ -120,8 +124,32 @@ export function ShopProvider({ children }) {
     const updateCartItemQty = (id, change) => {
         setCart(cart.map(item => {
             if (item.id === id) {
-                const newQty = item.purchaseQty + change;
+
+                if (item.purchaseQty === '') {
+                    return { ...item, purchaseQty: 1, isBuyWholesale: false };
+                }
+
+                const newQty = parseInt(item.purchaseQty) + change;
                 return newQty > 0 ? { ...item, purchaseQty: newQty } : item;
+            }
+            
+            return item;
+        }));
+    }
+
+    const updateCartItemQtyInput = (id, change) => {
+        setCart(cart.map(item => {
+            if (item.id === id) {
+                return { ...item, purchaseQty: change };
+            }
+            return item;
+        }));
+    }
+
+    const updateCartItemStock = (id, change) => {
+        setCart(cart.map(item => {
+            if (item.id === id) {
+                return { ...item, stock: change };
             }
             return item;
         }));
@@ -256,7 +284,9 @@ export function ShopProvider({ children }) {
                 removeCartItem,
                 updateCartItemUseMOQ,
                 updateCartItemQty,
+                updateCartItemQtyInput,
                 updateCartItemColor,
+                updateCartItemStock,
                 clearCart,
 
                 favorites, 

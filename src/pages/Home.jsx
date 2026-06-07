@@ -90,17 +90,19 @@ export default function HomePage() {
                 loadCategories(['All Jewellery'])
             }
 
-            products.map((product) => {
+            const availableProducts = products.filter(product => product.stock > 0);
+
+            availableProducts.map((product) => {
                 product.isFavorite = false
                 product.preferedColor = product.colors[0]
-                product.purchaseQty = 1 // product.minimumOrder
-                product.orderQty = 1 // product.minimumOrder
+                product.purchaseQty = 1 
+                product.orderQty = 1 
                 product.isBuyWholesale = false
                 product.purchasingPrice = product.sellingPrice
             })
 
-            loadAllProducts(products);
-            const bestSellers = products.filter(product => product.tag === 'Best Seller');
+            loadAllProducts(availableProducts);
+            const bestSellers = availableProducts.filter(product => product.tag === 'Best Seller');
             loadBestSellers(bestSellers);
             // loadSuccessfulOrder(successfullOrdersDummy);
             

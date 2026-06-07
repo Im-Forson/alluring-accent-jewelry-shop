@@ -51,7 +51,9 @@ export default function AllBestSellers() {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
             const products = response.data;
 
-            products.map((product) => {
+            const availableProducts = products.filter(product => product.stock > 0);
+
+            availableProducts.map((product) => {
                 product.isFavorite = false
                 product.preferedColor = product.colors[0]
                 product.purchaseQty = 1 // product.minimumOrder
@@ -60,9 +62,9 @@ export default function AllBestSellers() {
                 product.purchasingPrice = product.sellingPrice
             })
 
-            loadAllProducts(products); 
-            setProductData(products);
-            const bestSellers = products.filter(product => product.tag === 'Best Seller');
+            loadAllProducts(availableProducts); 
+            setProductData(availableProducts);
+            const bestSellers = availableProducts.filter(product => product.tag === 'Best Seller');
             loadBestSellers(bestSellers);
 
           } catch (error) {

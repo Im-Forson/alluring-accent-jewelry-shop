@@ -12,9 +12,11 @@ import BestSellers from '../components/BestSellers';
 import PurchaseOrderSummary from '../components/PurchaseOrderSummary';
 import { ErrorState } from '../components/ErrorState'
 import OrderSuccessModal from '../components/OrderSuccessModal';
+import axios from 'axios';
+import ProcessOverlay from '../components/ProcessOverlay';
 
 export default function ProductPage() {
-  const { allProducts, cart, addToCart, removeCartItem, removeFavorite, viewingProduct, addOrder } = useShop();
+  const { allProducts, cart, addToCart, removeCartItem, removeFavorite, viewingProduct, addOrder, setProcessOverlay } = useShop();
   const { pathname } = useLocation();
   const location = useLocation();
   const navigationSource = (location.state).source;
@@ -112,25 +114,63 @@ export default function ProductPage() {
       toast.success('Added to cart', {duration: 2000});
     }
 
-    const prepareOrder = () => {
-        let buyingPrice = productPrice;
-
-        if (!isBuyAtWholesale && quantity >= WholesaleMOQ) {
-            buyingPrice = wholesalePrice;
-            setProductPrice(buyingPrice)
-            setBuyAtWholesale(true);
+    const prepareOrder = async () => {
+        try {
+            setProcessOverlay(true);
+    
+            let buyingPrice = productPrice;
+    
+            if (!isBuyAtWholesale && quantity >= WholesaleMOQ) {
+                buyingPrice = wholesalePrice;
+                setProductPrice(buyingPrice)
+                setBuyAtWholesale(true);
+            }
+    
+            const order =[ {
+                id: viewingProduct.id,
+                name: viewingProduct.name,
+                image: viewingProduct.images[0],
+                price: buyingPrice,
+                quantity: quantity,
+                totalPrice: quantity * buyingPrice,
+            }];
+    
+            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/product/availability`,
+                {order: order},
+                {
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                }
+            );
+    
+            if (res.status !== 200) {
+                setProcessOverlay(false);
+                return toast.error('Something went wrong', {duration: 2000,});
+            }
+    
+            const availabilityResults = res.data.results;
+            const product = availabilityResults[0];
+            const currentStock = product.stock;
+    
+            if (!product.isAvailable) {
+                setProcessOverlay(false);
+                return toast.error('Out of Stock', {duration: 3000,});
+            }
+    
+            if (quantity > currentStock) {
+                setProcessOverlay(false);
+                return toast.error(`Only ${currentStock} available`, {duration: 3000,});
+            }
+    
+    
+            addOrder(order);
+            setIsOpenPurchaseOrderSummary(true);
+            setProcessOverlay(false);
+        } catch (error) {
+            setProcessOverlay(false);
+            return toast.error('Something went wrong', {duration: 2500,});
         }
-
-        const order =[ {
-            id: viewingProduct.id,
-            name: viewingProduct.name,
-            image: viewingProduct.images[0],
-            price: buyingPrice,
-            quantity: quantity,
-            totalPrice: quantity * buyingPrice,
-        }];
-
-        addOrder(order);
     }
 
     return (
@@ -146,7 +186,10 @@ export default function ProductPage() {
                             isOpen={isOpenPurchaseOrderSummary}
                             setIsOpen={setIsOpenPurchaseOrderSummary}
                         />
+
                         <OrderSuccessModal/>
+
+                        <ProcessOverlay/>
 
                         <div className="min-h-screen bg-white text-zinc-800 font-sans pt-20 pb-16">
                             <div className="px-8 mb-5">
@@ -326,10 +369,7 @@ export default function ProductPage() {
                                         
                                         {/* Express Direct Checkout */}
                                         <button 
-                                            onClick={() => {
-                                            prepareOrder();
-                                            setIsOpenPurchaseOrderSummary(true);
-                                            }}
+                                            onClick={prepareOrder}
                                             className="w-full max-w-md bg-black hover:bg-zinc-900 text-white text-xs font-bold py-3.5 rounded-xl uppercase tracking-widest active:scale-[0.99] transition-all shadow-md cursor-pointer text-center"
                                         >
                                             Buy Now

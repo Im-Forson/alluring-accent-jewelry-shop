@@ -8,11 +8,12 @@ import ProductPage from "../pages/ProductPage"
 
 import logo from '../assets/logo.png'
 import PurchaseOrderSummary from "./PurchaseOrderSummary"
+import axios from "axios"
 
 const colors= []
 
 export default function NavBar({ activePage, favoriteCount, cartCount, setFavorites, bestSellers, setBestSellers }) {
-    const { wholesaleMinOrderQty, allProducts, addOrder, cart, addToCart, setCart, updateCartItemQty, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement } = useShop();
+    const { wholesaleMinOrderQty, allProducts, addOrder, cart, addToCart, setCart, updateCartItemStock, updateCartItemQty, updateCartItemQtyInput, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement, setProcessOverlay } = useShop();
     const navigate = useNavigate();
 
     // Drawer Interface Visibility States
@@ -39,25 +40,27 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
     const handleInputChange = (id, val) => {
         // Strip out anything that isn't a numeric digit
         const numericValue = val.replace(/\D/g, '');
+
+        updateCartItemQtyInput(id, numericValue)
         
-        setCart(cart.map(item => {
-            if (item.id === id) {
-                // If the input is completely empty, leave it as 0 or empty string so they can type freely
-                if (numericValue === '') {
-                    return { ...item, purchaseQty: '' };
-                }
+        // setCart(cart.map(item => {
+        //     if (item.id === id) {
+        //         // If the input is completely empty, leave it as 0 or empty string so they can type freely
+        //         if (numericValue === '') {
+        //             return { ...item, purchaseQty: '' };
+        //         }
                 
-                let parsedQty = parseInt(numericValue, 10);
+        //         let parsedQty = parseInt(numericValue, 10);
                 
-                // Enforce minimum order quantity if active
-                if (item.isUseMOQ && parsedQty < item.minimumOrder) {
-                    parsedQty = item.minimumOrder;
-                }
+        //         // Enforce minimum order quantity if active
+        //         if (item.isBuyWholesale && parsedQty < item.WholesaleMOQ) {
+        //             parsedQty = item.WholesaleMOQ;
+        //         }
                 
-                return { ...item, purchaseQty: parsedQty };
-            }
-            return item;
-        }));
+        //         return { ...item, purchaseQty: parsedQty };
+        //     }
+        //     return item;
+        // }));
     };
 
     const handleInputBlur = (id, val) => {
@@ -100,66 +103,119 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
         
     };
 
-    function proceedToPayment() {
-        const orders = cart.map(item => {
-            let buyingPrice = item.purchasingPrice;
-
-            if (!item.isBuyWholesale && item.purchaseQty >= wholesaleMinOrderQty) {
-                buyingPrice = item.wholesalePrice
+    const proceedToPayment = async () => {
+        try {
+            setProcessOverlay(true);
+    
+            const orders = cart.map(item => {
+                let buyingPrice = item.purchasingPrice;
+    
+                if (!item.isBuyWholesale && item.purchaseQty >= wholesaleMinOrderQty) {
+                    buyingPrice = item.wholesalePrice
+                }
+    
+                const order = {
+                    id: item.id,
+                    category: item.category,
+                    name: item.name,
+                    price: buyingPrice,
+                    wholesalePrice: item.wholesalePrice,
+                    quantity: item.purchaseQty,
+                    totalPrice: buyingPrice * item.purchaseQty,
+                };
+    
+                return order;
+            });
+    
+            // checking availability
+            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/product/availability`,
+                {order: orders},
+                {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+    
+            if (res.status !== 200) {
+                setProcessOverlay(false);
+                return toast.error('Something went wrong', {duration: 2000,});
             }
+    
+            const availabilityResults = res.data.results;
+            console.log('results:', availabilityResults)
 
-            const order = {
-                id: item.id,
-                category: item.category,
-                name: item.name,
-                price: buyingPrice,
-                wholesalePrice: item.wholesalePrice,
-                quantity: item.purchaseQty,
-                totalPrice: buyingPrice * item.purchaseQty,
-            };
+            let isItemUnavailable = false;
+            let isItemLowStock = false;
 
-            return order;
-        });
+            for (let i = 0; i < availabilityResults.length; i++) {
+                const id = availabilityResults[i].productId;
+                const isAvailable = availabilityResults[i].isAvailable;
+                const orderQty = availabilityResults[i].orderQty;
+                const currentStock = availabilityResults[i].stock;
 
-        // count same categories
-        const categories = [];
-
-        orders.map((order) => {
-            const category = order.category;
-
-            let isNew = true;
-
-            for (let i = 0; i < categories.length; i++) {
-                if (categories[i].name === category) {
-                    categories[i].count = categories[i].count + 1;
-                    isNew = false;
-                    break;
+                if (!isAvailable) {
+                    isItemUnavailable = true;
+                    updateCartItemStock(id, currentStock);
+                }
+                else {
+                    if (currentStock < orderQty) {
+                        isItemLowStock = true;
+                        updateCartItemStock(id, currentStock);
+                    }
                 }
             }
 
-            if (isNew) {
-                categories.push({name: category, count: 1});
+            if (isItemUnavailable || isItemLowStock) {
+                setProcessOverlay(false);
+                return toast.error('Some items are in low stock or unavailable', { duration: 3000});
             }
-        })
-
-        // change prices to wholesale if quantity is 6 or more
-        for (let i = 0; i < categories.length; i++) {
-            if (categories[i].count >= wholesaleMinOrderQty) {
-                orders.map(order => {
-                    if (order.category === categories[i].name) {
-                        order.price = order.wholesalePrice;
-                        order.totalPrice = order.wholesalePrice * order.quantity;
+    
+            // count same categories
+            const categories = [];
+    
+            orders.map((order) => {
+                const category = order.category;
+    
+                let isNew = true;
+    
+                for (let i = 0; i < categories.length; i++) {
+                    if (categories[i].name === category) {
+                        categories[i].count = categories[i].count + 1;
+                        isNew = false;
+                        break;
                     }
-                })
+                }
+    
+                if (isNew) {
+                    categories.push({name: category, count: 1});
+                }
+            })
+    
+            // change prices to wholesale if quantity is 6 or more
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].count >= wholesaleMinOrderQty) {
+                    orders.map(order => {
+                        if (order.category === categories[i].name) {
+                            order.price = order.wholesalePrice;
+                            order.totalPrice = order.wholesalePrice * order.quantity;
+                        }
+                    })
+                }
             }
+    
+            addOrder(orders);
+            openPaymentSummary(true);
+            setIsMenuOpen(false);
+            setIsFavoritesOpen(false);
+            setIsCartOpen(false);
+            setProcessOverlay(false);
+            
+        } catch (error) {
+            console.log(error)
+            setProcessOverlay(false);
+            return toast.error('Something went wrong', {duration: 2500,});
         }
-
-        addOrder(orders);
-        openPaymentSummary(true);
-        setIsMenuOpen(false);
-        setIsFavoritesOpen(false);
-        setIsCartOpen(false);
-        // console.log(orders)
     }
 
     return (
@@ -362,8 +418,21 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                             ) : (
                                 cart.map((item, index) => (
                                     <div key={index} className={`flex gap-3  p-3 ${activePage === 'product' && item.id === viewingProduct.id ? ' bg-pink-0' : ' bg-pink-50'}`}>
+
                                         <img src={item.images[0]} alt={item.name} className="w-16 h-16 rounded-lg object-cover shrink-0" />
                                         <div className="flex-1 min-w-0">
+                                        <div className="">
+                                            {
+                                                item.stock < item.purchaseQty && (
+                                                    <p className="text-[red] text-sm font-bold ">Available stock: {item.stock}</p>
+                                                )
+                                            }
+                                            {
+                                                item.stock <= 0 && (
+                                                    <p className="text-[red] text-sm font-bold">Unavailable</p>
+                                                )
+                                            }
+                                        </div>
                                             <div className="flex justify-between items-start mb-1">
                                                 <h5 className="text-sm font-bold text-zinc-800 font-sans truncate pr-2 capitalize mb-">{item.name}</h5>
                                                 <button onClick={() => handleRemoveCartItem(item)} className="text-[gray] hover:text-[maroon] p-0.5 active:text-red-500 transition-colors cursor-pointer">

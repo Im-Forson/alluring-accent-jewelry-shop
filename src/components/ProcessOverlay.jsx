@@ -42,10 +42,12 @@ export default function ProcessOverlay() {
                         margin: '0 auto 15px auto'
                     }}
                 />
+                {/* <p style={{ color: '#ffffff', fontFamily: 'sans-serif', fontSize: '14px', letterSpacing: '1px' }}>
+                    Please wait
+                </p> */}
                 <p style={{ color: '#ffffff', fontFamily: 'sans-serif', fontSize: '14px', letterSpacing: '1px' }}>
-                    Processing details, please wait...
+                    Processing...
                 </p>
-
                 {/* Injecting CSS keyframes directly into a style tag for the spinner animation */}
                 <style>{`
                     @keyframes spin {
