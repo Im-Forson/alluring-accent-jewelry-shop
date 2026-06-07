@@ -292,15 +292,15 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                         </>
                     }
 
-                    <div className="flex flex-row items-center gap-4 md:gap-5">
-                        {
+                    <div className="flex flex-row items-center gap-5 md:gap-5">
+                        {/* {
                             activePage === 'product' ? '' :
                             <>
                                 <button className="hidden md:flex cursor-pointer hover:text-pink-500 transition-colors" onClick={loginHandler}>
                                     <UserRound className="w-5 h-5 text-zinc-700 font-bold"/>
                                 </button>
                             </>
-                        }
+                        } */}
                         
                         {/* Favorites Activation Button Hook */}
                         <button onClick={() => setIsFavoritesOpen(true)} className="flex flex-row items-center relative cursor-pointer hover:text-pink-500 transition-colors">
@@ -339,11 +339,11 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                             <span onClick={shopHandler} className={`text-base font-semibold transition-colors ${activePage === 'shop' ? 'text-pink-600' : 'text-gray-800'}`}>Shop</span>
                             <span onClick={contactHandler} className={`text-base font-semibold transition-colors ${activePage === 'contact' ? 'text-pink-600' : 'text-gray-800'}`}>Contact Us</span>
                         </div>
-                        <div className="mt-auto pt-6 border-t border-gray-100">
+                        {/* <div className="mt-auto pt-6 border-t border-gray-100">
                             <button onClick={loginHandler} className="w-full flex items-center justify-center gap-2 bg-pink-500 text-white font-bold py-3 px-4 rounded-xl text-sm active:scale-95 transition-all cursor-pointer">
                                 <UserRound className="w-4 h-4" /> Account Login
                             </button>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 
