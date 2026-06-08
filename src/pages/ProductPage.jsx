@@ -390,7 +390,7 @@ export default function ProductPage() {
                                 </div>
                             </main>
                             
-                            <BestSellers/>
+                            {/* <BestSellers/> */}
                             <WhyShopWithUs/>
                             <Footer/>
                         </div>

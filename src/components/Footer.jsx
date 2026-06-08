@@ -17,16 +17,16 @@ export default function Footer() {
                     </p>
                     {/* Modern Circled Social Icons */}
                     <div className="flex gap-3 mt-2">
-                        <a href="#" className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
+                        <a className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
                             <FaInstagram className="text-sm" />
                         </a>
-                        <a href="#" className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
+                        <a className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
                             <FaFacebookF className="text-sm" />
                         </a>
-                        <a href="#" className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
+                        <a className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
                             <FaTiktok className="text-sm" />
                         </a>
-                        <a href="#" className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
+                        <a className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-pink-500 hover:text-white active:scale-90 transition-all cursor-pointer">
                             <FaPinterestP className="text-sm" />
                         </a>
                     </div>
