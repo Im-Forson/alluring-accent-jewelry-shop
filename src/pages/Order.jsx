@@ -59,6 +59,7 @@ function Order() {
       });
       
       const data = response.data;
+      console.log(data)
 
       const formattedOrders = data.map((order, index) => {
         let currentStatus = 'Pending';
@@ -83,7 +84,7 @@ function Order() {
           isDelivered: order.isDelivered || false,
           date: order.createdAt 
             ? new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            : 'May 22, 2026',
+            : 'null',
           customerDetails: {
             phone: order.phone || 'N/A',
             email: order.email || 'N/A',

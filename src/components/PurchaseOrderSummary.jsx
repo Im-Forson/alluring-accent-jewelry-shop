@@ -53,25 +53,25 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmitOrder = () => {
-    const handler = window.PaystackPop.setup({
-      key: "pk_test_d9b8c4ff167bb22afa168ab92ab2f50bee0706bc",
-      email: "info.alluringaccent@gmail.com",
-      amount: 5000 * 100,
-      currency: "GHS",
+  // const handleSubmitOrder = () => {
+  //   const handler = window.PaystackPop.setup({
+  //     key: paystackKey,
+  //     email: "info.alluringaccent@gmail.com",
+  //     amount: 5000 * 100,
+  //     currency: "GHS",
   
-      callback: function (response) {
-        // 👉 send reference to backend
-        // verifyPayment(response.reference);
-      },
+  //     callback: function (response) {
+  //       // 👉 send reference to backend
+  //       // verifyPayment(response.reference);
+  //     },
   
-      onClose: function () {
-        toast.error('Payment cancelled', {duration: 2000})
-      },
-    });
+  //     onClose: function () {
+  //       toast.error('Payment cancelled', {duration: 2000})
+  //     },
+  //   });
   
-    handler.openIframe();
-  };
+  //   handler.openIframe();
+  // };
 
   const handleRemoveOrdersFromCart = () => {
     if (orders.length > 1) {
