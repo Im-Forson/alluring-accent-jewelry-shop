@@ -40,27 +40,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
     const handleInputChange = (id, val) => {
         // Strip out anything that isn't a numeric digit
         const numericValue = val.replace(/\D/g, '');
-
         updateCartItemQtyInput(id, numericValue)
-        
-        // setCart(cart.map(item => {
-        //     if (item.id === id) {
-        //         // If the input is completely empty, leave it as 0 or empty string so they can type freely
-        //         if (numericValue === '') {
-        //             return { ...item, purchaseQty: '' };
-        //         }
-                
-        //         let parsedQty = parseInt(numericValue, 10);
-                
-        //         // Enforce minimum order quantity if active
-        //         if (item.isBuyWholesale && parsedQty < item.WholesaleMOQ) {
-        //             parsedQty = item.WholesaleMOQ;
-        //         }
-                
-        //         return { ...item, purchaseQty: parsedQty };
-        //     }
-        //     return item;
-        // }));
     };
 
     const handleInputBlur = (id, val) => {
@@ -118,6 +98,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                     id: item.id,
                     category: item.category,
                     name: item.name,
+                    color: item.preferedColor,
                     price: buyingPrice,
                     wholesalePrice: item.wholesalePrice,
                     quantity: item.purchaseQty,

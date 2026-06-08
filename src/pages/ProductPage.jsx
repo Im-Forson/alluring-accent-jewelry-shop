@@ -130,6 +130,7 @@ export default function ProductPage() {
                 id: viewingProduct.id,
                 name: viewingProduct.name,
                 image: viewingProduct.images[0],
+                color: selectedColor,
                 price: buyingPrice,
                 quantity: quantity,
                 totalPrice: quantity * buyingPrice,
