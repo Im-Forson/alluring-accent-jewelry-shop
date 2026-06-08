@@ -130,7 +130,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         }
       );
 
-      await axios.post(`${import.meta.env.VITE_API_BASE_URLL}/order/sms`,
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/sms`,
         {...orderInfo},
         {
           headers: {
