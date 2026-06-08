@@ -44,8 +44,9 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
   const totalCost = (orderDetails.purchasingPrice * orderDetails.purchaseQty) + orderDetails.shippingFee;
 
-  const itemsTotalCost = orders.reduce((totalCost, order) => {return totalCost + order.totalPrice}, 0)
-  const grandTotal = itemsTotalCost + orderDetails.shippingFee
+  const itemsTotalCost = orders.reduce((totalCost, order) => {return totalCost + order.totalPrice}, 0);
+  const serviceFee = itemsTotalCost * 0.02;
+  const grandTotal = itemsTotalCost + orderDetails.shippingFee + serviceFee;
 
   // Form Field Change Listener Action
   const handleInputChange = (e) => {
@@ -379,8 +380,12 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                       <span className="font-bold text-zinc-700">{orderDetails.currency} {(itemsTotalCost).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Insured Delivery</span>
+                      <span>Delivery</span>
                       <span className="font-bold text-zinc-700">{orderDetails.currency} {orderDetails.shippingFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Service</span>
+                      <span className="font-bold text-zinc-700">{orderDetails.currency} {serviceFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                     </div>
                   </div>
                 </div>

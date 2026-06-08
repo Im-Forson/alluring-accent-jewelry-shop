@@ -192,7 +192,7 @@ export default function ProductPage() {
 
                         <ProcessOverlay/>
 
-                        <div className="min-h-screen bg-white text-zinc-800 font-sans pt-20 pb-16">
+                        <div className="min-h-screen bg-white text-zinc-800 font-sans pt-20 pb-">
                             <div className="px-8 mb-5">
                                 {/* <h3 className="hidden md:flex text-sm">Explore our most loved pieces</h3> */}
                             </div>
@@ -391,9 +391,10 @@ export default function ProductPage() {
                             </main>
                             
                             {/* <BestSellers/> */}
-                            <WhyShopWithUs/>
-                            <Footer/>
+                            
                         </div>
+                        <WhyShopWithUs/>
+                        <Footer/>
                     </div>
                 )
             }
