@@ -32,6 +32,7 @@ export function ShopProvider({ children }) {
     const [bestSellers, setBestSellers] = useState([]);
 
     const [activePage, setActivePage] = useState('home');
+    // const [paystackKey, setPaystackKey] = useState('pk_test_db11b399b9f558c72508d218d313f13b35e2658d');
 
     const [shopCategory, setShopAllCategory] = useState("All Jewellery");
     const [shopColor, setShopColor] = useState("All Colors");
@@ -41,6 +42,9 @@ export function ShopProvider({ children }) {
     const [isProcessing, setProcessing] = useState(false);
 
     const [announcement, setAnnouncement] = useState({message: "", isDisplay: false});
+
+    // const paystackKey = 'pk_live_b719b05ba80b43fa0efa101aabaaf40cd5fa4691';
+    const paystackKey = 'pk_test_db11b399b9f558c72508d218d313f13b35e2658d';
 
     const setHomeDataLoading = (val) => {
         setisHomeDataLoading(val);
@@ -248,6 +252,7 @@ export function ShopProvider({ children }) {
     return (
         <ShopContext.Provider 
             value={{
+                paystackKey,
                 wholesaleMinOrderQty,
                 
                 ishomeDataLoading,

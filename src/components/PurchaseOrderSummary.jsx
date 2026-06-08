@@ -10,7 +10,7 @@ import { useShop } from '../../utilities/ShopContext';
 import toast from 'react-hot-toast';
 
 export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
-  const { orders, addOrder, loadOrderReceipt, cart, clearCart, removeCartItem, updateIsOrderSuccess, paystackResponse, loadPaystackResponse, setProcessOverlay } = useShop();
+  const { orders, addOrder, loadOrderReceipt, cart, clearCart, removeCartItem, updateIsOrderSuccess, paystackResponse, loadPaystackResponse, setProcessOverlay, paystackKey } = useShop();
   const navigate = useNavigate();
   const location = useLocation();
   // console.log(orders)
@@ -97,7 +97,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       formData.products = orders
   
       const handler = window.PaystackPop.setup({
-        key: `pk_test_d9b8c4ff167bb22afa168ab92ab2f50bee0706bc`,
+        key: paystackKey,
         email: "info.alluringaccent@gmail.com",
         amount: grandTotal * 100,
         currency: "GHS",
@@ -368,6 +368,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                           <span className="text-[11px] font-semibold font-sans text-zinc-400">{order.quantity} x {orderDetails.currency}{order.price.toLocaleString()}</span>
                           <span className="text-[11px] font-semibold font-sans text-zinc-400">{orderDetails.currency}{order.totalPrice.toLocaleString()}</span>
                         </div>
+                        <span className="text-[11px] font-semibold font-sans text-zinc-400 capitalize">Color: {order.color}</span>
                       </div>
                     ))
                   }
