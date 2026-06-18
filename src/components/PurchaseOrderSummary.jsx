@@ -86,7 +86,8 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
   const payWithPaystack = async (e) => {
     try {
-      e.preventDefault()
+      e.preventDefault();
+
       if (formData.email.trim() === '') {
         formData.email = 'null';
       }
@@ -96,10 +97,14 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       formData.subtotal = itemsTotalCost
       formData.totalCost = grandTotal
       formData.products = orders
+
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/payment/data`);
+      const paymentData = res.data
+      console.log(res.data)
   
       const handler = window.PaystackPop.setup({
-        key: paystackKey,
-        email: "info.alluringaccent@gmail.com",
+        key: paymentData.testKey,
+        email: paymentData.email,
         amount: grandTotal * 100,
         currency: "GHS",
     
@@ -110,7 +115,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         },
     
         onClose: function () {
-          console.log("Payment closed");
+          toast.error('Payment closed', {duration: 2000});
         },
       });
     
@@ -171,14 +176,12 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
             email: formData.email,
             region: formData.region,
             city: formData.city,
-            address: formData.address,
             products: orders,
             isOrderPlaced: true,
             deliveryCost: orderDetails.shippingFee,
             subtotal: itemsTotalCost,
             totalCost: grandTotal,
           },
-        // formData,
         {
           headers: {
             "Content-Type": "application/json"
@@ -198,8 +201,47 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         sendEmail_Sms(receipt);
       }
       else {
-        setProcessOverlay(false);
-        toast.error('Something went wrong', {duration: 2000});
+
+        const res = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/order/create`,
+            {
+              recipient: formData.recipient,
+              phone: formData.phone,
+              email: formData.email,
+              region: formData.region,
+              city: formData.city,
+              products: orders,
+              isOrderPlaced: true,
+              deliveryCost: orderDetails.shippingFee,
+              subtotal: itemsTotalCost,
+              totalCost: grandTotal,
+            },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+    
+        const receipt = res.data.orderInfo
+    
+        if (res.status === 201) {
+          loadOrderReceipt(receipt)
+          setProcessOverlay(false)
+          handleRemoveOrdersFromCart();
+          addOrder([])
+          updateIsOrderSuccess(true); // show upon transaction onsuccess
+    
+          sendEmail_Sms(receipt);
+        }
+        else {
+  
+          setProcessOverlay(false);
+          toast.error('Something went wrong', {duration: 2000});
+        }
+
+        // setProcessOverlay(false);
+        // toast.error('Something went wrong', {duration: 2000});
       }
     } catch (error) {
       setProcessOverlay(false);
@@ -325,7 +367,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   <div>
                     <label className="text-[10px] font-bold text-zinc-500 tracking-wide uppercase">City / Town</label>
                     <input 
@@ -338,7 +380,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                       className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa]"
                     />
                   </div>
-                  <div>
+                  {/* <div>
                     <label className="text-[10px] font-bold text-zinc-500 tracking-wide uppercase">Address</label>
                     <input 
                       type="text"
@@ -349,7 +391,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                       required
                       className="w-full mt-1 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pink-400 bg-[#fafafa]"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
