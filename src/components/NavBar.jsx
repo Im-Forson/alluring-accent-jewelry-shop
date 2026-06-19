@@ -124,7 +124,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
             }
     
             const availabilityResults = res.data.results;
-            console.log('results:', availabilityResults)
+            // console.log('results:', availabilityResults)
 
             let isItemUnavailable = false;
             let isItemLowStock = false;

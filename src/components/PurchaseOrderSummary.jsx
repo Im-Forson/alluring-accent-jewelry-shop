@@ -10,198 +10,148 @@ import { useShop } from '../../utilities/ShopContext';
 import toast from 'react-hot-toast';
 
 export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
-  const { orders, addOrder, loadOrderReceipt, cart, clearCart, removeCartItem, updateIsOrderSuccess, paystackResponse, loadPaystackResponse, setProcessOverlay, paystackKey } = useShop();
-  const navigate = useNavigate();
-  const location = useLocation();
-  // console.log(orders)
+    const { orders, addOrder, loadOrderReceipt, cart, clearCart, removeCartItem, updateIsOrderSuccess, paystackResponse, loadPaystackResponse, setProcessOverlay, paystackKey } = useShop();
+    const navigate = useNavigate();
+    const location = useLocation();
+    // console.log(orders)
 
-  const [isAlert, setAlert] = useState(false);
+    const [isAlert, setAlert] = useState(false);
 
-  const [isProcessReceipt, setProcessReceipt] = useState(false);
-  const [isSendEmail, setSendEmail] = useState(false);
-  const [] = useState(false);
-  const [] = useState(false);
+    const [isProcessReceipt, setProcessReceipt] = useState(false);
+    const [isReprocessReceipt, setReprocessReceipt] = useState(false);
+    const [isSendEmail, setSendEmail] = useState(false);
+    const [] = useState(false);
+    const [] = useState(false);
 
-  // 1. Initialize Controlled Form Input State Fields
-  const [formData, setFormData] = useState({
-    recipient: '',
-    phone: '',
-    email: '',
-    region: 'Accra',
-    city: '',
-    address: ''
-  });
+    // 1. Initialize Controlled Form Input State Fields
+    const [formData, setFormData] = useState({
+      recipient: '',
+      phone: '',
+      email: '',
+      region: 'Accra',
+      city: '',
+      address: ''
+    });
 
-  // Sample purchase cost payload attributes matching your item structure
-  
-  const orderDetails = {
-    title: "Rose Gold Infinity Ring",
-    purchasingPrice: 450.00,
-    purchaseQty: 1,
-    shippingFee: formData.region === 'Accra' ? 0.00 : 15.00, // Dynamic location pricing calculations
-    currency: "GH₵"
-  };
+    // Sample purchase cost payload attributes matching your item structure
+    
+    const orderDetails = {
+      title: "Rose Gold Infinity Ring",
+      purchasingPrice: 450.00,
+      purchaseQty: 1,
+      shippingFee: formData.region === 'Accra' ? 0.00 : 15.00, // Dynamic location pricing calculations
+      currency: "GH₵"
+    };
 
-  const totalCost = (orderDetails.purchasingPrice * orderDetails.purchaseQty) + orderDetails.shippingFee;
+    const totalCost = (orderDetails.purchasingPrice * orderDetails.purchaseQty) + orderDetails.shippingFee;
 
-  const itemsTotalCost = orders.reduce((totalCost, order) => {return totalCost + order.totalPrice}, 0);
-  const serviceFee = itemsTotalCost * 0.02;
-  const grandTotal = itemsTotalCost + orderDetails.shippingFee + serviceFee;
+    const itemsTotalCost = orders.reduce((totalCost, order) => {return totalCost + order.totalPrice}, 0);
+    const serviceFee = itemsTotalCost * 0.02;
+    const grandTotal = itemsTotalCost + orderDetails.shippingFee + serviceFee;
+    // console.log(grandTotal)
 
-  // Form Field Change Listener Action
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+    // Form Field Change Listener Action
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
-  // const handleSubmitOrder = () => {
-  //   const handler = window.PaystackPop.setup({
-  //     key: paystackKey,
-  //     email: "info.alluringaccent@gmail.com",
-  //     amount: 5000 * 100,
-  //     currency: "GHS",
-  
-  //     callback: function (response) {
-  //       // 👉 send reference to backend
-  //       // verifyPayment(response.reference);
-  //     },
-  
-  //     onClose: function () {
-  //       toast.error('Payment cancelled', {duration: 2000})
-  //     },
-  //   });
-  
-  //   handler.openIframe();
-  // };
+    const handleRemoveOrdersFromCart = () => {
+      if (orders.length > 1) {
+        return clearCart();
+      }
 
-  const handleRemoveOrdersFromCart = () => {
-    if (orders.length > 1) {
-      return clearCart();
+      orders.map((item) => {
+        removeCartItem(item.id);
+      })
     }
 
-    orders.map((item) => {
-      removeCartItem(item.id);
-    })
-  }
+    const payWithPaystack = async (e) => {
+      try {
+        e.preventDefault();
 
-  const payWithPaystack = async (e) => {
-    try {
-      e.preventDefault();
+        if (formData.email.trim() === '') {
+          formData.email = 'null';
+        }
+    
+        formData.isOrderPlaced = true
+        formData.deliveryCost = orderDetails.shippingFee
+        formData.subtotal = itemsTotalCost
+        formData.totalCost = grandTotal
+        formData.products = orders
 
-      if (formData.email.trim() === '') {
-        formData.email = 'null';
-      }
-  
-      formData.isOrderPlaced = true
-      formData.deliveryCost = orderDetails.shippingFee
-      formData.subtotal = itemsTotalCost
-      formData.totalCost = grandTotal
-      formData.products = orders
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/payment/data`);
+        const paymentData = res.data
 
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/payment/data`);
-      const paymentData = res.data
-      console.log(res.data)
-  
-      const handler = window.PaystackPop.setup({
-        key: paymentData.testKey,
-        email: paymentData.email,
-        amount: grandTotal * 100,
-        currency: "GHS",
+        let amountPayable = (grandTotal * 100).toFixed(2)
+        amountPayable = parseFloat(amountPayable);
     
-        callback: function (response) {
-          // console.log("Success:", response.reference);
-          // processReceipt();
-          setProcessReceipt(true);
-        },
-    
-        onClose: function () {
-          toast.error('Payment closed', {duration: 2000});
-        },
-      });
-    
-      handler.openIframe();
-    } catch (error) {
+        const handler = window.PaystackPop.setup({
+          key: paymentData.liveKey,
+          email: paymentData.email,
+          amount: amountPayable,
+          currency: "GHS",
       
-    }
-  };
-
-  const sendEmail_Sms = async (orderInfo) => {
-    try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/email`,
-        {...orderInfo},
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
-
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/sms`,
-        {...orderInfo},
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
-
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const processReceipt = async () => {
-    try {
-      setProcessOverlay(true);
-      setIsOpen(false);
-      if (location.key !== 'default') {
-        navigate(-1);
-      }
-  
-      if (formData.email.trim() === '') {
-        formData.email = 'null';
-      }
-  
-      formData.isOrderPlaced = true
-      formData.deliveryCost = orderDetails.shippingFee
-      formData.subtotal = itemsTotalCost
-      formData.totalCost = grandTotal
-      formData.products = orders
-  
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/order/create`,
-          {
-            recipient: formData.recipient,
-            phone: formData.phone,
-            email: formData.email,
-            region: formData.region,
-            city: formData.city,
-            products: orders,
-            isOrderPlaced: true,
-            deliveryCost: orderDetails.shippingFee,
-            subtotal: itemsTotalCost,
-            totalCost: grandTotal,
+          callback: function (response) {
+            // console.log("Success:", response.reference);
+            setProcessReceipt(true);
           },
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      )
-  
-      const receipt = res.data.orderInfo
-  
-      if (res.status === 201) {
-        loadOrderReceipt(receipt)
-        setProcessOverlay(false)
-        handleRemoveOrdersFromCart();
-        addOrder([])
-        updateIsOrderSuccess(true); // show upon transaction onsuccess
-  
-        sendEmail_Sms(receipt);
+      
+          onClose: function () {
+            toast.error('Payment closed', {duration: 2000});
+          },
+        });
+      
+        handler.openIframe();
+      } catch (error) {
+        toast.error('Something went wrong', {duration: 2000});
       }
-      else {
+    };
 
+    const sendEmail_Sms = async (orderInfo) => {
+      try {
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/email`,
+          {...orderInfo},
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/sms`,
+          {...orderInfo},
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    const processReceipt = async () => {
+      try {
+        setProcessOverlay(true);
+        setIsOpen(false);
+
+        if (location.key !== 'default') {
+          navigate(-1);
+        }
+    
+        if (formData.email.trim() === '') {
+          formData.email = 'null';
+        }
+    
+        formData.isOrderPlaced = true
+        formData.deliveryCost = orderDetails.shippingFee
+        formData.subtotal = itemsTotalCost
+        formData.totalCost = grandTotal
+        formData.products = orders
+    
         const res = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/order/create`,
             {
@@ -233,28 +183,169 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
           updateIsOrderSuccess(true); // show upon transaction onsuccess
     
           sendEmail_Sms(receipt);
+
         }
         else {
-  
-          setProcessOverlay(false);
-          toast.error('Something went wrong', {duration: 2000});
+          // Recreate order when first request fails
+          const res = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/order/create`,
+              {
+                recipient: formData.recipient,
+                phone: formData.phone,
+                email: formData.email,
+                region: formData.region,
+                city: formData.city,
+                products: orders,
+                isOrderPlaced: true,
+                deliveryCost: orderDetails.shippingFee,
+                subtotal: itemsTotalCost,
+                totalCost: grandTotal,
+              },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+      
+          const receipt = res.data.orderInfo
+      
+          if (res.status === 201) {
+            loadOrderReceipt(receipt)
+            setProcessOverlay(false)
+            handleRemoveOrdersFromCart();
+            addOrder([])
+            updateIsOrderSuccess(true); // show upon transaction onsuccess
+      
+            sendEmail_Sms(receipt);
+
+          }
+          else {
+            // generate locally when second request fails
+            const orderId = generateOrderId();
+
+            const manualReceipt = {
+                orderId: orderId,
+                recipient: formData.recipient,
+                phone: formData.phone,
+                email: formData.email,
+                region: formData.region,
+                city: formData.city,
+                products: orders,
+                subtotal: itemsTotalCost,
+                deliveryCost: orderDetails.shippingFee,
+                totalCost: grandTotal,
+            }
+
+            loadOrderReceipt(manualReceipt)
+            setProcessOverlay(false)
+            handleRemoveOrdersFromCart();
+            addOrder([])
+            updateIsOrderSuccess(true); // show upon transaction onsuccess
+      
+            sendEmail_Sms(manualReceipt);
+          }
         }
-
-        // setProcessOverlay(false);
-        // toast.error('Something went wrong', {duration: 2000});
+      } catch (error) {
+        reprocessReceipt();
       }
-    } catch (error) {
-      setProcessOverlay(false);
-      toast.error('Something went wrong', {duration: 2000});
     }
-  }
 
-  useEffect(() => {
-    if (isProcessReceipt) {
-      processReceipt();
-      setProcessReceipt(false);
+    const reprocessReceipt = async () => {
+      try {
+        if (formData.email.trim() === '') {
+          formData.email = 'null';
+        }
+    
+        formData.isOrderPlaced = true
+        formData.deliveryCost = orderDetails.shippingFee
+        formData.subtotal = itemsTotalCost
+        formData.totalCost = grandTotal
+        formData.products = orders
+    
+        const res = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/order/create`,
+            {
+              recipient: formData.recipient,
+              phone: formData.phone,
+              email: formData.email,
+              region: formData.region,
+              city: formData.city,
+              products: orders,
+              isOrderPlaced: true,
+              deliveryCost: orderDetails.shippingFee,
+              subtotal: itemsTotalCost,
+              totalCost: grandTotal,
+            },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+    
+        const receipt = res.data.orderInfo
+    
+        if (res.status === 201) {
+          loadOrderReceipt(receipt)
+          setProcessOverlay(false)
+          handleRemoveOrdersFromCart();
+          addOrder([])
+          updateIsOrderSuccess(true); // show upon transaction onsuccess
+    
+          sendEmail_Sms(receipt);
+
+        }
+        else {
+          // generate locally when second request fails
+          const orderId = generateOrderId();
+
+          const manualReceipt = {
+              orderId: orderId,
+              recipient: formData.recipient,
+              phone: formData.phone,
+              email: formData.email,
+              region: formData.region,
+              city: formData.city,
+              products: orders,
+              subtotal: itemsTotalCost,
+              deliveryCost: orderDetails.shippingFee,
+              totalCost: grandTotal,
+          }
+
+          loadOrderReceipt(manualReceipt)
+          setProcessOverlay(false)
+          handleRemoveOrdersFromCart();
+          addOrder([])
+          updateIsOrderSuccess(true); // show upon transaction onsuccess
+    
+          sendEmail_Sms(manualReceipt);
+
+        }
+      } catch (error) {
+        setProcessOverlay(false);
+        toast.error('Something went wrong', {duration: 2000});
+      }
     }
-  }, [isProcessReceipt])
+
+    useEffect(() => {
+      if (isProcessReceipt) {
+        processReceipt();
+        setProcessReceipt(false);
+      }
+    }, [isProcessReceipt]);
+
+    function generateOrderId() {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let orderId = '';
+      
+      for (let i = 0; i < 8; i++) {
+          const randomIndex = Math.floor(Math.random() * characters.length);
+          orderId += characters[randomIndex];
+      }
+      
+      return orderId;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center p-">
