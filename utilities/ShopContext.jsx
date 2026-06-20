@@ -211,6 +211,10 @@ export function ShopProvider({ children }) {
         });
     };
 
+    const clearFavorites = () => {
+        setFavorites([]);
+    };
+
     const loadBestSellers = (products) => {
         setBestSellers(products);
     }
@@ -296,6 +300,7 @@ export function ShopProvider({ children }) {
                 favorites, 
                 manageFavorite,
                 removeFavorite,
+                clearFavorites,
 
                 bestSellers,
                 loadBestSellers,

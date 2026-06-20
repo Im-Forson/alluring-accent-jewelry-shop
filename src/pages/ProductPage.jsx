@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle, Square, CheckSquare } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -16,12 +16,14 @@ import axios from 'axios';
 import ProcessOverlay from '../components/ProcessOverlay';
 
 export default function ProductPage() {
-  const { allProducts, cart, addToCart, removeCartItem, removeFavorite, viewingProduct, addOrder, setProcessOverlay } = useShop();
+  const { allProducts, loadAllProducts, cart, addToCart, removeCartItem, clearCart, removeFavorite, clearFavorites, viewingProduct, addOrder, setProcessOverlay } = useShop();
   const { pathname } = useLocation();
   const location = useLocation();
   const navigationSource = (location.state).source;
+  const navigate = useNavigate();
 
-  const { id, name, description, retailPrice, wholesalePrice, purchasingPrice, colors, preferedColor, WholesaleMOQ, purchaseQty, images, isBuyWholesale, } = viewingProduct;
+  const { id, name, description, retailPrice, wholesalePrice, purchasingPrice, colors, preferedColor, WholesaleMOQ, purchaseQty, images, isBuyWholesale, isPromotion } = viewingProduct;
+
 
     const [isOpenPurchaseOrderSummary, setIsOpenPurchaseOrderSummary] = useState(false);
 
@@ -153,6 +155,8 @@ export default function ProductPage() {
             const availabilityResults = res.data.results;
             const product = availabilityResults[0];
             const currentStock = product.stock;
+            const isProductPromoted = product.isPromotion;
+            // console.log(product)
     
             if (!product.isAvailable) {
                 setProcessOverlay(false);
@@ -162,6 +166,25 @@ export default function ProductPage() {
             if (quantity > currentStock) {
                 setProcessOverlay(false);
                 return toast.error(`Only ${currentStock} available`, {duration: 3000,});
+            }
+
+            let isReload = false;
+            if (isPromotion) {
+                if (!isProductPromoted) {
+                    isReload = true;
+                }
+            } else {
+                if (isProductPromoted) {
+                    isReload = true;
+                }
+            }
+
+            if (isReload) {
+                clearCart();
+                clearFavorites();
+                loadAllProducts([]);
+                setProcessOverlay(false);
+                return navigate('/');
             }
     
     
@@ -236,7 +259,7 @@ export default function ProductPage() {
                                 <div className="flex flex-col gap-6">
                                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 font-serif capitalize">{name}</h1>
                                     <div className="text-2xl font-black text-pink-600 tracking-wide font-sans">
-                                        GH₵ {productPrice}
+                                        GH₵ {Number(productPrice).toFixed(2)}
                                     </div>
 
                                     <p className="text-sm md:text-sm text-zinc-500 font-serif leading-relaxed max-w-md">{description}</p>
@@ -307,9 +330,7 @@ export default function ProductPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="">
-                                                
-
+                                            {!isPromotion && <div className="">
                                                 <div className="flex items-center mb-1 active:opacity-25"
                                                     onClick={()=>{
                                                         const isWholesaleSelected = !isBuyAtWholesale
@@ -328,24 +349,10 @@ export default function ProductPage() {
                                                     }}
                                                 >
                                                     {!isBuyAtWholesale ? <Square className="h-4 ml-[-5px] text-zinc-500"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-500"/>}
-                                                    <p className="text-xs text-zinc-500 font-mono font-bold">₵{wholesalePrice} @ wholesale</p>
+                                                    <p className="text-xs text-zinc-500 font-mono font-bold">₵{Number(wholesalePrice).toFixed(2)} @ wholesale</p>
                                                 </div>
                                                 <p className={`${isBuyAtWholesale ? '':'line-throug '} pl-5 text-xs text-zinc-500 font-mono font-bold`}>minimum order: {WholesaleMOQ}</p>
-                                                {/* {
-                                                    isAllowBelowMOQ && (
-                                                        <div className="flex items-center active:opacity-25"
-                                                            onClick={()=>{
-                                                                setIsUseMOQSelected(!isUseMOQSelected);
-                                                                setQuantity(minimumOrder);
-                                                                setProductPrice(!isUseMOQSelected ? sellingPrice : belowMOQPrice)
-                                                            }}
-                                                        >
-                                                            {isUseMOQSelected ? <Square className="h-4 ml-[-5px] text-zinc-400"/>:<CheckSquare className="h-4 ml-[-5px] text-zinc-400"/>}
-                                                            <p className="text-xs text-zinc-400 font-mono font-bold">Order less</p>
-                                                        </div>
-                                                    )
-                                                } */}
-                                            </div>
+                                            </div>}
                                         </div>
                                     </div>
 

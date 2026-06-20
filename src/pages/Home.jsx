@@ -131,7 +131,7 @@ export default function HomePage() {
             fetchCategories();
         }
     
-    }, []);
+    }, [allProducts]);
 
     useEffect(() => {
         window.scrollTo(0, 0);

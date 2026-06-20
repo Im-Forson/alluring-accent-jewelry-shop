@@ -283,11 +283,11 @@ export default function AllBestSellers() {
                                     <div className="flex gap-3">
                                         {product.oldSellingPrice > product.sellingPrice && (
                                         <p className="text-xs md:text-sm font-semibold mt-1 line-through text-[grey]">
-                                            Gh₵ {product.oldSellingPrice}
+                                            Gh₵ {Number(product.oldSellingPrice).toFixed(2)}
                                         </p>
                                         )}
                                         <p className="text-xs md:text-sm font-semibold mt-1">
-                                        Gh₵ {product.sellingPrice}
+                                        Gh₵ {Number(product.sellingPrice).toFixed(2)}
                                         </p>
                                     </div>
                                     </div>

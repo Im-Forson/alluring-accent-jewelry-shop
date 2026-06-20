@@ -13,7 +13,7 @@ import axios from "axios"
 const colors= []
 
 export default function NavBar({ activePage, favoriteCount, cartCount, setFavorites, bestSellers, setBestSellers }) {
-    const { wholesaleMinOrderQty, allProducts, addOrder, cart, addToCart, setCart, updateCartItemStock, updateCartItemQty, updateCartItemQtyInput, removeCartItem, updateCartItemColor, updateCartItemUseMOQ, favorites, removeFavorite, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement, setProcessOverlay } = useShop();
+    const { loadAllProducts, wholesaleMinOrderQty, allProducts, addOrder, cart, addToCart, setCart, updateCartItemStock, updateCartItemQty, updateCartItemQtyInput, removeCartItem, updateCartItemColor, clearCart, updateCartItemUseMOQ, favorites, removeFavorite, clearFavorites, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement, setProcessOverlay } = useShop();
     const navigate = useNavigate();
 
     // Drawer Interface Visibility States
@@ -103,6 +103,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                     wholesalePrice: item.wholesalePrice,
                     quantity: item.purchaseQty,
                     totalPrice: buyingPrice * item.purchaseQty,
+                    isPromotion: item.isPromotion,
                 };
     
                 return order;
@@ -125,15 +126,18 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
     
             const availabilityResults = res.data.results;
             // console.log('results:', availabilityResults)
+            // console.log('orders:', orders)
 
             let isItemUnavailable = false;
             let isItemLowStock = false;
+            let isReload = false;
 
             for (let i = 0; i < availabilityResults.length; i++) {
                 const id = availabilityResults[i].productId;
                 const isAvailable = availabilityResults[i].isAvailable;
                 const orderQty = availabilityResults[i].orderQty;
                 const currentStock = availabilityResults[i].stock;
+                const isProductPromoted = availabilityResults[i].isPromotion;
 
                 if (!isAvailable) {
                     isItemUnavailable = true;
@@ -145,11 +149,29 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                         updateCartItemStock(id, currentStock);
                     }
                 }
+
+                if (orders[i].isPromotion) {
+                    if (!isProductPromoted) {
+                        isReload = true;
+                    }
+                } else {
+                    if (isProductPromoted) {
+                        isReload = true;
+                    }
+                }
             }
 
             if (isItemUnavailable || isItemLowStock) {
                 setProcessOverlay(false);
                 return toast.error('Some items are in low stock or unavailable', { duration: 3000});
+            }
+
+            if (isReload) {
+                clearCart();
+                clearFavorites();
+                loadAllProducts([]);
+                setProcessOverlay(false);
+                return navigate('/');
             }
     
             // count same categories
@@ -481,7 +503,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                                     </div>
                                                 </div>
 
-                                                <div className="">
+                                                {!item.isPromotion && <div className="">
                                                     <div 
                                                         onClick={() => {
                                                             if (activePage === 'product') {
@@ -494,11 +516,11 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                                         className={`flex items-center cursor-pointer ${activePage === 'product' ? 'active:opacity-100' : 'active:opacity-25'} mb-1`}
                                                     >
                                                         {!item.isBuyWholesale ? <Square className="h-3 ml-[-5px]"/>:<CheckSquare className="h-3 ml-[-5px]"/>}
-                                                        <p className="text-xs text-zinc-500 font-mono">₵{item.wholesalePrice} @ wholesale</p>
+                                                        <p className="text-xs text-zinc-500 font-mono">₵{Number(item.wholesalePrice).toFixed(2)} @ wholesale</p>
                                                     </div>
 
                                                     <p className={`${item.isBuyWholesale ? '':'line-throug'} text-zinc-500 text-xs pl-5 font-mono font-bld`}>minimum order: {item.WholesaleMOQ}</p>
-                                                </div>
+                                                </div>}
                                             </div>
                                             
                                             {/* Dynamic Quantity Controller & Price Summation Row */}
