@@ -47,7 +47,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
     const itemsTotalCost = orders.reduce((totalCost, order) => {return totalCost + order.totalPrice}, 0);
     const serviceFee = itemsTotalCost * 0.02;
-    const grandTotal = itemsTotalCost + orderDetails.shippingFee + serviceFee;
+    const grandTotal = itemsTotalCost + orderDetails.shippingFee;
     // console.log(grandTotal)
 
     // Form Field Change Listener Action
@@ -83,7 +83,8 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/payment/data`);
         const paymentData = res.data
 
-        let amountPayable = (grandTotal * 100).toFixed(2)
+        const finalAmount = grandTotal + serviceFee
+        let amountPayable = (finalAmount * 100).toFixed(2)
         amountPayable = parseFloat(amountPayable);
     
         const handler = window.PaystackPop.setup({
@@ -516,10 +517,10 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                       <span>Delivery</span>
                       <span className="font-bold text-zinc-700">{orderDetails.currency} {orderDetails.shippingFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                     </div>
-                    <div className="flex justify-between">
+                    {/* <div className="flex justify-between">
                       <span>Service</span>
                       <span className="font-bold text-zinc-700">{orderDetails.currency} {serviceFee.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
