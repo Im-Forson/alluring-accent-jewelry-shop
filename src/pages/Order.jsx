@@ -94,7 +94,8 @@ function Order() {
           itemBreakdown: (order.products || []).map(p => ({
             name: p.name || 'Unnamed Product',
             qty: p.quantity || 1,
-            price: p.price || '0'
+            price: p.price || '0',
+            image: p.image
           }))
         };
       });
@@ -565,7 +566,7 @@ function Order() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '280px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid #f1f5f9', color: '#64748b', textAlign: 'left' }}>
-                          <th style={{ padding: '8px 16px' }}>Product Unit</th>
+                          <th style={{ padding: '8px 16px' }}>Item</th>
                           <th style={{ padding: '8px 16px', textAlign: 'center' }}>Qty</th>
                           <th style={{ padding: '8px 16px', textAlign: 'right' }}>Unit Cost</th>
                         </tr>
@@ -573,7 +574,12 @@ function Order() {
                       <tbody>
                         {selectedOrder.itemBreakdown?.map((item, idx) => (
                           <tr key={`item-${idx}`} style={{ borderBottom: idx !== selectedOrder.itemBreakdown.length - 1 ? '1px solid #f8fafc' : 'none' }}>
-                            <td style={{ padding: '8px 16px', color: '#334155', fontWeight: '500' }}>{item.name}</td>
+                            <td style={{ padding: '8px 16px', color: '#334155', fontWeight: '500' }}>
+                              <div className='flex gap-4 items-center'>
+                              <img style={{width: '60px', height: '50px'}} src={item.image}/>
+                              <p style={{ color: '#334155', fontWeight: '500' }}>{item.name}</p>
+                              </div>
+                            </td>
                             <td style={{ padding: '8px 16px', textAlign: 'center', color: '#64748b' }}>{item.qty}</td>
                             <td style={{ padding: '8px 16px', textAlign: 'right', color: '#0f172a' }}>₵{item.price}</td>
                           </tr>
