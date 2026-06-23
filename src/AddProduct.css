@@ -741,3 +741,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+.no-options-row {
+  padding: 10px;
+  color: #999;
+  font-style: italic;
+  cursor: default;
+}

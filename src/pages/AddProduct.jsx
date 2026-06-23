@@ -21,7 +21,6 @@ function AddProduct() {
   const [mainIndex, setMainIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // MOQ state management
   const [moq, setMoq] = useState(6);
   const [isModifyingMoq, setIsModifyingMoq] = useState(false);
 
@@ -47,44 +46,33 @@ function AddProduct() {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const fetchCategories = async () => {
-        const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+    const fetchCategories = async () => {
+      const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
 
-        if (categoryResponse.status === 200) {
-            const allCategories = categoryResponse.data;
-            // const filteredCategories = allCategories.filter(cat => cat.name)
-  
-            loadCategories(allCategories);
-            setAvailableCategories(allCategories)
-        }
-        else {
-            loadCategories(['All Jewellery'])
-        }
+      if (categoryResponse.status === 200) {
+        const allCategories = categoryResponse.data;
+        const filteredCategories = allCategories.filter(cat => {
+          const catName = cat.name.toLowerCase();
+          return catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets';
+        });
+
+        loadCategories(filteredCategories);
+        setAvailableCategories(filteredCategories);
+      } else {
+        loadCategories(['All Jewellery']);
       }
+    };
 
-      if (categories.length === 0) {
-        fetchCategories()
-      }
-
-    } catch (error) {
-      toast.error('Something went wrong', {duration: 2000})
+    if (categories.length === 0) {
+      fetchCategories();
     }
-
-  }, [])
+  }, []);
 
   const filteredTags = availableTags.filter((tag) =>
     tag.toLowerCase().includes(tagInput.toLowerCase())
   );
 
-  const filteredCategories = availableCategories.filter((cat) => {
-      let name = cat.name
-      name.toLowerCase().includes(categoryInput.toLowerCase())
-    }
-  );
-
   const tagExactExists = availableTags.some(t => t.toLowerCase() === tagInput.trim().toLowerCase());
-  const categoryExactExists = availableCategories.some(c => c.name.toLowerCase() === categoryInput.trim().toLowerCase());
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -116,36 +104,6 @@ function AddProduct() {
     setColors(colors.filter((_, index) => index !== indexToRemove));
   };
 
-  const handleAddCategory = async () => {
-    setSubmitting(true);
-    const categoryLoadId = toast.loading("Creating category...");
-
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/category/create`, 
-        {category: categoryInput.trim()},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`,
-          }
-        }
-      );
-
-      if (res.status === 201) {
-        toast.dismiss(categoryLoadId);
-        toast.error("Category created", {duration: 2000});
-        setSubmitting(false);
-      }
-    } catch (error) {
-      toast.dismiss(categoryLoadId);
-      toast.error("Category failed to create", {duration: 2000});
-      setSubmitting(false);
-    }
-    setAvailableCategories([...availableCategories, categoryInput.trim()]);
-    setIsCategoryDropdownOpen(false);
-  }
-
-  // MOQ Increment and Decrement Handlers
   const handleIncrementMOQ = () => {
     setMoq(prev => prev + 1);
   };
@@ -154,7 +112,6 @@ function AddProduct() {
     setMoq(prev => (prev > 1 ? prev - 1 : 1));
   };
 
-  // Reset MOQ handler
   const handleResetMoq = () => {
     setMoq(6);
     setIsModifyingMoq(false);
@@ -166,7 +123,6 @@ function AddProduct() {
     const form = e.target;
     const formData = new FormData(form);
 
-    // Dynamic extraction of input numbers for commercial margin guarding
     const wholesale = parseFloat(formData.get("wholesalePrice")) || 0;
     const retail = parseFloat(formData.get("retailPrice")) || 0;
 
@@ -182,17 +138,16 @@ function AddProduct() {
     const loadId = toast.loading("Processing and uploading product...");
 
     try {
-
       if (!categoryInput.trim()) {
         toast.dismiss(loadId);
-        toast.error("Product category is required", {duration: 2000});
+        toast.error("Product category is required", { duration: 2000 });
         setSubmitting(false);
         return;
       }
 
       if (mediaFiles.length === 0) {
         toast.dismiss(loadId);
-        toast.error("Image upload is required", {duration: 2000});
+        toast.error("Image upload is required", { duration: 2000 });
         setSubmitting(false);
         return;
       }
@@ -201,18 +156,13 @@ function AddProduct() {
         setAvailableTags(prev => [...prev, tagInput.trim()]);
       }
 
-      if (categoryInput.trim() && !categoryExactExists) {
-        setAvailableCategories(prev => [...prev, categoryInput.trim()]);
-      }
-
       if (colors.length === 0) {
         toast.dismiss(loadId);
-        toast.error('Color is required!', {duration: 3000});
+        toast.error('Color is required!', { duration: 3000 });
         setSubmitting(false);
         return;
       }
 
-      // Explicitly append the precise numeric MOQ value from controlled state
       formData.set("WholesaleMOQ", moq);
 
       colors.forEach(color => {
@@ -240,7 +190,7 @@ function AddProduct() {
 
       if (response.status === 201) {
         toast.dismiss(loadId);
-        toast.success('Product Published', {duration: 2000});
+        toast.success('Product Published', { duration: 2000 });
 
         setColors([]);
         setColor('');
@@ -254,12 +204,12 @@ function AddProduct() {
         setMoq(6); 
         setIsModifyingMoq(false);
         setSubmitting(false);
-        form.reset()
+        form.reset();
       }
 
     } catch (error) {
       toast.dismiss(loadId);
-      toast.error("Publish Unsuccessful!", {duration: 2000});
+      toast.error("Publish Unsuccessful!", { duration: 2000 });
       setSubmitting(false);
     }
   };
@@ -423,8 +373,7 @@ function AddProduct() {
                         className="preview-media"
                         onClick={() => setSelectedPreview({ url: previewUrl, type: 'video' })}
                       />
-                    )
-                    }
+                    )}
 
                     <button
                       type="button"
@@ -463,6 +412,7 @@ function AddProduct() {
             <input type="number" name="retailPrice" placeholder="Retail Price (₵)" className="form-input" required />
           </div>
 
+          {/* ✅ Category: Read-only, dropdown-only selection */}
           <div className="input-group select-wrapper" ref={categoryDropdownRef}>
             <input
               type="text"
@@ -470,36 +420,32 @@ function AddProduct() {
               placeholder="Select category"
               className="form-input capitalize"
               value={categoryInput}
-              onChange={(e) => {
-                setCategoryInput(e.target.value);
-                setIsCategoryDropdownOpen(true);
-              }}
-              onFocus={() => setIsCategoryDropdownOpen(true)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && categoryInput.trim()) {
-                  e.preventDefault();
-                  if (!categoryExactExists) {
-                    setAvailableCategories([...availableCategories, categoryInput.trim()]);
-                  }
-                  setIsCategoryDropdownOpen(false);
-                }
-              }}
+              readOnly
+              onClick={() => setIsCategoryDropdownOpen(prev => !prev)}
+              style={{ cursor: 'pointer' }}
             />
-            <FiChevronDown className="select-arrow" onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)} />
+            <FiChevronDown
+              className="select-arrow"
+              onClick={() => setIsCategoryDropdownOpen(prev => !prev)}
+            />
 
             {isCategoryDropdownOpen && (
               <ul className="tag-dropdown capitalize">
-                {availableCategories.map((catItem, idx) => (
-                  <li
-                    key={idx}
-                    onClick={() => {
-                      setCategoryInput(catItem.name);
-                      setIsCategoryDropdownOpen(false);
-                    }}
-                  >
-                    {catItem.name}
-                  </li>
-                ))}
+                {availableCategories.length > 0 ? (
+                  availableCategories.map((catItem, idx) => (
+                    <li
+                      key={idx}
+                      onClick={() => {
+                        setCategoryInput(catItem.name);
+                        setIsCategoryDropdownOpen(false);
+                      }}
+                    >
+                      {catItem.name}
+                    </li>
+                  ))
+                ) : (
+                  <li className="no-options-row">No categories available</li>
+                )}
               </ul>
             )}
           </div>
@@ -585,15 +531,13 @@ function AddProduct() {
           </div>
 
           <div className="form-actions-row">
-            {
-              isSubmitting ? (
-                <div className="btn-primary">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                </div>
-              ) : (
-                <button type="submit" className="btn-primary">Publish Product</button>
-              )
-            }
+            {isSubmitting ? (
+              <div className="btn-primary">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            ) : (
+              <button type="submit" className="btn-primary">Publish Product</button>
+            )}
           </div>
         </form>
       </main>

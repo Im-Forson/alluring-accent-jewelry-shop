@@ -1,0 +1,1 @@
+export const safeLower = (str) => (str || "").toString().toLowerCase();
