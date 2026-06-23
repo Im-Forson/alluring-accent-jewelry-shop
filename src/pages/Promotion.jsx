@@ -14,6 +14,7 @@ function Promotion() {
   // ==========================================
   const [promos, setPromos] = useState([]);
   useAdminBackButton();
+  const [loadingId, setLoadingId] = useState(null);
 
   // Create New Promotion Form States
   const [promoTitle, setPromoTitle] = useState("");
@@ -226,6 +227,10 @@ function Promotion() {
       return;
     }
 
+    // Engage fade state on the pressed button & surface a hold-on toast while the campaign spins up
+    setLoadingId(targetId);
+    const holdToastId = toast.loading("Hold on, the promotion is starting...");
+
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
 
@@ -241,10 +246,14 @@ function Promotion() {
 
       setPromos(updated);
       localStorage.setItem("storePromotions", JSON.stringify(updated));
+      toast.dismiss(holdToastId);
       toast.success("Promotional campaign is now LIVE across the storefront!");
     } catch (err) {
       console.error(err);
+      toast.dismiss(holdToastId);
       toast.error("Failed to activate promotion campaign.");
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -256,6 +265,10 @@ function Promotion() {
       toast.error("Invalid tracker reference ID.");
       return;
     }
+
+    // Engage fade state on the pressed button & surface a hold-on toast while the campaign winds down
+    setLoadingId(targetId);
+    const holdToastId = toast.loading("Hold on, the promotion is stopping...");
 
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
@@ -272,10 +285,14 @@ function Promotion() {
       
       setPromos(updated);
       localStorage.setItem("storePromotions", JSON.stringify(updated));
-      toast.success("Campaign stopped and moved to Expired / Ended.");
-    } catch (err) {
+      toast.dismiss(holdToastId);
+      toast.success("Campaign stopped, please refresh the page.");
+    } catch (err) { 
       console.error(err);
+      toast.dismiss(holdToastId);
       toast.error("Failed to end promotional sequence.");
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -346,6 +363,13 @@ function Promotion() {
   };
 
   return (
+
+
+
+
+
+
+
     <div className="admin-layout">
       <SideBar />
 
@@ -388,6 +412,7 @@ function Promotion() {
                     const isActive = promo.status === 'active';
                     const isInactive = promo.status === 'inactive';
                     const isUpcoming = promo.status === 'upcoming';
+                    const isThisRowLoading = loadingId === currentPromoId;
                     
                     let statusLabel = "Live & Active";
                     let pillClass = "";
@@ -414,10 +439,11 @@ function Promotion() {
                                   style={{ 
                                     backgroundColor: hasActivePromo ? '#cbd5e1' : '#10b981', 
                                     color: hasActivePromo ? '#94a3b8' : '#fff', 
-                                    cursor: hasActivePromo ? 'not-allowed' : 'pointer',
-                                    opacity: hasActivePromo ? 0.6 : 1
+                                    cursor: (hasActivePromo || isThisRowLoading) ? 'not-allowed' : 'pointer',
+                                    opacity: hasActivePromo ? 0.6 : (isThisRowLoading ? 0.4 : 1),
+                                    transition: 'opacity 0.2s ease'
                                   }} 
-                                  disabled={hasActivePromo}
+                                  disabled={hasActivePromo || isThisRowLoading}
                                   onClick={() => handleToggleStart(currentPromoId)}
                                   title={hasActivePromo ? "End the currently active promotion to start this one" : "Start Campaign"}
                                 >
@@ -433,7 +459,14 @@ function Promotion() {
                             {isActive && (
                               <button 
                                 className="action-btn pause-btn" 
-                                style={{ backgroundColor: '#f59e0b', color: '#fff', cursor: 'pointer' }} 
+                                style={{ 
+                                  backgroundColor: '#f59e0b', 
+                                  color: '#fff', 
+                                  cursor: isThisRowLoading ? 'not-allowed' : 'pointer',
+                                  opacity: isThisRowLoading ? 0.4 : 1,
+                                  transition: 'opacity 0.2s ease'
+                                }} 
+                                disabled={isThisRowLoading}
                                 onClick={() => handleTogglePause(currentPromoId)}
                               >
                                 Stop
@@ -448,10 +481,11 @@ function Promotion() {
                                   style={{ 
                                     backgroundColor: hasActivePromo ? '#cbd5e1' : '#10b981', 
                                     color: hasActivePromo ? '#94a3b8' : '#fff', 
-                                    cursor: hasActivePromo ? 'not-allowed' : 'pointer',
-                                    opacity: hasActivePromo ? 0.6 : 1
+                                    cursor: (hasActivePromo || isThisRowLoading) ? 'not-allowed' : 'pointer',
+                                    opacity: hasActivePromo ? 0.6 : (isThisRowLoading ? 0.4 : 1),
+                                    transition: 'opacity 0.2s ease'
                                   }} 
-                                  disabled={hasActivePromo}
+                                  disabled={hasActivePromo || isThisRowLoading}
                                   onClick={() => handleToggleStart(currentPromoId)}
                                   title={hasActivePromo ? "End the currently active promotion to start this one" : "Start Campaign"}
                                 >
