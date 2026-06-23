@@ -59,7 +59,6 @@ function Order() {
       });
       
       const data = response.data;
-      console.log(data)
 
       const formattedOrders = data.map((order, index) => {
         let currentStatus = 'Pending';

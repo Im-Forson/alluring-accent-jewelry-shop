@@ -61,14 +61,14 @@ export default function Shop() {
 
             if (categoryResponse.status === 200) {
                 const allCategories = categoryResponse.data;
-                const filteredCategories = allCategories.filter(cat => {
-                    const catName = cat.name.toLowerCase();
-                    if (catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets') {
-                        return cat;
-                    }
-                })
+                // const filteredCategories = allCategories.filter(cat => {
+                //     const catName = cat.name.toLowerCase();
+                //     if (catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets') {
+                //         return cat;
+                //     }
+                // })
 
-                loadCategories(filteredCategories);
+                loadCategories(allCategories);
             }
             else {
                 loadCategories(['All Jewellery'])

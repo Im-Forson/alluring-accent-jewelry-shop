@@ -53,9 +53,7 @@ function AddProduct() {
 
         if (categoryResponse.status === 200) {
             const allCategories = categoryResponse.data;
-            const filteredCategories = allCategories.filter(cat => {
-              return cat.name
-            })
+            // const filteredCategories = allCategories.filter(cat => cat.name)
   
             loadCategories(allCategories);
             setAvailableCategories(allCategories)
