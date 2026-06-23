@@ -47,29 +47,30 @@ function AddProduct() {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   useEffect(() => {
+    try {
       const fetchCategories = async () => {
-      const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+        const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
 
-      if (categoryResponse.status === 200) {
-          const allCategories = categoryResponse.data;
-          const filteredCategories = allCategories.filter(cat => {
-              const catName = cat.name.toLowerCase();
-              if (catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets') {
-                  return cat;
-              }
-          })
-
-          loadCategories(filteredCategories);
-          setAvailableCategories(filteredCategories)
-      }
-      else {
-          loadCategories(['All Jewellery'])
+        if (categoryResponse.status === 200) {
+            const allCategories = categoryResponse.data;
+            const filteredCategories = allCategories.filter(cat => {
+              return cat.name
+            })
+  
+            loadCategories(allCategories);
+            setAvailableCategories(allCategories)
+        }
+        else {
+            loadCategories(['All Jewellery'])
+        }
       }
 
-    }
+      if (categories.length === 0) {
+        fetchCategories()
+      }
 
-    if (categories.length === 0) {
-      fetchCategories()
+    } catch (error) {
+      toast.error('Something went wrong', {duration: 2000})
     }
 
   }, [])
