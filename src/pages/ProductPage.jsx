@@ -272,7 +272,7 @@ export default function ProductPage() {
                                                     setVideo(true);
                                                     setActiveImg('')
                                                 }}
-                                                className={`w-[22%] flex items-center justify-center  rounded-xl bg-${isVideo ? 'pink-500' : 'zinc-500'}`}
+                                                className={`w-[22%] flex items-center justify-center  rounded-xl ${isVideo ? 'bg-pink-500' : 'bg-zinc-500'}`}
                                             >
                                                 <CirclePlay className='w-8 h-8 md:w-10 md:h-10 text-white'/>
                                             </button>}
