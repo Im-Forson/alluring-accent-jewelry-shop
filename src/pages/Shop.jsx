@@ -31,7 +31,7 @@ import ProcessOverlay from '../components/ProcessOverlay'
 
 
 export default function Shop() {
-    const { allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData, loadCategories } = useShop();
+    const { allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData, loadCategories, loadProductColors, productColors, categories } = useShop();
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
@@ -89,6 +89,30 @@ export default function Shop() {
             setProductData(availableProducts);
             const bestSellers = availableProducts.filter(product => product.tag === 'Best Seller');
             loadBestSellers(bestSellers);
+
+            let productColors = [];
+
+            for (let i = 0; i < availableProducts.length; i++) {
+                const colors = availableProducts[i].colors;
+
+                for (let j = 0; j < colors.length; j++) {
+                    let isDuplicate = false;
+                    let color = colors[j];
+
+                    for (let k = 0; k < productColors.length; k++) {
+                        if (color === productColors[k]) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!isDuplicate) {
+                        productColors.push(color);
+                    }
+                }
+            }
+
+            loadProductColors(productColors);
 
           } catch (error) {
             setDataError(true);
@@ -166,7 +190,7 @@ export default function Shop() {
 
     const filteredProducts = productsData.filter(product => {
         const matchCat =
-          activeCategory === "All Jewellery" || product.category === activeCategory;
+          activeCategory === "All Jewellery" || (product.category).trim() === activeCategory;
       
         const matchColl =
           activeCollection === "All Collections" || product.collection === activeCollection;
@@ -211,10 +235,10 @@ export default function Shop() {
     }
 
     const filterProducts = () => {
-        setActiveCategory(selectedCategory);
+        setActiveCategory(selectedCategory.trim());
         setActiveColor(selectedColor);
         setActivePrice(selectedPrice);
-        setActiveCollection(selectedCollection);
+        // setActiveCollection(selectedCollection);
         setVisibleCount(ITEMS_PER_LOAD); // reset pagination
         // window.scrollTo({ top: 0, behavior: "smooth" }); // optional UX
     }
@@ -288,10 +312,9 @@ export default function Shop() {
                                         className="w-full h-9 sm:h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-3 py-1 text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 font-sans transition-all cursor-pointer appearance-none"
                                     >
                                         <option>All Jewellery</option>
-                                        <option>Rings</option>
-                                        <option>Necklaces</option>
-                                        <option>Earrings</option>
-                                        <option>Bracelets</option>
+                                        {
+                                            categories.map((category, index) => <option key={index}>{category.name}</option>)
+                                        }
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
                                         <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
@@ -311,9 +334,9 @@ export default function Shop() {
                                         className="w-full h-9 sm:h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-3 py-1 text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer appearance-none"
                                     >
                                         <option>All Colors</option>
-                                        <option>Rose Gold</option>
-                                        <option>White Gold</option>
-                                        <option>Yellow Gold</option>
+                                        {
+                                            productColors.map((color, index) => <option key={index}>{color}</option>)
+                                        }
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
                                         <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>

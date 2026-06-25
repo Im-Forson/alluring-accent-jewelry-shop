@@ -44,7 +44,7 @@ export default function HomePage() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
-    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData } = useShop();
+    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadProductColors, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData } = useShop();
 
     const [favorites, setFavorites] = useState([]);
     const [favoriteCount, setFavoriteCount] = useState(0);
@@ -104,7 +104,30 @@ export default function HomePage() {
             loadAllProducts(availableProducts);
             const bestSellers = availableProducts.filter(product => product.tag === 'Best Seller');
             loadBestSellers(bestSellers);
-            // loadSuccessfulOrder(successfullOrdersDummy);
+
+            let productColors = [];
+
+            for (let i = 0; i < availableProducts.length; i++) {
+                const colors = availableProducts[i].colors;
+
+                for (let j = 0; j < colors.length; j++) {
+                    let isDuplicate = false;
+                    let color = colors[j];
+
+                    for (let k = 0; k < productColors.length; k++) {
+                        if (color === productColors[k]) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!isDuplicate) {
+                        productColors.push(color);
+                    }
+                }
+            }
+
+            loadProductColors(productColors);
             
           } catch (error) {
             setDataError(true);
@@ -202,7 +225,7 @@ export default function HomePage() {
                                 }}
                                 >view all</button>
                             </div>
-                            <div className="flex flex-wrap justify-between">
+                            <div className={`flex flex-wrap ${categories.length < 4 ? 'gap-4' : 'justify-between'}`}>
                                 {categories.map((category, index) => (
                                     <div key={index}  className="w-[24%] mb-5">
                                         <div 

@@ -11,6 +11,7 @@ export function ShopProvider({ children }) {
     const [viewingProduct, setViewingProduct] = useState({});
 
     const [categories, setCategories] = useState([])
+    const [productColors, setProductColors] = useState([])
 
     const [ishomeDataLoading, setisHomeDataLoading] = useState(true);
     const [isShopDataLoading, setisShopDataLoading] = useState(true);
@@ -67,6 +68,10 @@ export function ShopProvider({ children }) {
 
     const loadCategories = (cats) => {
         setCategories(cats);
+    }
+
+    const loadProductColors = (colors) => {
+        setProductColors(colors);
     }
 
     const loadAllBestSellers = (products) => {
@@ -270,6 +275,9 @@ export function ShopProvider({ children }) {
 
                 categories,
                 loadCategories,
+
+                productColors,
+                loadProductColors,
 
                 activePage,
                 activatePage,
