@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle, Square, CheckSquare } from 'lucide-react';
+import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle, Square, CheckSquare, CirclePlay } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { useShop } from '../../utilities/ShopContext';
@@ -22,7 +22,7 @@ export default function ProductPage() {
   const navigationSource = (location.state).source;
   const navigate = useNavigate();
 
-  const { id, name, description, retailPrice, wholesalePrice, purchasingPrice, colors, preferedColor, WholesaleMOQ, purchaseQty, images, isBuyWholesale, isPromotion } = viewingProduct;
+  const { id, name, description, retailPrice, wholesalePrice, purchasingPrice, colors, preferedColor, WholesaleMOQ, purchaseQty, images,video, isBuyWholesale, isPromotion } = viewingProduct;
 
 
     const [isOpenPurchaseOrderSummary, setIsOpenPurchaseOrderSummary] = useState(false);
@@ -35,6 +35,8 @@ export default function ProductPage() {
     const [isBuyAtWholesale, setBuyAtWholesale] = useState(false);
 
     const [isError, setError] = useState(false);
+
+    const [isVideo, setVideo] = useState(false);
     
     useEffect(() => {
         if (!viewingProduct.hasOwnProperty('name')) {
@@ -225,11 +227,23 @@ export default function ProductPage() {
                                 {/* LEFT ELEMENT: PRODUCT GALLERY VIEWER */}
                                 <div className="space-y-4">
                                     <div className="relative rounded-2xl border-3 overflow-hidden border-zinc-300 flex items-center justify-center aspect-square group ">
+                                    {
+                                        isVideo ? <video 
+                                            src={video} 
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            controls={false}
+                                            className="w-full h-full p-8 transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                        :
                                         <img 
                                             src={activeImg} 
                                             alt="Rose Gold Infinity Ring Main Focus" 
                                             className="w-full h-full object-contain p-8 transition-transform duration-300 group-hover:scale-105"
                                         />
+                                    }
                                         
                                     </div>
 
@@ -241,7 +255,10 @@ export default function ProductPage() {
                                             {images?.map((img, index) => (
                                                 <button 
                                                     key={index}
-                                                    onClick={() => setActiveImg(img)}
+                                                    onClick={() => {
+                                                        setActiveImg(img);
+                                                        setVideo(false);
+                                                    }}
                                                     className={`w-[22%] aspect-square  rounded-xl overflow-hidden border-2 shrink-0 p-1.5 transition-all cursor-pointer ${
                                                         activeImg === img ? 'border-pink-500 ring-1 ring-pink-500' : 'border-zinc-200 hover:border-zinc-400'
                                                     }`}
@@ -249,7 +266,18 @@ export default function ProductPage() {
                                                     <img src={img} alt="thumbnail" className="w-full h-full object-contain" />
                                                 </button>
                                             ))}
+
+                                            {video && <button 
+                                                onClick={() => {
+                                                    setVideo(true);
+                                                    setActiveImg('')
+                                                }}
+                                                className={`w-[22%] flex items-center justify-center  rounded-xl bg-${isVideo ? 'pink-500' : 'zinc-500'}`}
+                                            >
+                                                <CirclePlay className='w-8 h-8 md:w-10 md:h-10 text-white'/>
+                                            </button>}
                                         </div>
+                                        
 
                                         {/* <button className="absolute right-0 p-1 bg-white border border-zinc-100 shadow-sm rounded-full cursor-pointer"><ChevronRight className="h-4 w-4" /></button> */}
                                     </div>
