@@ -3,7 +3,7 @@ import '../ManageProduct.css';
 import { 
   FiSearch, FiBell, FiChevronDown, FiFilter, FiDownload, 
   FiChevronLeft, FiChevronRight, FiShoppingBag, FiX,
-  FiPlus
+  FiPlus, FiCamera, FiVideo
 } from 'react-icons/fi';
 import SideBar from '../components/SideBar';
 import { useNavigate } from "react-router";
@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 
+// --- CUSTOM HOOKS ---
 export function useWindowSize() {
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -37,10 +38,14 @@ export function useWindowSize() {
   return windowSize;
 }
 
+// --- MAIN COMPONENT ---
 function ManageProduct() {
   const navigate = useNavigate();
   const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Track window resizing if needed via custom hook
+  const { width } = useWindowSize();
   
   // Prevent unauthorized navigation and warn on browser back/forward
   useAdminBackButton();
@@ -56,18 +61,18 @@ function ManageProduct() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
-  // --- NOTIFICATION BELL INTERACTIVE UI STATES ---
+  // NOTIFICATION BELL INTERACTIVE UI STATES
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef(null);
 
-  // --- NOTIFICATION STORE STATES ---
+  // NOTIFICATION STORE STATES
   const [notifMetrics, setNotifMetrics] = useState({
     lowStockItems: [],
     outOfStockItems: [],
     totalAlertsCount: 0
   });
 
-  // --- DYNAMIC PAGINATION STATES ---
+  // DYNAMIC PAGINATION STATES
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25; 
 
@@ -93,7 +98,7 @@ function ManageProduct() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // --- LIVE BACKEND REFRESH ENGINE ---
+  // LIVE BACKEND REFRESH ENGINE
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -130,12 +135,13 @@ function ManageProduct() {
           stock: item.stock || "0",
           wholesalePrice: parseFloat(item.wholesalePrice || 0).toFixed(2),
           retailPrice: parseFloat(item.retailPrice || item.price || 0).toFixed(2),
-          price: parseFloat(item.retailPrice || item.price || 0).toFixed(2), // for table visualization
+          price: parseFloat(item.retailPrice || item.price || 0).toFixed(2), 
           status: parseInt(item.stock) > 0 ? 'Active' : 'Inactive',
           image: resolvedThumb,
           tag: item.tag || '',
           colors: Array.isArray(item.colors) ? item.colors : [],
-          media: item.images || item.media || []
+          media: item.images || item.media || [],
+          video: item.video || null 
         };
       });
       
@@ -276,8 +282,10 @@ function ManageProduct() {
 
     setEditingProduct({
       ...product,
-      media: [],
-      existingImages
+      media: [], 
+      existingImages, 
+      videoFile: null, 
+      existingVideo: product.video || null 
     });
     setIsModalOpen(true);
     setSelectedEditPreview(null);
@@ -300,35 +308,50 @@ function ManageProduct() {
     setEditingProduct({ ...editingProduct, media: updatedMedia });
   };
 
-  // --- SYNCED DATABASE UPDATE CONTROLLER MATCHING THE SCREENSHOT SPEC ---
+  const handleRemoveExistingVideo = () => {
+    if (!editingProduct) return;
+    setEditingProduct({ ...editingProduct, existingVideo: null });
+  };
+
+  const handleRemoveStagedVideo = () => {
+    if (!editingProduct) return;
+    setEditingProduct({ ...editingProduct, videoFile: null });
+  };
+
   const handleUpdateProductSubmit = async (e) => {
     e.preventDefault();
+
+    const wholesale = parseFloat(editingProduct.wholesalePrice) || 0;
+    const retail = parseFloat(editingProduct.retailPrice) || 0;
+
+    if (wholesale >= retail) {
+      toast.error("Wholesale Prices must always be less than Retail Prices!", {
+        duration: 4000,
+        position: "top-center"
+      });
+      return;
+    }
 
     const loadId = toast.loading("Synchronizing updates with backend database...");
 
     try {
       const formData = new FormData();
 
-      // Form payload mappings precisely aligned to the documentation in Screenshot_21_2.png
       formData.append('name', editingProduct.name);
       formData.append('description', editingProduct.description);
       formData.append('category', editingProduct.category);
-      formData.append('WholesaleMOQ', parseInt(editingProduct.WholesaleMOQ));
-      formData.append('stock', parseInt(editingProduct.stock));
-      formData.append('wholesalePrice', parseFloat(editingProduct.wholesalePrice));
-      formData.append('retailPrice', parseFloat(editingProduct.retailPrice));
+      formData.append('WholesaleMOQ', parseInt(editingProduct.WholesaleMOQ, 10) || 0);
+      formData.append('stock', parseInt(editingProduct.stock, 10) || 0);
+      formData.append('wholesalePrice', wholesale);
+      formData.append('retailPrice', retail);
 
-      // Appending multi-value color form parameters sequentially to match the endpoint schema
       const colors = editingProduct.colors || [];
-      const updatedColors = colors.filter((color) => color.trim() !== "");
-
-      // Handle raw multimedia file uploads
       const newFileUploads = editingProduct.media || [];
-      const existingImages = editingProduct.existingImages;
+      const existingImages = editingProduct.existingImages || [];
 
       if (existingImages.length === 0 && newFileUploads.length === 0) {
         toast.dismiss(loadId);
-        toast.error('Images required', {duration: 2000});
+        toast.error('At least one image is required', { duration: 2000 });
         return;
       }
       
@@ -339,18 +362,33 @@ function ManageProduct() {
       }
 
       colors.forEach(color => {
-        formData.append("colors[]", color);
+        if (color.trim() !== "") {
+          formData.append("colors[]", color);
+        }
       });
 
+     
       existingImages.forEach((url) => {
-        formData.append('existingImages[]', url)
+       
+        formData.append('existingImages[]', url);
       });
 
+     
       newFileUploads.forEach((file) => {
+       
         if (file instanceof File) {
+      
           formData.append('images', file);
         }
       });
+
+      if (editingProduct.videoFile) {
+        formData.append('video', editingProduct.videoFile);
+      } else if (editingProduct.existingVideo) {
+        formData.append('video', editingProduct.existingVideo);
+      }
+
+      
 
       await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/product/update/${targetId}`,
@@ -370,56 +408,11 @@ function ManageProduct() {
       loadProducts();
 
     } catch (error) {
-      console.log(error)
+      console.error(error);
       toast.dismiss(loadId);
       toast.error(error.response?.data?.message || "Failed to save updated parameters.");
     }
   };
-
-  const toggleDropdown = (id, e) => {
-    e.stopPropagation();
-    setActiveDropdownId(activeDropdownId === id ? null : id);
-  };
-
-  const toggleProductStatus = async (id) => {
-    setActiveDropdownId(null);
-    const targetProduct = productList.find(p => p.id === id);
-    if (!targetProduct) return;
-
-    const currentStock = parseInt(targetProduct.stock) || 0;
-    const targetStock = currentStock === 0 ? 10 : 0;
-    
-    const loadId = toast.loading("Updating visibility states...");
-    try {
-      await axios.patch(
-        `${import.meta.env.VITE_API_BASE_URL}/product/update/${id}`,
-        { stock: targetStock },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}`
-          }
-        }
-      );
-      
-      toast.dismiss(loadId);
-      if (targetStock > 0) {
-        toast.success("Product is now Active (Defaulted to 10 units).");
-      } else {
-        toast.error("Product is now Inactive (Stock set to 0).");
-      }
-      loadProducts();
-    } catch (error) {
-      toast.dismiss(loadId);
-      toast.error("Failed to alter product status config.");
-    }
-  };
-
-  const lowStockItems = filteredProducts.filter(p => {
-    const s = parseInt(p.stock) || 0;
-    return s <= 5 && s > 0;
-  });
-  const outOfStockItems = filteredProducts.filter(p => (parseInt(p.stock) || 0) === 0);
 
   return (
     <div className="admin-layout">
@@ -456,7 +449,7 @@ function ManageProduct() {
                       All items have healthy stock configurations.
                     </div>
                   ) : (
-                    <>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                       {notifMetrics.outOfStockItems.map(item => (
                         <div key={`notif-out-${item._id || item.id}`} style={notifItemStyle}>
                           <div style={{ ...statusIndicatorStyle, backgroundColor: '#ef4444' }}></div>
@@ -476,7 +469,7 @@ function ManageProduct() {
                           </div>
                         </div>
                       ))}
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
@@ -570,7 +563,7 @@ function ManageProduct() {
                   </thead>
                   <tbody>
                     {currentPaginatedProducts.map((product, index) => {
-                      const stockValue = parseInt(product.stock) || 0;
+                      const stockValue = parseInt(product.stock, 10) || 0;
                       const isOutOfStock = stockValue === 0;
                       const displayRowNumber = indexOfFirstItem + index + 1;
 
@@ -603,15 +596,6 @@ function ManageProduct() {
                             <div className="action-button-cluster" style={{ position: 'relative' }}>
                               <button className="row-btn edit-row-btn" onClick={() => handleOpenEditModal(product)}>Edit</button>
                               <button className="row-btn delete-row-btn" onClick={() => handleDeleteProduct(product.id)}>Delete</button>
-                              
-                              {/* <div style={{ display: 'inline-block' }} ref={activeDropdownId === product.id ? dropdownRef : null}>
-                                <button className="row-dropdown-toggle" onClick={(e) => toggleDropdown(product.id, e)}><FiChevronDown /></button>
-                                {activeDropdownId === product.id && (
-                                  <div className="custom-dropdown-menu" style={actionDropdownMenuStyle}>
-                                    <button onClick={() => toggleProductStatus(product.id)} style={dropdownItemStyle}>Toggle Stock Status</button>
-                                  </div>
-                                )}
-                              </div> */}
                             </div>
                           </td>
                         </tr>
@@ -636,18 +620,17 @@ function ManageProduct() {
         </section>
       </main>
 
-      {/* --- EDITED OVERLAY MODAL TO ACCURATELY MIMIC ADDPRODUCT FIELDS --- */}
+      {/* OVERLAY MODAL */}
       {isModalOpen && editingProduct && (
         <div className="modal-overlay-backdrop p-5" style={modalOverlayStyle}>
           <div className="modal-content-car w-full md:w-1/2 h-full" style={modalContentStyle}>
             <div className="modal-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #edf2f7', paddingBottom: '12px' }}>
               <h2 style={{ fontSize: '1.25rem', color: '#1a202c', margin: 0 }}>Edit Product Parameters</h2>
-              <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#718096' }}><FiX /></button>
+              <button type="button" onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#718096' }}><FiX /></button>
             </div>
 
             <form onSubmit={handleUpdateProductSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* input: name */}
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Product Name (name)</label>
                 <input
@@ -658,7 +641,6 @@ function ManageProduct() {
                 />
               </div>
 
-              {/* input: description */}
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Description (description)</label>
                 <textarea
@@ -668,7 +650,6 @@ function ManageProduct() {
                 />
               </div>
 
-              {/* input: category */}
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Category (category)</label>
                 <input
@@ -679,13 +660,11 @@ function ManageProduct() {
                 />
               </div>
 
-              {/* input: WholesaleMOQ & stock */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div style={inputGroupStyle}>
                   <label style={labelStyle}>Wholesale MOQ (WholesaleMOQ)</label>
                   <input
                     type="number"
-                    readOnly
                     value={editingProduct.WholesaleMOQ}
                     onChange={(e) => setEditingProduct({ ...editingProduct, WholesaleMOQ: e.target.value })}
                     style={inputStyle} required
@@ -702,7 +681,6 @@ function ManageProduct() {
                 </div>
               </div>
 
-              {/* input: wholesalePrice & retailPrice */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div style={inputGroupStyle}>
                   <label style={labelStyle}>Wholesale Price (wholesalePrice)</label>
@@ -726,7 +704,6 @@ function ManageProduct() {
                 </div>
               </div>
 
-              {/* input: tag */}
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Tag (tag)</label>
                 <input
@@ -737,7 +714,6 @@ function ManageProduct() {
                 />
               </div>
 
-              {/* input: colors array configuration */}
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>Colors (comma-separated list for payload arrays)</label>
                 <input
@@ -752,49 +728,98 @@ function ManageProduct() {
                 />
               </div>
 
-              {/* input: images uploads mapping */}
-              <div style={inputGroupStyle}>
-                <label style={labelStyle}>Product Images (images)</label>
+              {/* IMAGES UPLOAD SECTION */}
+              <div style={{ border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '16px', backgroundColor: '#f8fafc' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}><FiCamera /> Product Images (Max 4)</label>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>
+                    {((editingProduct.existingImages?.length || 0) + (editingProduct.media?.length || 0))}/4 Uploaded
+                  </span>
+                </div>
                 <input
                   type="file"
+                  name="images"
                   multiple
                   accept="image/*"
                   onChange={(e) => {
                     if (e.target.files) {
                       const addedFiles = Array.from(e.target.files);
+                      const currentTotal = (editingProduct.existingImages?.length || 0) + (editingProduct.media?.length || 0);
+                      if (currentTotal + addedFiles.length > 4) {
+                        toast.error("A maximum limit of 4 product images is permitted.");
+                        return;
+                      }
                       setEditingProduct((prev) => ({
                         ...prev,
                         media: getUniqueFiles([...(prev.media || []), ...addedFiles])
                       }));
                     }
                   }}
-                  style={inputStyle}
+                  style={{ ...inputStyle, width: '100%', backgroundColor: '#fff' }}
                 />
 
-                {/* Saved Existing Database Image Previews */}
-                {editingProduct.existingImages && editingProduct.existingImages.length > 0 && (
-                  <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-                    {editingProduct.existingImages.map((url, idx) => (
-                      <div key={`exist-${idx}`} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                        <img src={url} alt="existing" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => setSelectedEditPreview({ url, type: 'image' })} />
+                {((editingProduct.existingImages?.length > 0) || (editingProduct.media?.length > 0)) && (
+                  <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
+                    {editingProduct.existingImages?.map((url, idx) => (
+                      <div key={`exist-img-${idx}`} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                        <img src={url} alt="existing" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setSelectedEditPreview({ url, type: 'image' })} />
                         <button type="button" onClick={() => handleRemoveExistingImage(idx)} style={removeImageBadgeStyle}>×</button>
                       </div>
                     ))}
-                  </div>
-                )}
-
-                {/* Staged New Additions Upload Previews */}
-                {editingProduct.media && editingProduct.media.length > 0 && (
-                  <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-                    {editingProduct.media.map((file, idx) => {
+                    {editingProduct.media?.map((file, idx) => {
                       const objectUrl = URL.createObjectURL(file);
                       return (
-                        <div key={`new-${idx}`} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                          <img src={objectUrl} alt="staged preview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => setSelectedEditPreview({ url: objectUrl, type: 'image' })} />
+                        <div key={`new-img-${idx}`} style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                          <img src={objectUrl} alt="staged preview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setSelectedEditPreview({ url: objectUrl, type: 'image' })} />
                           <button type="button" onClick={() => handleRemoveEditMedia(idx)} style={removeImageBadgeStyle}>×</button>
                         </div>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+
+              {/* VIDEO UPLOAD SECTION */}
+              <div style={{ border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '16px', backgroundColor: '#f8fafc' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}><FiVideo /> Product Video (Max 1)</label>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>
+                    {(editingProduct.existingVideo || editingProduct.videoFile) ? 1 : 0}/1 Uploaded
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  name="video"
+                  accept="video/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setEditingProduct((prev) => ({
+                        ...prev,
+                        videoFile: e.target.files[0],
+                        existingVideo: null 
+                      }));
+                    }
+                  }}
+                  style={{ ...inputStyle, width: '100%', backgroundColor: '#fff' }}
+                />
+
+                {(editingProduct.existingVideo || editingProduct.videoFile) && (
+                  <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
+                    {editingProduct.existingVideo && (
+                      <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#ebf5ff', borderRadius: '4px', overflow: 'hidden', border: '1px solid #bfdbfe' }}>
+                        <video src={editingProduct.existingVideo} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setSelectedEditPreview({ url: editingProduct.existingVideo, type: 'video' })} />
+                        <button type="button" onClick={handleRemoveExistingVideo} style={removeImageBadgeStyle}>×</button>
+                      </div>
+                    )}
+                    {editingProduct.videoFile && (() => {
+                      const stagedVideoUrl = URL.createObjectURL(editingProduct.videoFile);
+                      return (
+                        <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', backgroundColor: '#ebf5ff', borderRadius: '4px', overflow: 'hidden', border: '1px solid #bfdbfe' }}>
+                          <video src={stagedVideoUrl} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setSelectedEditPreview({ url: stagedVideoUrl, type: 'video' })} />
+                          <button type="button" onClick={handleRemoveStagedVideo} style={removeImageBadgeStyle}>×</button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -808,12 +833,16 @@ function ManageProduct() {
         </div>
       )}
 
-      {/* FULLSCREEN MEDIA PREVIEW */}
+      {/* FULLSCREEN MULTIMEDIA PREVIEW */}
       {selectedEditPreview && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.9)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000 }} onClick={() => setSelectedEditPreview(null)}>
           <div style={{ position: 'relative', maxWidth: '85vw', maxHeight: '85vh' }} onClick={(e) => e.stopPropagation()}>
-            <img src={selectedEditPreview.url} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '4px' }} />
-            <button onClick={() => setSelectedEditPreview(null)} style={{ position: 'absolute', top: '-40px', right: '-40px', background: '#e11d48', color: '#fff', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontSize: '20px' }}>×</button>
+            {selectedEditPreview.type === 'video' ? (
+              <video src={selectedEditPreview.url} controls autoPlay style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '4px' }} />
+            ) : (
+              <img src={selectedEditPreview.url} alt="Preview Context" style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '4px' }} />
+            )}
+            <button type="button" onClick={() => setSelectedEditPreview(null)} style={{ position: 'absolute', top: '-40px', right: '-40px', background: '#e11d48', color: '#fff', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
           </div>
         </div>
       )}
@@ -829,17 +858,15 @@ const notifItemStyle = { display: 'flex', alignItems: 'flex-start', gap: '10px',
 const statusIndicatorStyle = { width: '8px', height: '8px', borderRadius: '50%', marginTop: '4px', flexShrink: 0 };
 const dropdownItemStyle = { padding: '10px 16px', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '13px', color: '#4a5568', display: 'flex', alignItems: 'center' };
 const filterDropdownStyle = { position: 'absolute', left: 0, top: '45px', backgroundColor: '#fff', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', borderRadius: '6px', padding: '6px 0', zIndex: 110, minWidth: '180px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
-const actionDropdownMenuStyle = { position: 'absolute', right: 0, top: '35px', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: '6px', padding: '6px 0', zIndex: 100, minWidth: '160px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' };
 
-const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', zIndex: 1001 };
-
-const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', overflowY: 'auto' };
+const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', zIndex: 1001, padding: '20px 0' };
+const modalContentStyle = { backgroundColor: '#fff', borderRadius: '8px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', overflowY: 'auto', maxHeight: '90vh' };
 
 const inputGroupStyle = { display: 'flex', flexDirection: 'column', gap: '6px' };
 const labelStyle = { fontSize: '13px', fontWeight: '600', color: '#334155' };
 const inputStyle = { padding: '10px 14px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '14px', outline: 'none' };
 const cancelBtnStyle = { padding: '10px 16px', background: '#f1f5f9', border: 'none', color: '#475569', borderRadius: '6px', fontWeight: '500', cursor: 'pointer' };
 const saveBtnStyle = { padding: '10px 16px', background: '#e11d48', border: 'none', color: '#fff', borderRadius: '6px', fontWeight: '500', cursor: 'pointer' };
-const removeImageBadgeStyle = { position: 'absolute', top: '2px', right: '2px', width: '18px', height: '18px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '12px', padding: 0 };
+const removeImageBadgeStyle = { position: 'absolute', top: '2px', right: '2px', width: '18px', height: '18px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '12px', padding: 0, zIndex: 10 };
 
 export default ManageProduct;
