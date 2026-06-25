@@ -115,7 +115,7 @@ export default function HomePage() {
                     let color = colors[j];
 
                     for (let k = 0; k < productColors.length; k++) {
-                        if (color === productColors[k]) {
+                        if (color.toLowerCase() === productColors[k].toLowerCase()) {
                             isDuplicate = true;
                             break;
                         }
