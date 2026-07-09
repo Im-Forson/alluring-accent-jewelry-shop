@@ -14,7 +14,11 @@ function AddProduct() {
 
   const [color, setColor] = useState("");
   const [colors, setColors] = useState([]);
-  const [mediaFiles, setMediaFiles] = useState([]);
+  
+  // Separated media structures
+  const [images, setImages] = useState([]);
+  const [videoFile, setVideoFile] = useState(null);
+
   const [productsArray, setProductsArray] = useState([]);
 
   const [selectedPreview, setSelectedPreview] = useState(null);
@@ -87,11 +91,15 @@ function AddProduct() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleRemoveMedia = (indexToRemove) => {
-    setMediaFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
-    if (mainIndex >= mediaFiles.length - 1) {
+  const handleRemoveImage = (indexToRemove) => {
+    setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
+    if (mainIndex >= images.length - 1) {
       setMainIndex(0);
     }
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoFile(null);
   };
 
   const handleAddColor = () => {
@@ -145,9 +153,9 @@ function AddProduct() {
         return;
       }
 
-      if (mediaFiles.length === 0) {
+      if (images.length === 0) {
         toast.dismiss(loadId);
-        toast.error("Image upload is required", { duration: 2000 });
+        toast.error("At least one product image is required", { duration: 2000 });
         setSubmitting(false);
         return;
       }
@@ -169,9 +177,19 @@ function AddProduct() {
         formData.append("colors", color);
       });
 
-      mediaFiles.forEach((file) => {
+      // Clear standard key-entries to avoid duplicate empty submissions from empty file nodes
+      formData.delete("images");
+      formData.delete("video");
+
+      // Appending images to match backend expectations
+      images.forEach((file) => {
         formData.append("images", file);
       });
+
+      // Appending video to match backend expectations
+      if (videoFile) {
+        formData.append("video", videoFile);
+      }
 
       if (tagInput.trim() === "") {
         formData.delete('tag');
@@ -194,7 +212,8 @@ function AddProduct() {
 
         setColors([]);
         setColor('');
-        setMediaFiles([]);
+        setImages([]);
+        setVideoFile(null);
         setProductsArray([]);
         setProductsArray(null);
         setMainIndex(0);
@@ -256,12 +275,18 @@ function AddProduct() {
       const file = new File([blob], `camera_${Date.now()}.jpg`, {
         type: "image/jpeg",
       });
-      setMediaFiles((prev) => [...prev, file]);
+      
+      if (images.length >= 4) {
+        toast.error("You can only upload a maximum of 4 images.");
+        return;
+      }
+      setImages((prev) => [...prev, file]);
     }, "image/jpeg");
   };
 
-  const openGallery = () => {
-    const input = document.getElementById("productMedia");
+  const openGallery = (type) => {
+    const inputId = type === 'video' ? 'productVideo' : 'productImages';
+    const input = document.getElementById(inputId);
     if (input) input.click();
   };
 
@@ -287,31 +312,41 @@ function AddProduct() {
           <div className="media-upload-card">
             <div className="media-upload-header">
               <h3>Product Media</h3>
-              <span className="media-count">{mediaFiles.length} file(s) uploaded</span>
+              <span className="media-count">
+                {images.length}/4 Image(s) & {videoFile ? 1 : 0}/1 Video uploaded
+              </span>
             </div>
 
             <div className="media-upload-body" onClick={() => startCamera(facingMode)}>
               <div className="media-icon-circle">
                 <FiCamera />
               </div>
-              <h4>Capture or Upload Media</h4>
-              <p>Images & videos supported</p>
+              <h4>Capture Photo or Upload Media</h4>
+              <p>Max 4 images and exactly 1 video container segment supported</p>
 
-              <button
-                type="button"
-                className="upload-secondary-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openGallery();
-                }}
-              >
-                Choose from device
-              </button>
+              <div className="upload-buttons-wrapper" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className="upload-secondary-btn"
+                  onClick={() => openGallery('image')}
+                  style={{ marginRight: '10px' }}
+                >
+                  Upload Images (Max 4)
+                </button>
+                <button
+                  type="button"
+                  className="upload-secondary-btn"
+                  onClick={() => openGallery('video')}
+                >
+                  Upload Video (Max 1)
+                </button>
+              </div>
             </div>
 
             <div className="media-upload-actions">
               <button type="button" onClick={() => startCamera(facingMode)}>📷 Camera</button>
-              <button type="button" onClick={(e) => { e.stopPropagation(); openGallery(); }}>📁 Gallery</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); openGallery('image'); }}>📁 Upload Images</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); openGallery('video'); }}>🎥 Upload Video</button>
             </div>
           </div>
 
@@ -337,44 +372,56 @@ function AddProduct() {
             </div>
           )}
 
+          {/* Hidden input field specialized for Images up to 4 elements */}
           <input
             type="file"
-            id="productMedia"
+            id="productImages"
+            name="images"
             hidden
             multiple
-            accept="image/*,video/*"
+            accept="image/*"
             onChange={(e) => {
               if (e.target.files) {
-                setMediaFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+                const incomingFiles = Array.from(e.target.files);
+                if (images.length + incomingFiles.length > 4) {
+                  toast.error("You can only upload a maximum of 4 images.");
+                  return;
+                }
+                setImages((prev) => [...prev, ...incomingFiles]);
               }
             }}
           />
 
-          {mediaFiles.length > 0 && (
+          {/* Hidden input field specialized for 1 unique Video input item */}
+          <input
+            type="file"
+            id="productVideo"
+            name="video"
+            hidden
+            accept="video/*"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                setVideoFile(e.target.files[0]);
+              }
+            }}
+          />
+
+          {/* Render media layout previews */}
+          {(images.length > 0 || videoFile) && (
             <div className="media-preview-grid">
-              {mediaFiles.map((file, index) => {
+              
+              {/* Image Previews */}
+              {images.map((file, index) => {
                 const previewUrl = URL.createObjectURL(file);
-                const isImage = file.type.startsWith("image");
-
                 return (
-                  <div key={index} className="media-preview-item">
+                  <div key={`img-${index}`} className="media-preview-item">
                     {mainIndex === index && <div className="main-badge">Main</div>}
-
-                    {isImage ? (
-                      <img
-                        src={previewUrl}
-                        alt="Upload preview"
-                        className="preview-media"
-                        onClick={() => setSelectedPreview({ url: previewUrl, type: 'image' })}
-                      />
-                    ) : (
-                      <video
-                        src={previewUrl}
-                        className="preview-media"
-                        onClick={() => setSelectedPreview({ url: previewUrl, type: 'video' })}
-                      />
-                    )}
-
+                    <img
+                      src={previewUrl}
+                      alt="Upload preview"
+                      className="preview-media"
+                      onClick={() => setSelectedPreview({ url: previewUrl, type: 'image' })}
+                    />
                     <button
                       type="button"
                       onClick={() => setMainIndex(index)}
@@ -382,17 +429,38 @@ function AddProduct() {
                     >
                       ★
                     </button>
-
                     <button
                       type="button"
                       className="delete-media-btn"
-                      onClick={() => handleRemoveMedia(index)}
+                      onClick={() => handleRemoveImage(index)}
                     >
                       ×
                     </button>
                   </div>
                 );
               })}
+
+              {/* Video Preview block element */}
+              {videoFile && (() => {
+                const videoUrl = URL.createObjectURL(videoFile);
+                return (
+                  <div className="media-preview-item video-preview-item">
+                    <div className="main-badge" style={{ backgroundColor: '#0070f3' }}>Video</div>
+                    <video
+                      src={videoUrl}
+                      className="preview-media"
+                      onClick={() => setSelectedPreview({ url: videoUrl, type: 'video' })}
+                    />
+                    <button
+                      type="button"
+                      className="delete-media-btn"
+                      onClick={handleRemoveVideo}
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -412,7 +480,6 @@ function AddProduct() {
             <input type="number" name="retailPrice" placeholder="Retail Price (₵)" className="form-input" required />
           </div>
 
-          {/* ✅ Category: Read-only, dropdown-only selection */}
           <div className="input-group select-wrapper" ref={categoryDropdownRef}>
             <input
               type="text"
