@@ -18,7 +18,7 @@ function Promotion() {
 
   // Create New Promotion Form States
   const [promoTitle, setPromoTitle] = useState("");
-  const [discountType, setDiscountType] = useState('percentage');
+  const [discountType, setDiscountType] = useState('fixed');
   const [discountValue, setDiscountValue] = useState("");
 
   // DATA BACKEND MANAGEMENT STATES
@@ -36,6 +36,8 @@ function Promotion() {
   const [isDisplay, setIsDisplay] = useState(false);
   const [bannerText, setBannerText] = useState("");
   const [isBannerSaving, setIsBannerSaving] = useState(false);
+
+  const [isProcessing, setProcessing] = useState(false);
 
   // Sync state data on mounting
   useEffect(() => {
@@ -221,15 +223,17 @@ function Promotion() {
       return;
     }
 
+    setProcessing(true);
+
     // Secondary UI Guard checking running structures
-    if (hasActivePromo) {
-      toast.error("Another promotion is currently active. Please stop it first.");
-      return;
-    }
+    // if (hasActivePromo) {
+    //   toast.error("Another promotion is currently active. Please stop it first.");
+    //   return;
+    // }
 
     // Engage fade state on the pressed button & surface a hold-on toast while the campaign spins up
     setLoadingId(targetId);
-    const holdToastId = toast.loading("Hold on, the promotion is starting...");
+    const holdToastId = toast.loading("Promotion is starting...");
 
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
@@ -247,13 +251,17 @@ function Promotion() {
       setPromos(updated);
       localStorage.setItem("storePromotions", JSON.stringify(updated));
       toast.dismiss(holdToastId);
-      toast.success("Promotional campaign is now LIVE across the storefront!");
+      toast.success("Promotion is Live!");
+      setProcessing(false);
+
     } catch (err) {
       console.error(err);
       toast.dismiss(holdToastId);
-      toast.error("Failed to activate promotion campaign.");
+      toast.error("Failed to activate promotion.");
+      setProcessing(false);
     } finally {
       setLoadingId(null);
+      setProcessing(false);
     }
   };
 
@@ -266,9 +274,11 @@ function Promotion() {
       return;
     }
 
+    setProcessing(true);
+
     // Engage fade state on the pressed button & surface a hold-on toast while the campaign winds down
     setLoadingId(targetId);
-    const holdToastId = toast.loading("Hold on, the promotion is stopping...");
+    const holdToastId = toast.loading("Promotion is stopping...");
 
     const token = localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("adminToken") || localStorage.getItem("token");
     const axiosConfig = { headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' } };
@@ -286,13 +296,18 @@ function Promotion() {
       setPromos(updated);
       localStorage.setItem("storePromotions", JSON.stringify(updated));
       toast.dismiss(holdToastId);
-      toast.success("Campaign stopped, please refresh the page.");
+      toast.success("Promotion Ended!");
+      window.location.reload();
     } catch (err) { 
-      console.error(err);
+
+      // console.error(err);
       toast.dismiss(holdToastId);
-      toast.error("Failed to end promotional sequence.");
+      toast.error("Failed to end promotion.");
+      setProcessing(false);
+
     } finally {
       setLoadingId(null);
+      setProcessing(false);
     }
   };
 
@@ -437,13 +452,13 @@ function Promotion() {
                                 <button 
                                   className="action-btn start-btn" 
                                   style={{ 
-                                    backgroundColor: hasActivePromo ? '#cbd5e1' : '#10b981', 
-                                    color: hasActivePromo ? '#94a3b8' : '#fff', 
-                                    cursor: (hasActivePromo || isThisRowLoading) ? 'not-allowed' : 'pointer',
-                                    opacity: hasActivePromo ? 0.6 : (isThisRowLoading ? 0.4 : 1),
+                                    backgroundColor: '#10b981', 
+                                    color: '#fff', 
+                                    cursor: (isThisRowLoading) ? 'not-allowed' : 'pointer',
+                                    // opacity: hasActivePromo ? 0.6 : (isThisRowLoading ? 0.4 : 1),
                                     transition: 'opacity 0.2s ease'
                                   }} 
-                                  disabled={hasActivePromo || isThisRowLoading}
+                                  disabled={isThisRowLoading}
                                   onClick={() => handleToggleStart(currentPromoId)}
                                   title={hasActivePromo ? "End the currently active promotion to start this one" : "Start Campaign"}
                                 >
@@ -466,7 +481,7 @@ function Promotion() {
                                   opacity: isThisRowLoading ? 0.4 : 1,
                                   transition: 'opacity 0.2s ease'
                                 }} 
-                                disabled={isThisRowLoading}
+                                disabled={isThisRowLoading || isProcessing}
                                 onClick={() => handleTogglePause(currentPromoId)}
                               >
                                 Stop
@@ -479,13 +494,13 @@ function Promotion() {
                                 <button 
                                   className="action-btn start-btn" 
                                   style={{ 
-                                    backgroundColor: hasActivePromo ? '#cbd5e1' : '#10b981', 
-                                    color: hasActivePromo ? '#94a3b8' : '#fff', 
-                                    cursor: (hasActivePromo || isThisRowLoading) ? 'not-allowed' : 'pointer',
-                                    opacity: hasActivePromo ? 0.6 : (isThisRowLoading ? 0.4 : 1),
+                                    backgroundColor: '#10b981', 
+                                    color: '#fff', 
+                                    cursor: (isThisRowLoading) ? 'not-allowed' : 'pointer',
+                                    opacity: (isThisRowLoading ? 0.4 : 1),
                                     transition: 'opacity 0.2s ease'
                                   }} 
-                                  disabled={hasActivePromo || isThisRowLoading}
+                                  disabled={isProcessing}
                                   onClick={() => handleToggleStart(currentPromoId)}
                                   title={hasActivePromo ? "End the currently active promotion to start this one" : "Start Campaign"}
                                 >
@@ -520,10 +535,10 @@ function Promotion() {
               <div className="form-field radio-row">
                 <label className="radio-label">Discount Type</label>
                 <div className="radio-options">
-                  <label className="radio-container">
+                  {/* <label className="radio-container">
                     <input type="radio" name="discountType" checked={discountType === 'percentage'} onChange={() => setDiscountType('percentage')} />
                     <span className="custom-radio"></span>Percentage %
-                  </label>
+                  </label> */}
                   <label className="radio-container">
                     <input type="radio" name="discountType" checked={discountType === 'fixed'} onChange={() => setDiscountType('fixed')} />
                     <span className="custom-radio"></span>Fixed Amount (₵)
@@ -535,7 +550,7 @@ function Promotion() {
                 <input type="number" placeholder={discountType === 'percentage' ? "Discount Value (%) e.g. 25" : "Discount Value (GHC) e.g. 150"} className="panel-input" value={discountValue} onChange={(e) => setDiscountValue(e.target.value)} />
               </div>
 
-              <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+              {/* <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <button
                   type="button"
                   style={{
@@ -552,7 +567,7 @@ function Promotion() {
                     Currently targeting entire storefront item registry.
                   </span>
                 )}
-              </div>
+              </div> */}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
                 <div className="category-dropdown-container" style={{ position: 'relative' }}>
