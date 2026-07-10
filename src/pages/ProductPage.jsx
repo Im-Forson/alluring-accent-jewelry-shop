@@ -132,6 +132,7 @@ export default function ProductPage() {
     
             const order =[ {
                 id: viewingProduct.id,
+                category: viewingProduct.category,
                 name: viewingProduct.name,
                 image: viewingProduct.images[0],
                 color: selectedColor,

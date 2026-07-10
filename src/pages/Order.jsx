@@ -85,15 +85,17 @@ function Order() {
             ? new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             : 'null',
           customerDetails: {
-            phone: order.phone || 'N/A',
-            email: order.email || 'N/A',
-            address: order.address ? `${order.address}, ${order.city || ''} (${order.region || ''})` : 'N/A'
+            phone: order.phone,
+            email: order.email,
+            city: `${order.city}`,
+            region: `${order.region}`
           },
           paymentMethod: order.paymentMethod || 'Mobile Money / Card',
+
           itemBreakdown: (order.products || []).map(p => ({
-            name: p.name || 'Unnamed Product',
-            qty: p.quantity || 1,
-            price: p.price || '0',
+            name: p.name,
+            qty: p.quantity,
+            price: p.price,
             image: p.image
           }))
         };
@@ -517,17 +519,21 @@ function Order() {
               <div>
                 <h2 style={panelSectionHeadingStyle}>Customer & Fulfillment Details</h2>
                 <div style={panelCardStyle}>
-                  <p style={dataRowStyle}><strong>Phone:</strong> <span>{selectedOrder.customerDetails?.phone || 'N/A'}</span></p>
-                  <p style={dataRowStyle}><strong>Email:</strong> <span>{selectedOrder.customerDetails?.email || 'N/A'}</span></p>
+                  <p style={dataRowStyle}><strong>Phone:</strong> <span>{selectedOrder.customerDetails.phone}</span></p>
+                  <p style={dataRowStyle}><strong>Email:</strong> <span>{selectedOrder.customerDetails.email}</span></p>
                   <p style={dataRowStyle} className="address-row">
-                    <strong>Fulfillment Address:</strong> 
-                    <span style={{ textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{selectedOrder.customerDetails?.address || 'N/A'}</span>
+                    <strong>City:</strong> 
+                    <span style={{ textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{selectedOrder.customerDetails.city}</span>
+                  </p>
+                  <p style={dataRowStyle} className="address-row">
+                    <strong>Region:</strong> 
+                    <span style={{ textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{selectedOrder.customerDetails.region}</span>
                   </p>
                 </div>
               </div>
 
               <div>
-                <h2 style={panelSectionHeadingStyle}>Pipeline Progress Actions</h2>
+                <h2 style={panelSectionHeadingStyle}>Progress Actions</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '4px 0' }}>
                   <button 
                     onMouseEnter={() => setHoveredBtn('processing')}
@@ -559,7 +565,7 @@ function Order() {
               </div>
 
               <div>
-                <h2 style={panelSectionHeadingStyle}>Product Itemized Breakdown</h2>
+                <h2 style={panelSectionHeadingStyle}>Product Breakdown</h2>
                 <div style={{ ...panelCardStyle, padding: '8px 0' }}>
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '280px' }}>

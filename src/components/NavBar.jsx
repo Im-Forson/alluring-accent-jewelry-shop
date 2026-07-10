@@ -98,12 +98,13 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                     id: item.id,
                     category: item.category,
                     name: item.name,
+                    image: item.images[0],
                     color: item.preferedColor,
                     price: buyingPrice,
                     wholesalePrice: item.wholesalePrice,
                     quantity: item.purchaseQty,
                     totalPrice: buyingPrice * item.purchaseQty,
-                    isPromotion: item.isPromotion,
+                    // isPromotion: item.isPromotion,
                 };
     
                 return order;

@@ -401,7 +401,7 @@ function Promotion() {
           </div>
           <div className="promo-card">
             <div className="promo-icon-box gray-bg">🕒</div>
-            <div className="promo-card-data"><span>Expired / Ended</span><h3>{expiredCount}</h3></div>
+            <div className="promo-card-data"><span>Ended</span><h3>{expiredCount}</h3></div>
           </div>
         </section>
 
@@ -412,9 +412,9 @@ function Promotion() {
             <table className="promo-table">
               <thead>
                 <tr>
-                  <th>Product / Campaign</th>
-                  <th>Value/Price</th>
-                  <th>Manual Lifecycle Status</th>
+                  <th>Campaign</th>
+                  <th>Value</th>
+                  <th>Status</th>
                   <th className="actions-header">Actions</th>
                 </tr>
               </thead>
@@ -601,7 +601,7 @@ function Promotion() {
                         </span>
                       ))
                     )}
-                    <FiChevronDown style={{ position: 'absolute', right: '12px', top: '14px', color: '#64748b', transform: `rotate(${isCategoryOpen ? '180deg' : '0deg'})`, transition: 'transform 0.2s' }} />
+                    {/* <FiChevronDown style={{ position: 'absolute', right: '12px', top: '14px', color: '#64748b', transform: `rotate(${isCategoryOpen ? '180deg' : '0deg'})`, transition: 'transform 0.2s' }} /> */}
                   </div>
 
                   {isCategoryOpen && (
@@ -633,7 +633,7 @@ function Promotion() {
 
                 <div className="product-dropdown-container" style={{ position: 'relative' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>
-                    Filter by Individual Products
+                    Filter by Products
                   </label>
                   <div
                     className="panel-input"
@@ -669,7 +669,7 @@ function Promotion() {
                     <div style={{ position: 'absolute', top: '102%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', boxShadow: '0 10px 20px rgba(0,0,0,0.08)', zIndex: 99, padding: '10px', maxHeight: '250px', overflowY: 'auto' }}>
                       <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }} onClick={e => e.stopPropagation()}>
                         <div style={{ position: 'relative', flex: 1 }}>
-                          <FiSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                          {/* <FiSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} /> */}
                           <input type="text" placeholder="Search products..." className="panel-input" style={{ paddingLeft: '32px', height: '34px', fontSize: '13px', marginBottom: 0 }} value={productSearch} onChange={e => setProductSearch(e.target.value)} />
                         </div>
                         <button type="button" style={{ height: '34px', padding: '0 12px', backgroundColor: '#be185d', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }} onClick={() => setIsProductOpen(false)}>Done</button>
