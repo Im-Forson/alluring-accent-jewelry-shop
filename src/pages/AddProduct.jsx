@@ -60,8 +60,8 @@ function AddProduct() {
           return catName === 'rings' || catName === 'necklaces' || catName === 'earrings' || catName === 'bracelets';
         });
 
-        loadCategories(filteredCategories);
-        setAvailableCategories(filteredCategories);
+        loadCategories(allCategories);
+        setAvailableCategories(allCategories);
       } else {
         loadCategories(['All Jewellery']);
       }
@@ -133,6 +133,22 @@ function AddProduct() {
 
     const wholesale = parseFloat(formData.get("wholesalePrice")) || 0;
     const retail = parseFloat(formData.get("retailPrice")) || 0;
+
+    if (wholesale <= 0) {
+      toast.error("Invalid wholesale price!", {
+        duration: 3000,
+        position: "top-center"
+      });
+      return;
+    }
+
+    if (retail <= 0) {
+      toast.error("Invalid retail price!", {
+        duration: 3000,
+        position: "top-center"
+      });
+      return;
+    }
 
     if (wholesale >= retail) {
       toast.error("Wholesale Prices must always be less than Retail Prices!", {
