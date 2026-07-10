@@ -135,26 +135,17 @@ function AddProduct() {
     const retail = parseFloat(formData.get("retailPrice")) || 0;
 
     if (wholesale <= 0) {
-      toast.error("Invalid wholesale price!", {
-        duration: 3000,
-        position: "top-center"
-      });
+      toast.error("Invalid wholesale price!", {duration: 2000});
       return;
     }
 
     if (retail <= 0) {
-      toast.error("Invalid retail price!", {
-        duration: 3000,
-        position: "top-center"
-      });
+      toast.error("Invalid retail price!", {duration: 2000});
       return;
     }
 
     if (wholesale >= retail) {
-      toast.error("Wholesale Prices must always be less than Retail Prices!", {
-        duration: 4000,
-        position: "top-center"
-      });
+      toast.error("Wholesale Prices must always be less than Retail Prices!", {duration: 2000});
       return;
     }
 
