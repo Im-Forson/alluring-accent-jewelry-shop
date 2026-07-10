@@ -517,18 +517,20 @@ function Order() {
               </div>
 
               <div>
-                <h2 style={panelSectionHeadingStyle}>Customer & Fulfillment Details</h2>
+                <h2 style={panelSectionHeadingStyle}>Customer Delivery Details</h2>
                 <div style={panelCardStyle}>
                   <p style={dataRowStyle}><strong>Phone:</strong> <span>{selectedOrder.customerDetails.phone}</span></p>
                   <p style={dataRowStyle}><strong>Email:</strong> <span>{selectedOrder.customerDetails.email}</span></p>
-                  <p style={dataRowStyle} className="address-row">
+                  <p style={dataRowStyle}><strong>Address:</strong> <span>{selectedOrder.customerDetails.city}, {selectedOrder.customerDetails.region}.</span></p>
+
+                  {/* <p style={dataRowStyle} className="address-row">
                     <strong>City:</strong> 
                     <span style={{ textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{selectedOrder.customerDetails.city}</span>
                   </p>
                   <p style={dataRowStyle} className="address-row">
                     <strong>Region:</strong> 
                     <span style={{ textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{selectedOrder.customerDetails.region}</span>
-                  </p>
+                  </p> */}
                 </div>
               </div>
 
