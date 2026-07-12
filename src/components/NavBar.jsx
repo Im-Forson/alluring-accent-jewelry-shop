@@ -104,7 +104,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                     wholesalePrice: item.wholesalePrice,
                     quantity: item.purchaseQty,
                     totalPrice: buyingPrice * item.purchaseQty,
-                    // isPromotion: item.isPromotion,
+                    isPromotion: item.isPromotion,
                 };
     
                 return order;
@@ -168,11 +168,12 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
             }
 
             if (isReload) {
-                clearCart();
-                clearFavorites();
-                loadAllProducts([]);
+                // clearCart();
+                // clearFavorites();
+                // loadAllProducts([]);
                 setProcessOverlay(false);
-                return navigate('/');
+                // return navigate('/');
+                return
             }
     
             // count same categories
