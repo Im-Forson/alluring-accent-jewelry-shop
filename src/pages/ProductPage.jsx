@@ -200,6 +200,12 @@ export default function ProductPage() {
         }
     }
 
+    const getOptimizedImage = (url, width) => {
+        if (!url) return '';
+        // Injects auto format, auto quality, and a max width boundary
+        return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+    };
+
     return (
         <>
             {
@@ -240,7 +246,7 @@ export default function ProductPage() {
                                         />
                                         :
                                         <img 
-                                            src={activeImg} 
+                                            src={getOptimizedImage(activeImg, 400)} 
                                             alt="Rose Gold Infinity Ring Main Focus" 
                                             className="w-full h-full object-contain p-8 transition-transform duration-300 group-hover:scale-105"
                                         />
@@ -264,7 +270,7 @@ export default function ProductPage() {
                                                         activeImg === img ? 'border-pink-500 ring-1 ring-pink-500' : 'border-zinc-200 hover:border-zinc-400'
                                                     }`}
                                                 >
-                                                    <img src={img} alt="thumbnail" className="w-full h-full object-contain" />
+                                                    <img src={getOptimizedImage(img, 400)} alt="img" className="w-full h-full object-contain" />
                                                 </button>
                                             ))}
 

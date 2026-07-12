@@ -70,6 +70,12 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       try {
         e.preventDefault();
 
+        if (!orders) {
+          setIsOpen(false);
+          navigate('/');
+          return;
+        }
+
         if (formData.email.trim() === '') {
           formData.email = 'null';
         }
@@ -88,7 +94,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         amountPayable = parseFloat(amountPayable);
     
         const handler = window.PaystackPop.setup({
-          key: paymentData.liveKey,
+          key: paymentData.testKey,
           email: paymentData.email,
           amount: amountPayable,
           currency: "GHS",
@@ -496,7 +502,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
                   
                   {/* Small inline preview panel containing line product metrics summary card */}
                   {
-                    orders.map((order, index) => (
+                    orders?.map((order, index) => (
                       <div key={index} className="pb-3 mb-3 border-b border-zinc-200/60 flex flex-col gap-0.5">
                         <span className="text-xs font-bold font-sans capitalize text-zinc-800 truncate">{order.name}</span>
                         <div className="flex justify-between mt-[2px]">

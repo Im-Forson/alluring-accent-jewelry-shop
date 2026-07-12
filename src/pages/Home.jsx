@@ -177,6 +177,12 @@ export default function HomePage() {
         }
     };
 
+    const getOptimizedImage = (url, width) => {
+        if (!url) return '';
+        // Injects auto format, auto quality, and a max width boundary
+        return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+    };
+
 
     return (
         <>
@@ -239,7 +245,10 @@ export default function HomePage() {
                                             {/* Dark overlay that activates when parent (group) is hovered */}
                                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
                                         
-                                            <img src={category.image} alt="img " className='w-full h-full object-cover' />
+                                            <img 
+                                                src={getOptimizedImage(category.image, 400)} alt="img " 
+                                                className='w-full h-full object-cover' 
+                                            />
                                             
                                             <div className="hidden md:flex flex-col relative left-[10px] bottom-[50px] z-20">
                                                 <h1 className='text-[17px] capitalize font-bold'>{category.name}</h1>

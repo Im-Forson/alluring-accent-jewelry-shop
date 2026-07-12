@@ -249,6 +249,12 @@ function Order() {
     };
   };
 
+  const getOptimizedImage = (url, width) => {
+      if (!url) return '';
+      // Injects auto format, auto quality, and a max width boundary
+      return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+  };
+
   return (
     <div className={`admin-layout ${sidebarOpen ? 'sidebar-active' : ''}`}>
       <SideBar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
@@ -583,7 +589,7 @@ function Order() {
                           <tr key={`item-${idx}`} style={{ borderBottom: idx !== selectedOrder.itemBreakdown.length - 1 ? '1px solid #f8fafc' : 'none' }}>
                             <td style={{ padding: '8px 16px', color: '#334155', fontWeight: '500' }}>
                               <div className='flex gap-4 items-center'>
-                              <img style={{width: '60px', height: '50px'}} src={item.image}/>
+                              <img style={{width: '60px', height: '50px'}} src={getOptimizedImage(item.image, 400)}/>
                               <p style={{ color: '#334155', fontWeight: '500' }}>{item.name}</p>
                               </div>
                             </td>

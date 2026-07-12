@@ -414,6 +414,12 @@ function ManageProduct() {
     }
   };
 
+  const getOptimizedImage = (url, width) => {
+      if (!url) return '';
+      // Injects auto format, auto quality, and a max width boundary
+      return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+  };
+
   return (
     <div className="admin-layout">
       <SideBar isModalOpen={isModalOpen} editingProduct={editingProduct} />
@@ -572,7 +578,7 @@ function ManageProduct() {
                           <td style={{ textAlign: 'center', fontWeight: '600', color: '#64748b', fontSize: '13px' }}>{displayRowNumber}.</td>
                           <td>
                             <div className="product-identity-cell">
-                              <img src={product.image} alt={product.name} className="product-thumb" />
+                              <img src={getOptimizedImage(product.image, 400)} alt={product.name} className="product-thumb" />
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <span className="product-title-text">{product.name}</span>
                                 {product.tag && <span className="meta-hash-tag" style={{ fontSize: '11px', color: '#e11d48', fontWeight: '500' }}>#{product.tag}</span>}

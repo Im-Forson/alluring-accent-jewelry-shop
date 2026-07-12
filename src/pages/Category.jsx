@@ -135,6 +135,12 @@ function Category() {
     }
   };
 
+  const getOptimizedImage = (url, width) => {
+      if (!url) return '';
+      // Injects auto format, auto quality, and a max width boundary
+      return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+  };
+
   return (
     <div className="admin-dashboard-wrapper">
       <Dialog
@@ -244,7 +250,7 @@ function Category() {
                     <div className="row-item-meta">
                       <div className="row-thumbnail-box">
                         {category.image ? (
-                          <img src={category.image} alt={category.name} />
+                          <img src={getOptimizedImage(category.image, 400)} alt={category.name} />
                         ) : (
                           <div className="empty-thumbnail-fallback">💎</div>
                         )}

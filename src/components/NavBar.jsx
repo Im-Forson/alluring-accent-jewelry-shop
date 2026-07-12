@@ -222,6 +222,12 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
         }
     }
 
+    const getOptimizedImage = (url, width) => {
+        if (!url) return '';
+        // Injects auto format, auto quality, and a max width boundary
+        return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+    };
+
     return (
         <>
             <div className="fixed top-0 left-0 w-full bg-white shadow z-50 font-sans">
@@ -374,7 +380,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                             ) : (
                                 favorites.map(item => (
                                     <div key={item.id} className="flex gap-3 bg-pink-50 p-3 items-center">
-                                        <img src={item.images[0]} alt={item.name} className="w-16 h-16 rounded-lg object-cover  shrink-0" />
+                                        <img src={getOptimizedImage(item.images[0], 400)} alt={item.name} className="w-16 h-16 rounded-lg object-cover  shrink-0" />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start">
                                                 <h4 className="text-sm font-bold font-sans text-zinc-800 truncate capitalize font-mono mb-1">{item.name}</h4>
@@ -423,7 +429,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
                                 cart.map((item, index) => (
                                     <div key={index} className={`flex gap-3  p-3 ${activePage === 'product' && item.id === viewingProduct.id ? ' bg-pink-0' : ' bg-pink-50'}`}>
 
-                                        <img src={item.images[0]} alt={item.name} className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                                        <img src={getOptimizedImage(item.images[0], 400)} alt={item.name} className="w-16 h-16 rounded-lg object-cover shrink-0" />
                                         <div className="flex-1 min-w-0">
                                         <div className="">
                                             {

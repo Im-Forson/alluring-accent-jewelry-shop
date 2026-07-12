@@ -39,6 +39,13 @@ export default function BestSellers() {
         navigate('/product', {state: {source: source}}); 
     }
 
+    const getOptimizedImage = (url, width) => {
+        if (!url) return '';
+        // Injects auto format, auto quality, and a max width boundary
+        return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+    };
+      
+
     return (
         <section className='px-4 md:px-10 mb-15 md:mb-20'>
             {/* Header section wrapper layout */}
@@ -95,7 +102,7 @@ export default function BestSellers() {
                             {/* IMAGE */}
                             <div className="relative h-[140px] md:h-[200px] overflow-hidden">
                             <img
-                                src={product.images[0]}
+                                src={getOptimizedImage(product.images[0], 400)}
                                 className="w-full h-full object-cover hover:scale-110 transition duration-500"
                             />
 
