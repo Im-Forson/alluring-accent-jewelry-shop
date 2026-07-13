@@ -94,7 +94,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         amountPayable = parseFloat(amountPayable);
     
         const handler = window.PaystackPop.setup({
-          key: paymentData.testKey,
+          key: paymentData.liveKey,
           email: paymentData.email,
           amount: amountPayable,
           currency: "GHS",
