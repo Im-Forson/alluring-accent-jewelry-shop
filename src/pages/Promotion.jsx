@@ -171,13 +171,15 @@ function Promotion() {
       if (selectedTargets.some(t => t.type === 'category' && (t.id === product.category || t.name === product.category))) return true;
       return false;
     }).some(product => {
-      const orig = parseFloat(product.retailPrice || 0);
+      const rPrc = parseFloat(product.retailPrice || 0);
+      const wPrc = parseFloat(product.wholesalePrice || 0);
       const disc = parseFloat(discountValue || 0);
-      return discountType === 'percentage' ? disc >= 100 : (orig - disc) <= 0;
+
+      return discountType === 'percentage' ? disc >= 100 : ((rPrc - disc) <= 0 || (wPrc - disc) <= 0);
     });
 
     if (willCauseNegativePricing) {
-      toast.error("Cannot save! One or more items have dropped into negative pricing structures.");
+      toast.error("Cannot save! Retail or wholesale price in negative.");
       return;
     }
 
