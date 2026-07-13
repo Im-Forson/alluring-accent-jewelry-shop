@@ -98,16 +98,21 @@ export default function ProductPage() {
 
     const handleAddToCart = () => {
       const foundProduct = cart.find((item) => item.id === id);
-      // console.log("is exist: ",foundProduct)
 
       if (!foundProduct) {
         const product = allProducts.find((item) => item.id === id);
+
+        product.purchasingPrice = productPrice;
+        product.purchaseQty = quantity;
+        product.preferedColor = selectedColor;
+        product.isBuyWholesale = isBuyAtWholesale;
+
         toast.success('Added to cart', {duration: 2000});
         return addToCart(product);
       }
 
       removeCartItem(id);
-      
+
       foundProduct.purchasingPrice = productPrice;
       foundProduct.purchaseQty = quantity;
       foundProduct.preferedColor = selectedColor;
