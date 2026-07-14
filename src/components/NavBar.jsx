@@ -85,7 +85,7 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
 
     const proceedToPayment = async () => {
         try {
-            // if (true) {return}
+            if (true) {return}
             setProcessOverlay(true);
     
             const orders = cart.map(item => {
