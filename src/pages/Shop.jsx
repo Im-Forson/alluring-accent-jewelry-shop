@@ -41,7 +41,7 @@ export default function Shop() {
     const [showTopBtn, setShowTopBtn] = useState(false);
 
     const [dataloading, setDataLoading] = useState(false);
-    const [isDataError, setDataError] = useState(false);
+    const [isDataError, setDataError] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
