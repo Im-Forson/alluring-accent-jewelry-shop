@@ -104,7 +104,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
     
         const handler = window.PaystackPop.setup({
-          key: paymentData.testKey,
+          key: paymentData.liveKey,
           email: paymentData.email,
           amount: amountPayable,
           currency: "GHS",
