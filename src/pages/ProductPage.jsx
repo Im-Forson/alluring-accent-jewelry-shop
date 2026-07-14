@@ -146,7 +146,7 @@ export default function ProductPage() {
                 totalPrice: quantity * buyingPrice,
             }];
     
-            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/product/availability`,
+            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/product/availability`,
                 {order: order},
                 {
                     headers: {

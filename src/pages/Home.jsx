@@ -57,7 +57,7 @@ export default function HomePage() {
     const [] = useState(false);
 
     const [dataloading, setDataLoading] = useState(true);
-    const [isDataError, setDataError] = useState(true);
+    const [isDataError, setDataError] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {

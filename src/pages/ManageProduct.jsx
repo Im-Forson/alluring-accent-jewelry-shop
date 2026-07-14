@@ -133,9 +133,11 @@ function ManageProduct() {
           category: item.category || "",
           WholesaleMOQ: item.WholesaleMOQ || item.minimumOrder || item.moq || "1",
           stock: item.stock || "0",
+          sellingPrice: parseFloat(item.sellingPrice).toFixed(2),
           wholesalePrice: parseFloat(item.wholesalePrice || 0).toFixed(2),
           retailPrice: parseFloat(item.retailPrice || item.price || 0).toFixed(2),
           price: parseFloat(item.retailPrice || item.price || 0).toFixed(2), 
+          isPromotion: item.isPromotion,
           status: parseInt(item.stock) > 0 ? 'Active' : 'Inactive',
           image: resolvedThumb,
           tag: item.tag || '',
@@ -561,6 +563,7 @@ function ManageProduct() {
                       <th>Product</th>
                       <th>Category</th>
                       <th>Stock</th>
+                      <th>Promo Price</th>
                       <th>Retail Price</th>
                       <th>Wholesale Price</th>
                       <th>Status</th>
@@ -591,6 +594,7 @@ function ManageProduct() {
                               {isOutOfStock ? 'Out of Stock' : `${stockValue} units`}
                             </span>
                           </td>
+                          <td className="price-text-bold">{product.isPromotion ? `GHC ${product.sellingPrice}` : 'null'}</td>
                           <td className="price-text-bold">GHC {product.retailPrice}</td>
                           <td className="price-text-bold text-slate-600">GHC {product.wholesalePrice}</td>
                           <td>
