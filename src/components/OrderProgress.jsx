@@ -80,7 +80,7 @@ export default function OrderProgress({showOrderTracker, setShowOrderTracker, se
                                     {/* Address */}
                                     <div className="flex items-start gap-2.5 text-xs text-gray-700">
                                         <MapPin className="w-3.5 h-3.5 text-pink-500 mt-0.5 shrink-0" />
-                                        <p><span className="font-semibold">Address:</span> {trackingOrder.address || trackingOrder.address}</p>
+                                        <p><span className="font-semibold">Address:</span> {trackingOrder.city}, {trackingOrder.region} region.</p>
                                     </div>
                                 </div>
                                 
