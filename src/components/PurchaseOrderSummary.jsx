@@ -20,7 +20,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
     const [isProcessReceipt, setProcessReceipt] = useState(false);
     const [isReprocessReceipt, setReprocessReceipt] = useState(false);
     const [isSendEmail, setSendEmail] = useState(false);
-    const [] = useState(false);
+    // const [isSendWhatsapp, setSendWhatsapp] = useState(false);
     const [] = useState(false);
 
     // 1. Initialize Controlled Form Input State Fields
@@ -205,7 +205,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         else {
           // Recreate order when first request fails
           const res = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL}/order/create`,
+            `${import.meta.env.VITE_API_BASE_URL}/order/recreate`,
               {
                 recipient: formData.recipient,
                 phone: formData.phone,
@@ -238,6 +238,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
           }
           else {
+            console.log('local genet...')
             // generate locally when second request fails
             const orderId = generateOrderId();
 

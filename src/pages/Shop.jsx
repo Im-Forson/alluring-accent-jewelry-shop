@@ -181,6 +181,8 @@ export default function Shop() {
 
     const [cartCount, setCartCount] = useState(2);
 
+    const [searchQuery, setSearchQuery] = useState("");
+
     // Filter Logic
     // const filteredProducts = productsData.filter(product => {
     //   const matchCat = selectedCategory === "All Jewellery" || product.category === selectedCategory;
@@ -188,25 +190,48 @@ export default function Shop() {
     //   return matchCat && matchColl;
     // });
 
+    // const filteredProducts = productsData.filter(product => {
+    //     const matchCat =
+    //       activeCategory === "All Jewellery" || (product.category).trim() === activeCategory;
+      
+    //     const matchColl =
+    //       activeCollection === "All Collections" || product.collection === activeCollection;
+      
+    //     const matchMaterial =
+    //       activeColor === "All Colors" ||
+    //       product.colors?.some(c => c.toLowerCase() === activeColor.toLowerCase());
+      
+    //     const matchPrice =
+    //       activePrice === "All Prices" ||
+    //       (activePrice === "Under GHC 300" && product.sellingPrice < 300) ||
+    //       (activePrice === "GHC 300 - GHC 500" && product.sellingPrice >= 300 && product.sellingPrice <= 500) ||
+    //       (activePrice === "Over GHC 500" && product.sellingPrice > 500);
+      
+    //     return matchCat && matchColl && matchMaterial && matchPrice;
+    //   });
+
     const filteredProducts = productsData.filter(product => {
+        const matchSearch =
+            (product.name || "").toLowerCase().includes(searchQuery.toLowerCase());
+    
         const matchCat =
-          activeCategory === "All Jewellery" || (product.category).trim() === activeCategory;
-      
+            activeCategory === "All Jewellery" || (product.category || "").trim() === activeCategory;
+    
         const matchColl =
-          activeCollection === "All Collections" || product.collection === activeCollection;
-      
+            activeCollection === "All Collections" || product.collection === activeCollection;
+    
         const matchMaterial =
-          activeColor === "All Colors" ||
-          product.colors?.some(c => c.toLowerCase() === activeColor.toLowerCase());
-      
+            activeColor === "All Colors" ||
+            product.colors?.some(c => c.toLowerCase() === activeColor.toLowerCase());
+    
         const matchPrice =
-          activePrice === "All Prices" ||
-          (activePrice === "Under GHC 300" && product.sellingPrice < 300) ||
-          (activePrice === "GHC 300 - GHC 500" && product.sellingPrice >= 300 && product.sellingPrice <= 500) ||
-          (activePrice === "Over GHC 500" && product.sellingPrice > 500);
-      
-        return matchCat && matchColl && matchMaterial && matchPrice;
-      });
+            activePrice === "All Prices" ||
+            (activePrice === "Under GHC 300" && product.sellingPrice < 300) ||
+            (activePrice === "GHC 300 - GHC 500" && product.sellingPrice >= 300 && product.sellingPrice <= 500) ||
+            (activePrice === "Over GHC 500" && product.sellingPrice > 500);
+    
+        return matchSearch && matchCat && matchColl && matchMaterial && matchPrice;
+    });
 
     // function viewProduct(product) {
     //     const details = {
@@ -235,6 +260,7 @@ export default function Shop() {
     }
 
     const filterProducts = () => {
+        setSearchQuery("");
         setActiveCategory(selectedCategory.trim());
         setActiveColor(selectedColor);
         setActivePrice(selectedPrice);
@@ -305,6 +331,7 @@ export default function Shop() {
                             <div className="w-full bg-pink-50 border border-stone-200/60 shadow-sm p-2 sm:p-6 rounded-lg">
                                 {/* ✅ GRID DEFINED AS 2 COLUMNS ON MOBILE, 5 COLUMNS ON DESKTOP */}
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 items-end">
+                                
                                 
                                 {/* Category Filter */}
                                 <div className="flex flex-col space-y-0.5 sm:space-y-1.5">
@@ -406,6 +433,35 @@ export default function Shop() {
                                         Apply Filter
                                     </span>
                                     </button>
+                                </div>
+
+                                {/* 🔍 Search Bar */}
+                                <div className="col-span-2 sm:col-span-4 md:col-span-3 flex flex-col space-y-0.5 sm:space-y-1.5">
+                                    <label className="text-[9px] md:text-xs font-semibold uppercase tracking-wider text-stone-500 font-sans pl-1">
+                                        Search
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Search products..."
+                                            value={searchQuery}
+                                            onChange={(e) => {
+                                                setActiveCategory("All Jewellery");
+                                                setActiveColor("All Colors");
+                                                setActivePrice("All Prices");
+
+                                                setSelectedCategory("All Jewellery");
+                                                setSelectedColor("All Colors");
+                                                setSelectedPrice("All Prices");
+
+                                                setSearchQuery(e.target.value)
+                                            }}
+                                            className="w-full h-9 sm:h-11 bg-white border border-stone-200 text-stone-800 rounded-xl px-3 py-1 text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all"
+                                        />
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400">
+                                            🔍
+                                        </div>
+                                    </div>
                                 </div>
 
                                 </div>
