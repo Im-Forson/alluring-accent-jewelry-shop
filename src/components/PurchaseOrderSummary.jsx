@@ -70,6 +70,10 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       try {
         e.preventDefault();
 
+        if (true) {
+          return;
+        }
+
         if (!orders) {
           setIsOpen(false);
           navigate('/');

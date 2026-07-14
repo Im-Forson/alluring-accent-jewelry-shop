@@ -125,6 +125,7 @@ export default function ProductPage() {
 
     const prepareOrder = async () => {
         try {
+            if (true) {return}
             setProcessOverlay(true);
     
             let buyingPrice = productPrice;
