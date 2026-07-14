@@ -43,6 +43,7 @@ function ManageProduct() {
   const navigate = useNavigate();
   const [productList, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isPromoActive, setPromoActive] = useState(false);
   
   // Track window resizing if needed via custom hook
   const { width } = useWindowSize();
@@ -148,6 +149,17 @@ function ManageProduct() {
       });
       
       setProductList(dynamicProducts);
+
+
+      for (let i=0; i < dynamicProducts.length; i++) {
+        if (dynamicProducts[i].isPromotion) {
+          setPromoActive(true);
+          break;
+        }
+      }
+
+      
+
     } catch (error) {
       console.error("Database connection failure:", error);
       toast.error("Failed to synchronize inventory database.");
@@ -563,7 +575,7 @@ function ManageProduct() {
                       <th>Product</th>
                       <th>Category</th>
                       <th>Stock</th>
-                      <th>Promo Price</th>
+                      {isPromoActive && <th>Promo Price</th>}
                       <th>Retail Price</th>
                       <th>Wholesale Price</th>
                       <th>Status</th>
@@ -594,7 +606,7 @@ function ManageProduct() {
                               {isOutOfStock ? 'Out of Stock' : `${stockValue} units`}
                             </span>
                           </td>
-                          <td className="price-text-bold">{product.isPromotion ? `GHC ${product.sellingPrice}` : 'null'}</td>
+                          {isPromoActive && <td className="price-text-bold">{product.isPromotion ? `GHC ${product.sellingPrice}` : 'null'}</td>}
                           <td className="price-text-bold">GHC {product.retailPrice}</td>
                           <td className="price-text-bold text-slate-600">GHC {product.wholesalePrice}</td>
                           <td>

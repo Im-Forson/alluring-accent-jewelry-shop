@@ -43,12 +43,17 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       currency: "GH₵"
     };
 
-    const totalCost = (orderDetails.purchasingPrice * orderDetails.purchaseQty) + orderDetails.shippingFee;
+    // const totalCost = (orderDetails.purchasingPrice * orderDetails.purchaseQty) + orderDetails.shippingFee;
 
     const itemsTotalCost = orders.reduce((totalCost, order) => {return totalCost + order.totalPrice}, 0);
     const serviceFee = itemsTotalCost * 0.02;
     const grandTotal = itemsTotalCost + orderDetails.shippingFee;
-    // console.log(grandTotal)
+
+    // console.log('totalCost:', totalCost)
+    // console.log('itemsTotalCost:', itemsTotalCost)
+    // console.log('serviceFee:', serviceFee)
+    // console.log('grandTotal:', grandTotal)
+    // console.log('amountPayable:', grandTotal + serviceFee)
 
     // Form Field Change Listener Action
     const handleInputChange = (e) => {
@@ -70,9 +75,9 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       try {
         e.preventDefault();
 
-        if (true) {
-          return;
-        }
+        // if (true) {
+        //   return;
+        // }
 
         if (!orders) {
           setIsOpen(false);
@@ -96,9 +101,10 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         const finalAmount = grandTotal + serviceFee
         let amountPayable = (finalAmount * 100).toFixed(2)
         amountPayable = parseFloat(amountPayable);
+
     
         const handler = window.PaystackPop.setup({
-          key: paymentData.liveKey,
+          key: paymentData.testKey,
           email: paymentData.email,
           amount: amountPayable,
           currency: "GHS",

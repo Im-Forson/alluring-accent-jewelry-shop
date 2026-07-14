@@ -172,14 +172,13 @@ function Promotion() {
       return false;
     }).some(product => {
       const rPrc = parseFloat(product.retailPrice || 0);
-      const wPrc = parseFloat(product.wholesalePrice || 0);
       const disc = parseFloat(discountValue || 0);
 
-      return discountType === 'percentage' ? disc >= 100 : ((rPrc - disc) <= 0 || (wPrc - disc) <= 0);
+      return discountType === 'percentage' ? disc >= 100 : (rPrc - disc) <= 0;
     });
 
     if (willCauseNegativePricing) {
-      toast.error("Cannot save! Retail or wholesale price in negative.");
+      toast.error("Invalid! Discount value greater than retail price");
       return;
     }
 

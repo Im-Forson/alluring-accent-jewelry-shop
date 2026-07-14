@@ -85,15 +85,19 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
 
     const proceedToPayment = async () => {
         try {
-            if (true) {return}
+            // if (true) {return}
             setProcessOverlay(true);
     
             const orders = cart.map(item => {
                 let buyingPrice = item.purchasingPrice;
+                // console.log('item:', item.name)
+                // console.log('buyingPrice:', buyingPrice)
     
                 if (!item.isBuyWholesale && item.purchaseQty >= wholesaleMinOrderQty) {
                     buyingPrice = item.wholesalePrice
                 }
+                // console.log('buyingPrice:', buyingPrice)
+                // console.log('')
     
                 const order = {
                     id: item.id,
@@ -110,6 +114,9 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
     
                 return order;
             });
+
+            // setProcessOverlay(false);
+            // if (true) {return}
     
             // checking availability
             const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/product/availability`,
@@ -199,16 +206,16 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
             })
     
             // change prices to wholesale if quantity is 6 or more
-            for (let i = 0; i < categories.length; i++) {
-                if (categories[i].count >= wholesaleMinOrderQty) {
-                    orders.map(order => {
-                        if (order.category === categories[i].name) {
-                            order.price = order.wholesalePrice;
-                            order.totalPrice = order.wholesalePrice * order.quantity;
-                        }
-                    })
-                }
-            }
+            // for (let i = 0; i < categories.length; i++) {
+            //     if (categories[i].count >= wholesaleMinOrderQty) {
+            //         orders.map(order => {
+            //             if (order.category === categories[i].name) {
+            //                 order.price = order.wholesalePrice;
+            //                 order.totalPrice = order.wholesalePrice * order.quantity;
+            //             }
+            //         })
+            //     }
+            // }
     
             addOrder(orders);
             openPaymentSummary(true);

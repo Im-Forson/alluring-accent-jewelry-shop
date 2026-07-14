@@ -125,7 +125,7 @@ export default function ProductPage() {
 
     const prepareOrder = async () => {
         try {
-            if (true) {return}
+            // if (true) {return}
             setProcessOverlay(true);
     
             let buyingPrice = productPrice;
@@ -147,7 +147,7 @@ export default function ProductPage() {
                 totalPrice: quantity * buyingPrice,
             }];
     
-            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/product/availability`,
+            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/product/availability`,
                 {order: order},
                 {
                     headers: {
