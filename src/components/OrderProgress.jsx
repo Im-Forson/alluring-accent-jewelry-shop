@@ -8,6 +8,12 @@ export default function OrderProgress({showOrderTracker, setShowOrderTracker, se
 
     const products = trackingOrder.products;
 
+    const getOptimizedImage = (url, width) => {
+        if (!url) return '';
+        // Injects auto format, auto quality, and a max width boundary
+        return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+    };
+
     return (
         <>
             {
@@ -43,7 +49,7 @@ export default function OrderProgress({showOrderTracker, setShowOrderTracker, se
                                         products.map((product, index) => (
                                             <div key={index} className="flex items-center gap-4 mb-4 last:mb-0">
                                                 <img
-                                                    src={product.image}
+                                                    src={getOptimizedImage(product.image, 400)}
                                                     className="w-14 h-14 object-cover rounded-lg shrink-0"
                                                 />
                                                 <div>

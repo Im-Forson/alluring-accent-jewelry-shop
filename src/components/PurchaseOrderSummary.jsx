@@ -85,8 +85,10 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
           return;
         }
 
+        let paystackUserEmail = formData.email;
         if (formData.email.trim() === '') {
           formData.email = 'null';
+          paystackUserEmail = 'info.alluringaccent@gmail.co'
         }
     
         formData.isOrderPlaced = true
@@ -101,11 +103,12 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         const finalAmount = grandTotal + serviceFee
         let amountPayable = (finalAmount * 100).toFixed(2)
         amountPayable = parseFloat(amountPayable);
+        console.log('paystackUserEmail:', paystackUserEmail)
 
     
         const handler = window.PaystackPop.setup({
           key: paymentData.liveKey,
-          email: paymentData.email,
+          email: paystackUserEmail,
           amount: amountPayable,
           currency: "GHS",
       
