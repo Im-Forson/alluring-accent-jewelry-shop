@@ -497,7 +497,7 @@ function ManageProduct() {
           </div>
         </header>
 
-        {/* Toolbar Controls */}
+      {/* Toolbar Controls */}
         <section className="inventory-toolbar">
           <button className="add-product-btn" onClick={goToAddProduct}>
             <span className="plus-sign">+</span> Add New Product
@@ -627,15 +627,45 @@ function ManageProduct() {
                 </table>
               </div>
 
-              <footer className="table-pagination-footer">
-                <span className="entries-count">Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalItems)} of {totalItems} entries</span>
-                <div className="pagination-controls">
-                  <button className="page-arrow-btn" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}><FiChevronLeft /></button>
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <button key={i+1} className={`page-num-btn ${currentPage === i+1 ? 'active-page' : ''}`} onClick={() => setCurrentPage(i+1)}>{i+1}</button>
-                  ))}
-                  <button className="page-arrow-btn" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}><FiChevronRight /></button>
-                </div>
+              {/* RESPONSIVE MOBILE PAGINATION FOOTER */}
+              <footer className="table-pagination-footer" style={responsiveFooterStyle}>
+                <span className="entries-count" style={{ fontSize: '13px', color: '#64748b' }}>
+                  Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalItems)} of {totalItems} entries
+                </span>
+                
+                {width < 640 ? (
+                  /* Compact Mobile Controls */
+                  <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button 
+                      className="page-arrow-btn" 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                      disabled={currentPage === 1}
+                      style={mobileArrowStyle}
+                    >
+                      <FiChevronLeft /> Prev
+                    </button>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#334155', padding: '0 8px' }}>
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button 
+                      className="page-arrow-btn" 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                      disabled={currentPage === totalPages}
+                      style={mobileArrowStyle}
+                    >
+                      Next <FiChevronRight />
+                    </button>
+                  </div>
+                ) : (
+                  /* Standard Desktop Layout */
+                  <div className="pagination-controls">
+                    <button className="page-arrow-btn" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}><FiChevronLeft /></button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button key={i+1} className={`page-num-btn ${currentPage === i+1 ? 'active-page' : ''}`} onClick={() => setCurrentPage(i+1)}>{i+1}</button>
+                    ))}
+                    <button className="page-arrow-btn" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}><FiChevronRight /></button>
+                  </div>
+                )}
               </footer>
             </>
           )}
@@ -890,5 +920,27 @@ const inputStyle = { padding: '10px 14px', border: '1px solid #cbd5e1', borderRa
 const cancelBtnStyle = { padding: '10px 16px', background: '#f1f5f9', border: 'none', color: '#475569', borderRadius: '6px', fontWeight: '500', cursor: 'pointer' };
 const saveBtnStyle = { padding: '10px 16px', background: '#e11d48', border: 'none', color: '#fff', borderRadius: '6px', fontWeight: '500', cursor: 'pointer' };
 const removeImageBadgeStyle = { position: 'absolute', top: '2px', right: '2px', width: '18px', height: '18px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '12px', padding: 0, zIndex: 10 };
+
+// NEW: Responsive mobile styles
+const responsiveFooterStyle = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '12px',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '16px'
+};
+
+const mobileArrowStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '8px 12px',
+  fontSize: '13px',
+  borderRadius: '6px',
+  border: '1px solid #cbd5e1',
+  background: '#ffffff',
+  cursor: 'pointer'
+};
 
 export default ManageProduct;

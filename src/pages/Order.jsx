@@ -134,7 +134,6 @@ function Order() {
       const storedAuth = localStorage.getItem('token') || localStorage.getItem('ACCESS_TOKEN');
       let token = storedAuth ? storedAuth.replace(/^["']|["']$/g, '') : '';
 
-      // INTEGRATED REQ BODY VALIDATION IDS REQUIREMENT
       const payload = {
         id: orderItem.dbId,
         orderId: orderItem.rawOrderId, 
@@ -177,7 +176,6 @@ function Order() {
                 const storedAuth = localStorage.getItem('token') || localStorage.getItem('ACCESS_TOKEN');
                 let token = storedAuth ? storedAuth.replace(/^["']|["']$/g, '') : '';
 
-                // CORRECTED PARAM ROUTE MATCHING LOCAL CONFIG: /api/order/delete/:id
                 await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/order/delete/${orderItem.dbId}`, {
                   headers: { Authorization: `Bearer ${token}` }
                 });
@@ -200,8 +198,11 @@ function Order() {
     ), { duration: 5000 });
   };
 
+  // DYNAMIC PIPELINE COUNTERS
   const totalOrdersCount = orders.length;
   const pendingOrdersCount = orders.filter(o => o.status === 'Pending').length;
+  const processingOrdersCount = orders.filter(o => o.status === 'Processing').length;
+  const outForDeliveryOrdersCount = orders.filter(o => o.status === 'Out For Delivery').length;
   const completedOrdersCount = orders.filter(o => o.status === 'Delivered').length;
 
   const filteredOrders = orders.filter((order) => {
@@ -251,8 +252,64 @@ function Order() {
 
   const getOptimizedImage = (url, width) => {
       if (!url) return '';
-      // Injects auto format, auto quality, and a max width boundary
       return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_scale/`);
+  };
+
+  // Helper function to render a clean, truncated list of page buttons on mobile devices
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxVisibleButtons = 3; // On mobile we keep it compact
+
+    let startPage = Math.max(1, currentPage - 1);
+    let endPage = Math.min(totalPagesCount, startPage + maxVisibleButtons - 1);
+
+    if (endPage - startPage < maxVisibleButtons - 1) {
+      startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+    }
+
+    if (startPage > 1) {
+      pages.push(
+        <button
+          key="page-1"
+          onClick={() => paginate(1)}
+          style={paginationIdxBtnStyle(currentPage === 1)}
+        >
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        pages.push(<span key="dots-start" style={{ px: 2, color: '#94a3b8', fontSize: '13px' }}>...</span>);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={`page-idx-${i}`}
+          onClick={() => paginate(i)}
+          style={paginationIdxBtnStyle(currentPage === i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPagesCount) {
+      if (endPage < totalPagesCount - 1) {
+        pages.push(<span key="dots-end" style={{ px: 2, color: '#94a3b8', fontSize: '13px' }}>...</span>);
+      }
+      pages.push(
+        <button
+          key={`page-${totalPagesCount}`}
+          onClick={() => paginate(totalPagesCount)}
+          style={paginationIdxBtnStyle(currentPage === totalPagesCount)}
+        >
+          {totalPagesCount}
+        </button>
+      );
+    }
+
+    return pages;
   };
 
   return (
@@ -299,16 +356,20 @@ function Order() {
                 </div>
               )}
             </div>
-
-            <div >
-              
-            </div>
           </div>
         </header>
 
-        {/* Analytic Counter Cards Grid */}
-        <section className="counters-summary-grid">
-          <div className="counter-card card-pink">
+        {/* Dynamic Analytic Counter Cards Grid */}
+        <section 
+          className="counters-summary-grid" 
+          style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+            gap: '16px',
+            marginBottom: '24px'
+          }}
+        >
+          <div className="counter-card" style={{ borderLeft: '4px solid #cbd5e1' }}>
             <div className="counter-icon-box">🛒</div>
             <div className="counter-data">
               <span>Total Orders</span>
@@ -316,18 +377,34 @@ function Order() {
             </div>
           </div>
 
-          <div className="counter-card card-yellow">
+          <div className="counter-card card-yellow" style={{ borderLeft: '4px solid #f59e0b' }}>
             <div className="counter-icon-box">🪙</div>
             <div className="counter-data">
-              <span>Pending Orders</span>
+              <span>Pending</span>
               <h3>{pendingOrdersCount}</h3>
             </div>
           </div>
 
-          <div className="counter-card card-green">
+          <div className="counter-card" style={{ borderLeft: '4px solid #3b82f6' }}>
+            <div className="counter-icon-box">⚙️</div>
+            <div className="counter-data">
+              <span>Processing</span>
+              <h3>{processingOrdersCount}</h3>
+            </div>
+          </div>
+
+          <div className="counter-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+            <div className="counter-icon-box">🚚</div>
+            <div className="counter-data">
+              <span>Out For Delivery</span>
+              <h3>{outForDeliveryOrdersCount}</h3>
+            </div>
+          </div>
+
+          <div className="counter-card card-green" style={{ borderLeft: '4px solid #10b981' }}>
             <div className="counter-icon-box">✓</div>
             <div className="counter-data">
-              <span>Completed Orders</span>
+              <span>Delivered</span>
               <h3>{completedOrdersCount}</h3>
             </div>
           </div>
@@ -404,7 +481,6 @@ function Order() {
                 ) : (
                   currentOrdersSlice.map((order, index) => (
                     <tr key={order.id}>
-                      {/* CONTINUOUS COUNTING INDEX */}
                       <td style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '600', paddingLeft: '16px' }}>
                         {indexOfFirstOrder + index + 1}
                       </td>
@@ -434,7 +510,6 @@ function Order() {
                             View & Manage
                           </button>
                           
-                          {/* EMBEDDED UPDATE: Delete action evaluates only after marking completed/delivered */}
                           {order.status === 'Delivered' && (
                             <button
                               className="btn-row-alt alt-delete"
@@ -454,11 +529,34 @@ function Order() {
 
           {/* DYNAMIC PAGINATION CONTROLLER FOOTER BLOCK */}
           {totalPagesCount > 1 && (
-            <footer className="ledger-pagination-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+            <footer 
+              className="ledger-pagination-footer" 
+              style={{ 
+                display: 'flex', 
+                flexDirection: 'row', 
+                flexWrap: 'wrap', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                gap: '12px', 
+                marginTop: '16px' 
+              }}
+            >
               <span className="entries-counter-label" style={{ fontSize: '13px', color: '#64748b' }}>
                 Showing <strong>{indexOfFirstOrder + 1}</strong> to <strong>{Math.min(indexOfLastOrder, filteredOrders.length)}</strong> of <strong>{filteredOrders.length}</strong> entries
               </span>
-              <div className="pagination-action-cluster" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              
+              <div 
+                className="pagination-action-cluster" 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '4px',
+                  maxWidth: '100%',
+                  overflowX: 'auto',
+                  padding: '4px 0',
+                  WebkitOverflowScrolling: 'touch' // Smooth scroll on iOS
+                }}
+              >
                 <button 
                   onClick={() => paginate(currentPage - 1)} 
                   disabled={currentPage === 1}
@@ -467,21 +565,7 @@ function Order() {
                   <FiChevronLeft size={16} />
                 </button>
                 
-                {Array.from({ length: totalPagesCount }, (_, idx) => idx + 1).map((pageNum) => (
-                  <button
-                    key={`page-idx-${pageNum}`}
-                    onClick={() => paginate(pageNum)}
-                    className={`page-index-btn ${currentPage === pageNum ? 'active-idx' : ''}`}
-                    style={{
-                      padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
-                      backgroundColor: currentPage === pageNum ? '#d6336c' : '#fff',
-                      color: currentPage === pageNum ? '#fff' : '#475569',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    {pageNum}
-                  </button>
-                ))}
+                {renderPageNumbers()}
 
                 <button 
                   onClick={() => paginate(currentPage + 1)} 
@@ -528,15 +612,6 @@ function Order() {
                   <p style={dataRowStyle}><strong>Phone:</strong> <span>{selectedOrder.customerDetails.phone}</span></p>
                   <p style={dataRowStyle}><strong>Email:</strong> <span>{selectedOrder.customerDetails.email}</span></p>
                   <p style={dataRowStyle}><strong>Address:</strong> <span>{selectedOrder.customerDetails.city}, {selectedOrder.customerDetails.region}.</span></p>
-
-                  {/* <p style={dataRowStyle} className="address-row">
-                    <strong>City:</strong> 
-                    <span style={{ textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{selectedOrder.customerDetails.city}</span>
-                  </p>
-                  <p style={dataRowStyle} className="address-row">
-                    <strong>Region:</strong> 
-                    <span style={{ textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{selectedOrder.customerDetails.region}</span>
-                  </p> */}
                 </div>
               </div>
 
@@ -625,9 +700,32 @@ const tableAvatarFallbackStyle = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', marginRight: '10px', border: '1px solid #f1f5f9'
 };
 const paginationArrowBtnStyle = {
-  display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px',
-  border: '1px solid #e2e8f0', borderRadius: '4px', backgroundColor: '#fff', color: '#64748b', transition: 'all 0.15s ease'
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '32px',
+  height: '32px',
+  flexShrink: 0,
+  border: '1px solid #e2e8f0',
+  borderRadius: '4px',
+  backgroundColor: '#fff',
+  color: '#64748b',
+  transition: 'all 0.15s ease'
 };
+
+// Generates dynamic page index style to avoid static redundancy
+const paginationIdxBtnStyle = (isActive) => ({
+  padding: '6px 12px',
+  border: '1px solid #e2e8f0',
+  borderRadius: '4px',
+  fontSize: '13px',
+  fontWeight: '600',
+  cursor: 'pointer',
+  flexShrink: 0,
+  backgroundColor: isActive ? '#d6336c' : '#fff',
+  color: isActive ? '#fff' : '#475569',
+  transition: 'all 0.15s ease'
+});
 
 const badgeCountStyle = { position: 'absolute', top: '-4px', right: '-4px', backgroundColor: '#d6336c', color: '#fff', fontSize: '10px', borderRadius: '9999px', padding: '2px 6px', fontWeight: 'bold' };
 const dropdownAlertStyle = { position: 'absolute', right: 0, top: '30px', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', width: '260px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', zIndex: 100 };
