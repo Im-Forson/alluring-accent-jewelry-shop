@@ -71,6 +71,10 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       })
     }
 
+    function formatString(str) {
+      return str.replace(/\s+/g, '').toLowerCase();
+    }
+    
     const payWithPaystack = async (e) => {
       try {
         e.preventDefault();
@@ -87,8 +91,11 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
         let paystackUserEmail = formData.email;
         if (formData.email.trim() === '') {
+          let tempEmail = formatString(formData.recipient);
+          tempEmail = `${tempEmail}@mail.com`
+
           formData.email = 'null';
-          paystackUserEmail = 'info.alluringaccent@gmail.co'
+          paystackUserEmail = tempEmail;
         }
     
         formData.isOrderPlaced = true
@@ -103,7 +110,6 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         const finalAmount = grandTotal + serviceFee
         let amountPayable = (finalAmount * 100).toFixed(2)
         amountPayable = parseFloat(amountPayable);
-        console.log('paystackUserEmail:', paystackUserEmail)
 
     
         const handler = window.PaystackPop.setup({
