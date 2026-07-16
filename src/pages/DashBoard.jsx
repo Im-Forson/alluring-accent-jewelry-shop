@@ -66,6 +66,7 @@ function DashBoard() {
     totalProducts: 0,
     outOfStockCount: 0,
     lowStockCount: 0,
+    availableProductsCount: 0, // NEW: Added state to track active/available products
     lowStockItems: [],
     outOfStockItems: []
   });
@@ -159,10 +160,14 @@ function DashBoard() {
         stock: 0
       }));
 
+      // Calculate the available items that are active and in stock (stock > 0)
+      const availableCount = storedItems.length - outOfStock.length;
+
       setProductMetrics({
         totalProducts: storedItems.length,
         outOfStockCount: outOfStock.length,
         lowStockCount: lowStock.length,
+        availableProductsCount: availableCount, // NEW: Calculated available products metric
         lowStockItems: normalLowStockItems,
         outOfStockItems: normalOutOfStockItems
       });
@@ -176,13 +181,10 @@ function DashBoard() {
   // =====================================================================
   const fetchLivePromotionsData = async () => {
     try {
-      // 1. Add authorization headers so the backend doesn't reject the request
       const token = localStorage.getItem("ACCESS_TOKEN");
       const config = token ? { headers: { authorization: `Bearer ${token}` } } : {};
 
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/promotion/all`, config);
-
-      // 2. Extract data safely whether it's raw or wrapped in a 'promotions' key
       const originalPromoArray = response.data?.promotions || response.data || [];
 
       if (!Array.isArray(originalPromoArray)) {
@@ -194,16 +196,13 @@ function DashBoard() {
       const currentTime = new Date();
 
       const calculatedActivePromos = originalPromoArray.filter(p => {
-        // Drop explicitly paused items immediately
         if (p.status === 'paused') return false;
 
-        // Extract values
         const startDate = p.startDate || p.start;
         const endDate = p.endDate || p.end;
 
         if (!startDate || !endDate) return false;
 
-        // 3. Clean Date Formatting: Ensure standard 'YYYY-MM-DD' split to prevent timezone shifting quirks
         const cleanStartDate = startDate.split('T')[0];
         const cleanEndDate = endDate.split('T')[0];
 
@@ -213,7 +212,6 @@ function DashBoard() {
         const startObj = new Date(`${cleanStartDate}T${startTime}`);
         const endObj = new Date(`${cleanEndDate}T${endTime}`);
 
-        // Check if current system time falls between start and end boundaries
         return currentTime >= startObj && currentTime <= endObj;
       });
 
@@ -224,18 +222,12 @@ function DashBoard() {
     }
   };
 
-  // =====================================================================
-  // 🛠️ BACKEND DEVELOPER: INSERT TODAY'S STATS LINK HERE
-  // Replace the placeholder URL below once your collaborator completes the endpoint.
-  // =====================================================================
   const fetchLiveTodayStats = async () => {
     try {
-      // PLUG REAL URL PATH HERE:
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/dashboard/today-stats`, {
         headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
       });
 
-      // Destructure data parameters returned from the Mongoose aggregations
       if (response.data) {
         setOrderMetrics({
           todaysSales: parseFloat(response.data.todaySales || 0).toFixed(2),
@@ -246,7 +238,6 @@ function DashBoard() {
       }
     } catch (error) {
       console.warn("Today's stats endpoint not fully linked or initialized yet. Falling back to base configurations.");
-      // Keep static defaults safe if backend isn't deployment ready yet
       setOrderMetrics({
         todaysSales: "0.00",
         totalOrdersCount: 0,
@@ -255,10 +246,6 @@ function DashBoard() {
     }
   };
 
-  // =====================================================================
-  // 🛠️ BACKEND DEVELOPER: INSERT RECENT ORDERS DATA LINK HERE
-  // Replace the placeholder URL below once your collaborator completes the endpoint.
-  // =====================================================================
   const fetchLiveRecentOrders = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/all`, {
@@ -267,14 +254,11 @@ function DashBoard() {
 
       const ordersData = response.data.orders || response.data || [];
 
-      // Structure database entries into UI table row mapping params cleanly
       const unifiedOrders = ordersData.map(order => {
-        // 1. Calculate the total dynamically from the products array if a top-level price is missing
         let calculatedTotal = 0;
 
         if (Array.isArray(order.products) && order.products.length > 0) {
           calculatedTotal = order.products.reduce((sum, item) => {
-            // Adapt to whatever price and quantity keys your product objects use (e.g., item.price or item.product?.price)
             const itemPrice = parseFloat(item.price || item.product?.price || 0);
             const itemQty = parseInt(item.quantity || item.qty || 1);
             return sum + (itemPrice * itemQty);
@@ -284,12 +268,7 @@ function DashBoard() {
         return {
           id: order.orderId || order._id || order.id || "N/A",
           name: order.recipient || order.customerName || order.name || "Anonymous User",
-
-          // 2. Use the database total if it somehow exists, otherwise use our calculated sum!
           amount: order.total || order.totalPrice || order.totalAmount || order.amount || calculatedTotal,
-
-          // color: order.statusColor || '#f1f5f9',
-          // time: order.formattedTime || order.createdAt || order.date || "Just Now"
         };
       });
 
@@ -299,10 +278,9 @@ function DashBoard() {
       setLiveOrdersList([]);
     }
   };
-  // Total alert notifications combining out of stock and low stock warnings
+
   const totalAlertNotificationsCount = productMetrics.outOfStockCount + productMetrics.lowStockCount;
 
-  // Responsive adjusted style configurations
   const dynamicNotifPanelStyle = {
     ...notifPanelStyle,
     right: windowWidth <= 768 ? '10px' : '40px',
@@ -313,15 +291,10 @@ function DashBoard() {
     <div className="dashboard-container">
       <SideBar />
 
-      {/* Main Content Workspace */}
       <main className="main-content">
-
-        {/* Top Header */}
         <header className="top-header" style={{ overflow: 'visible' }}>
           <h1>Welcome back, Admin!</h1>
           <div className="header-actions" style={{ position: 'relative' }} ref={notifRef}>
-
-            {/* Functional Notification Trigger Button */}
             <button
               className={`icon-btn badge-btn ${isNotifOpen ? 'active-bell' : ''}`}
               onClick={() => setIsNotifOpen(!isNotifOpen)}
@@ -335,7 +308,6 @@ function DashBoard() {
               )}
             </button>
 
-            {/* Dynamic Notification Dropdown Drawer Panel */}
             {isNotifOpen && (
               <div className="notification-dropdown-panel" style={dynamicNotifPanelStyle}>
                 <div style={notifHeaderStyle}>
@@ -350,7 +322,6 @@ function DashBoard() {
                     </div>
                   ) : (
                     <>
-                      {/* Out of stock notifications block */}
                       {productMetrics.outOfStockItems.map(item => (
                         <div key={`out-${item.id}`} style={notifItemStyle}>
                           <div style={{ ...statusIndicatorStyle, backgroundColor: '#ef4444' }}></div>
@@ -361,7 +332,6 @@ function DashBoard() {
                         </div>
                       ))}
 
-                      {/* Low stock notifications block */}
                       {productMetrics.lowStockItems.map(item => (
                         <div key={`low-${item.id}`} style={notifItemStyle}>
                           <div style={{ ...statusIndicatorStyle, backgroundColor: '#f97316' }}></div>
@@ -376,10 +346,7 @@ function DashBoard() {
                 </div>
               </div>
             )}
-
-            <div>
-
-            </div>
+            <div></div>
           </div>
         </header>
 
@@ -390,7 +357,7 @@ function DashBoard() {
         ) : (
           <>
             {/* Top Metric Cards Grid */}
-            <section className="metrics-grid">
+            <section className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
               <div className="metric-card">
                 <div className="icon-wrapper yellow"><FiBox /></div>
                 <div className="metric-data">
@@ -398,6 +365,16 @@ function DashBoard() {
                   <h3>{productMetrics.totalProducts}</h3>
                 </div>
               </div>
+
+              {/* NEW: Available Products Metric Card */}
+              <div className="metric-card">
+                <div className="icon-wrapper green" style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}><FiActivity /></div>
+                <div className="metric-data">
+                  <span className="label">Available Products</span>
+                  <h3>{productMetrics.availableProductsCount}</h3>
+                </div>
+              </div>
+
               <div className="metric-card">
                 <div className="icon-wrapper pink"><FiArchive /></div>
                 <div className="metric-data">
@@ -405,6 +382,7 @@ function DashBoard() {
                   <h3>{productMetrics.outOfStockCount}</h3>
                 </div>
               </div>
+
               <div className="metric-card">
                 <div className="icon-wrapper orange"><FiAlertTriangle /></div>
                 <div className="metric-data">
@@ -430,7 +408,6 @@ function DashBoard() {
                 </div>
               </div>
 
-              {/* RECENT ORDERS COMPONENT CARD */}
               <div className="dashboard-card recent-orders" style={{ display: 'flex', flexDirection: 'column' }}>
                 <h3 className="card-title">Recent Orders</h3>
                 <div className="orders-list" style={{ flexGrow: 1 }}>
@@ -439,7 +416,6 @@ function DashBoard() {
                       No active user orders found. Waiting for incoming data...
                     </div>
                   ) : (
-                    // Slices data array down to exactly 5 items
                     liveOrdersList.slice(0, 5).map(order => (
                       <div className="order-item" key={order.id}>
                         <div className="order-user-wrapper">
@@ -460,7 +436,6 @@ function DashBoard() {
                   )}
                 </div>
 
-                {/* View All Orders Button Layout Section */}
                 <div className="card-action-right" style={{ marginTop: '14px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
                   <NavLink
                     to="/order"
@@ -498,7 +473,6 @@ function DashBoard() {
                 </ul>
               </div>
 
-              {/* DYNAMIC PROMOTIONS COMPONENT CARD */}
               <div className="dashboard-card promos-card">
                 <h3 className="card-title">Active Promotions ({activePromotionsList.length})</h3>
                 <ul className="simple-list">
