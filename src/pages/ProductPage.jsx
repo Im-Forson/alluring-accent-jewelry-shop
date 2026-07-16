@@ -171,6 +171,11 @@ export default function ProductPage() {
                 setProcessOverlay(false);
                 return toast.error('Out of Stock', {duration: 3000,});
             }
+
+            if (currentStock <= 0) {
+                setProcessOverlay(false);
+                return toast.error(`Out of Stock`, {duration: 3000,});
+            }
     
             if (quantity > currentStock) {
                 setProcessOverlay(false);

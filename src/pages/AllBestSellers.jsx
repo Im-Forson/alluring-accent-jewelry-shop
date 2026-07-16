@@ -51,7 +51,8 @@ export default function AllBestSellers() {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
             const products = response.data;
 
-            const availableProducts = products.filter(product => product.stock > 0);
+            // const availableProducts = products.filter(product => product.stock > 0);
+            const availableProducts = products;
 
             availableProducts.map((product) => {
                 product.isFavorite = false

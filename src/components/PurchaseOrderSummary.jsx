@@ -114,7 +114,8 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       
           callback: function (response) {
             // console.log("Success:", response.reference);
-            setProcessReceipt(true);
+            processReceipt()
+            // setProcessReceipt(true);
           },
       
           onClose: function () {
@@ -157,10 +158,6 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       try {
         setProcessOverlay(true);
         setIsOpen(false);
-
-        if (location.key !== 'default') {
-          navigate(-1);
-        }
     
         if (formData.email.trim() === '') {
           formData.email = 'null';
@@ -206,67 +203,73 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
 
         }
         else {
-          // Recreate order when first request fails
-          const res = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL}/order/recreate`,
-              {
-                recipient: formData.recipient,
-                phone: formData.phone,
-                email: formData.email,
-                region: formData.region,
-                city: formData.city,
-                products: orders,
-                isOrderPlaced: true,
-                deliveryCost: orderDetails.shippingFee,
-                subtotal: itemsTotalCost,
-                totalCost: grandTotal,
-              },
-            {
-              headers: {
-                "Content-Type": "application/json"
-              }
-            }
-          )
+          reprocessReceipt();
+          // // Recreate order when first request fails
+          // const res = await axios.post(
+          //   `${import.meta.env.VITE_API_BASE_URL}/order/recreate`,
+          //     {
+          //       recipient: formData.recipient,
+          //       phone: formData.phone,
+          //       email: formData.email,
+          //       region: formData.region,
+          //       city: formData.city,
+          //       products: orders,
+          //       isOrderPlaced: true,
+          //       deliveryCost: orderDetails.shippingFee,
+          //       subtotal: itemsTotalCost,
+          //       totalCost: grandTotal,
+          //     },
+          //   {
+          //     headers: {
+          //       "Content-Type": "application/json"
+          //     }
+          //   }
+          // )
       
-          const receipt = res.data.orderInfo
+          // const receipt = res.data.orderInfo
       
-          if (res.status === 201) {
-            loadOrderReceipt(receipt)
-            setProcessOverlay(false)
-            handleRemoveOrdersFromCart();
-            addOrder([])
-            updateIsOrderSuccess(true); // show upon transaction onsuccess
+          // if (res.status === 201) {
+          //   loadOrderReceipt(receipt)
+          //   setProcessOverlay(false)
+          //   handleRemoveOrdersFromCart();
+          //   addOrder([])
+          //   updateIsOrderSuccess(true); // show upon transaction onsuccess
       
-            sendEmail_Sms(receipt);
+          //   sendEmail_Sms(receipt);
 
-          }
-          else {
-            console.log('local genet...')
-            // generate locally when second request fails
-            const orderId = generateOrderId();
+          // }
+          // else {
+          //   console.log('local genet...')
+          //   // generate locally when second request fails
+          //   const orderId = generateOrderId();
 
-            const manualReceipt = {
-                orderId: orderId,
-                recipient: formData.recipient,
-                phone: formData.phone,
-                email: formData.email,
-                region: formData.region,
-                city: formData.city,
-                products: orders,
-                subtotal: itemsTotalCost,
-                deliveryCost: orderDetails.shippingFee,
-                totalCost: grandTotal,
-            }
+          //   const manualReceipt = {
+          //       orderId: orderId,
+          //       recipient: formData.recipient,
+          //       phone: formData.phone,
+          //       email: formData.email,
+          //       region: formData.region,
+          //       city: formData.city,
+          //       products: orders,
+          //       subtotal: itemsTotalCost,
+          //       deliveryCost: orderDetails.shippingFee,
+          //       totalCost: grandTotal,
+          //   }
 
-            loadOrderReceipt(manualReceipt)
-            setProcessOverlay(false)
-            handleRemoveOrdersFromCart();
-            addOrder([])
-            updateIsOrderSuccess(true); // show upon transaction onsuccess
+          //   loadOrderReceipt(manualReceipt)
+          //   setProcessOverlay(false)
+          //   handleRemoveOrdersFromCart();
+          // //   addOrder([])
+          // //   updateIsOrderSuccess(true); // show upon transaction onsuccess
       
-            sendEmail_Sms(manualReceipt);
-          }
+          // //   sendEmail_Sms(manualReceipt);
+          // }
         }
+
+        if (location.key !== 'default') {
+          navigate(-1);
+        }
+
       } catch (error) {
         reprocessReceipt();
       }
@@ -343,6 +346,11 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
           sendEmail_Sms(manualReceipt);
 
         }
+
+        if (location.key !== 'default') {
+          navigate(-1);
+        }
+        
       } catch (error) {
         setProcessOverlay(false);
         toast.error('Something went wrong', {duration: 2000});

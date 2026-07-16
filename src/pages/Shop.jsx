@@ -74,7 +74,8 @@ export default function Shop() {
                 loadCategories(['All Jewellery'])
             }
 
-            const availableProducts = products.filter(product => product.stock > 0);
+            // const availableProducts = products.filter(product => product.stock > 0);
+            const availableProducts = products;
 
             availableProducts.map((product) => {
                 product.isFavorite = false
