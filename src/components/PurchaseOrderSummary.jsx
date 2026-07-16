@@ -89,14 +89,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
           return;
         }
 
-        let paystackUserEmail = formData.email;
-        if (formData.email.trim() === '') {
-          let tempEmail = formatString(formData.recipient);
-          tempEmail = `${tempEmail}@mail.com`
-
-          formData.email = 'null';
-          paystackUserEmail = tempEmail;
-        }
+        const paystackUserEmail = formData.email.trim() !== "" ? formData.email : `${formatString(formData.recipient)}@mail.com`;
     
         formData.isOrderPlaced = true
         formData.deliveryCost = orderDetails.shippingFee
@@ -108,8 +101,7 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         const paymentData = res.data
 
         const finalAmount = grandTotal + serviceFee
-        let amountPayable = (finalAmount * 100).toFixed(2)
-        amountPayable = parseFloat(amountPayable);
+        const amountPayable = Math.round(finalAmount * 100);
 
     
         const handler = window.PaystackPop.setup({
@@ -117,6 +109,36 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
           email: paystackUserEmail,
           amount: amountPayable,
           currency: "GHS",
+
+          metadata: {
+            custom_fields: [
+              {
+                display_name: "Recipient",
+                variable_name: "recipient",
+                value: formData.recipient,
+              },
+              {
+                display_name: "Phone Number",
+                variable_name: "phone",
+                value: formData.phone,
+              },
+              {
+                display_name: "Delivery Address",
+                variable_name: "address",
+                value: `${formData.city}, ${formData.region} region`,
+              },
+              {
+                display_name: "Products",
+                variable_name: "products",
+                value: orders.map((item, index) => `${item.name} (x${item.quantity}) - ${item.color}`).join(" || "),
+              },
+              {
+                display_name: "Total Amount",
+                variable_name: "total_amount",
+                value: `GHS ${grandTotal}`,
+              },
+            ],
+          },
       
           callback: function (response) {
             // console.log("Success:", response.reference);
