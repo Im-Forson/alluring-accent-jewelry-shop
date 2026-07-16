@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, } from 'react'
-import { Filter, Heart, ListFilter, Settings } from 'lucide-react'
+import { Filter, Heart, ListFilter, Settings, Ban } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router'
 import axios from 'axios'
 
@@ -535,6 +535,13 @@ export default function Shop() {
                                             Gh₵ {Number(product.sellingPrice).toFixed(2)}
                                             </p>
                                         </div>
+
+                                        {
+                                            product.stock <= 0 && <div className="mt-1 flex gap-1 items-center">
+                                                <Ban className='w-[12px] h-[12px] md:w-[14px] md:h-[14px] font-bold text-[red]'/>
+                                                <p className="text-xs md:text-sm font-bold capitalize text-[red]">Sold out</p>
+                                            </div>
+                                        }
 
                                         {
                                             product.isPromotion && (

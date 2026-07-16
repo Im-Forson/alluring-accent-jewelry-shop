@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, } from 'react'
-import { Filter, Heart, ListFilter, Settings } from 'lucide-react'
+import { Filter, Heart, ListFilter, Settings, Ban } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router'
 import axios from 'axios'
 
@@ -297,7 +297,25 @@ export default function AllBestSellers() {
                                         Gh₵ {Number(product.sellingPrice).toFixed(2)}
                                         </p>
                                     </div>
+
+                                    {
+                                        product.stock <= 0 && <div className="mt-1 flex gap-1 items-center">
+                                            <Ban className='w-[12px] h-[12px] md:w-[14px] md:h-[14px] font-bold text-[red]'/>
+                                            <p className="text-xs md:text-sm font-bold capitalize text-[red]">Sold out</p>
+                                        </div>
+                                    }
+
+                                    {
+                                        product.isPromotion && (
+                                            <div className="mt-2.5 flex items-center justify-between gap-1.5 border border-pink-500/20 bg-pink-500/5 px-2 py-1 rounded-md text-[10px] font-bold text-pink-400 uppercase tracking-wider">
+                                                <span>Limited Time Offer</span>
+                                                <span className="text-white bg-pink-600 px-1 rounded text-[9px]">SAVE</span>
+                                            </div>
+                                        )
+                                    }
                                     </div>
+
+                                    
 
                                     {/* VIEW PRODUCT */}
                                     <button

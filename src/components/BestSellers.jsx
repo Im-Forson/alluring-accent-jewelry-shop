@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { MoveRight, Heart, ChevronLeft, ChevronRight, HeartIcon, ShoppingBag } from 'lucide-react'
+import { MoveRight, Heart, ChevronLeft, ChevronRight, HeartIcon, ShoppingBag, Ban } from 'lucide-react'
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
@@ -150,6 +150,13 @@ export default function BestSellers() {
                                 </div>
 
                                 {
+                                    product.stock <= 0 && <div className="mt-1 flex gap-1 items-center">
+                                        <Ban className='w-[12px] h-[12px] md:w-[14px] md:h-[14px] font-bold text-[red]'/>
+                                        <p className="text-xs md:text-sm font-bold capitalize text-[red]">Sold out</p>
+                                    </div>
+                                }
+
+                                {
                                     product.isPromotion && (
                                         <div className="mt-2.5 flex items-center justify-between gap-1.5 border border-pink-500/20 bg-pink-500/5 px-2 py-1 rounded-md text-[10px] font-bold text-pink-400 uppercase tracking-wider">
                                             <span>Limited Time Offer</span>
@@ -157,6 +164,8 @@ export default function BestSellers() {
                                         </div>
                                     )
                                 }
+
+                                
                             </div>
 
                             {/* VIEW PRODUCT */}

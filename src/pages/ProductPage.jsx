@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle, Square, CheckSquare, CirclePlay } from 'lucide-react';
+import { Heart, ShoppingBag, Search, Menu, UserRound, ChevronLeft, ChevronRight, Star, Plus, Minus, MessageCircle, Square, CheckSquare, CirclePlay, Ban } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { useShop } from '../../utilities/ShopContext';
