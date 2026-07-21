@@ -15,6 +15,7 @@ import { faUserShield } from "@fortawesome/free-solid-svg-icons";
 import SideBar from '../components/SideBar';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
 import toast from 'react-hot-toast';
+import { useShop } from '../../utilities/ShopContext';
 
 
 
@@ -60,7 +61,7 @@ const statusIndicatorStyle = {
 };
 
 function DashBoard() {
-  // Global loading states for overall dashboard network requests
+  const { isShopOpen, loadIsShopOpen } = useShop();
   const [loadingDashboardData, setLoadingDashboardData] = useState(true);
 
   useAdminBackButton();
@@ -91,10 +92,18 @@ function DashBoard() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef(null);
 
-  const [isOpen, setIsOpen] = useState(true);
+  // const [isOpen, setIsOpen] = useState(true);
 
   // Window width tracking to adjust inline styles dynamically for mobile viewports
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  const shopStatus = async () => {
+    const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/shop/status`);
+    loadIsShopOpen(shopStatusRes.data.isOpen)
+  }
+  useEffect(() => {
+    shopStatus();
+  }, [])
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -302,7 +311,7 @@ function DashBoard() {
       });
 
       if (response.status === 200) {
-        setIsOpen(false);
+        loadIsShopOpen(false);
         toast.dismiss(loadId);
         toast.success("Shop closed", {duration: 2000});
     }
@@ -322,7 +331,7 @@ function DashBoard() {
       });
 
       if (response.status === 200) {
-        setIsOpen(true);
+        loadIsShopOpen(true);
         toast.dismiss(loadId);
         toast.success("Shop Opened", {duration: 2000});
     }
@@ -352,12 +361,12 @@ function DashBoard() {
                 padding: '4px 10px',
                 borderRadius: '9999px',
                 marginTop: '4px',
-                backgroundColor: isOpen ? '#dcfce7' : '#fee2e2',
-                color: isOpen ? '#15803d' : '#b91c1c'
+                backgroundColor: isShopOpen ? '#dcfce7' : '#fee2e2',
+                color: isShopOpen ? '#15803d' : '#b91c1c'
               }}
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOpen ? '#16a34a' : '#dc2626' }}></span>
-              Shop Status: {isOpen ? 'Open & Accepting Orders' : 'Closed to Customers'}
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isShopOpen ? '#16a34a' : '#dc2626' }}></span>
+              Shop Status: {isShopOpen ? 'Open & Accepting Orders' : 'Closed to Customers'}
             </span>
           </div>
 
@@ -367,7 +376,7 @@ function DashBoard() {
             <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '3px', backgroundColor: '#f8fafc' }}>
               <button
                 onClick={() => {
-                  if (isOpen) {return};
+                  if (isShopOpen) {return};
                   const res = window.confirm('Shop will be opened to customers!');
                   if (res) {
                     oPenShop()
@@ -384,16 +393,16 @@ function DashBoard() {
                   borderRadius: '6px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  backgroundColor: isOpen ? '#fff' : 'transparent',
-                  color: isOpen ? '#16a34a' : '#64748b',
-                  boxShadow: isOpen ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  backgroundColor: isShopOpen ? '#fff' : 'transparent',
+                  color: isShopOpen ? '#16a34a' : '#64748b',
+                  boxShadow: isShopOpen ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                 }}
               >
                 <FiUnlock size={14} /> Open Shop
               </button>
               <button
                 onClick={() => {
-                  if (!isOpen) {return};
+                  if (!isShopOpen) {return};
                   const res = window.confirm('Shop will be closed to customers!');
                   if (res) {
                     closeShop()
@@ -410,9 +419,9 @@ function DashBoard() {
                   borderRadius: '6px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  backgroundColor: !isOpen ? '#fff' : 'transparent',
-                  color: !isOpen ? '#ef4444' : '#64748b',
-                  boxShadow: !isOpen ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  backgroundColor: !isShopOpen ? '#fff' : 'transparent',
+                  color: !isShopOpen ? '#ef4444' : '#64748b',
+                  boxShadow: !isShopOpen ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                 }}
               >
                 <FiLock size={14} /> Close Shop
