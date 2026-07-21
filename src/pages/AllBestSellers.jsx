@@ -25,11 +25,12 @@ import Footer from '../components/Footer'
 import WhyShopWithUs from '../components/WhyShopWithUs'
 import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
+import ShopClosed from '../components/ShopClosed'
 
 
 
 export default function AllBestSellers() {
-    const { allProducts, loadAllProducts, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, bestSellers, loadBestSellers, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isBestSellersDataLoading } = useShop();
+    const { isShopOpen, loadIsShopOpen, allProducts, loadAllProducts, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, bestSellers, loadBestSellers, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isBestSellersDataLoading } = useShop();
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
@@ -50,6 +51,9 @@ export default function AllBestSellers() {
             
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
             const products = response.data;
+
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            loadIsShopOpen(shopStatusRes.data.isOpen)
 
             // const availableProducts = products.filter(product => product.stock > 0);
             const availableProducts = products;
@@ -203,6 +207,11 @@ export default function AllBestSellers() {
                 (
                     <ErrorState/>
                 ) :
+                !isShopOpen ?
+                (
+                    <ShopClosed/>
+                )
+                :
                 (
                     <div>
                         <NavBar activePage={'shop'}/>

@@ -13,7 +13,7 @@ import axios from "axios"
 const colors= []
 
 export default function NavBar({ activePage, favoriteCount, cartCount, setFavorites, bestSellers, setBestSellers }) {
-    const { loadAllProducts, wholesaleMinOrderQty, allProducts, addOrder, cart, addToCart, setCart, updateCartItemStock, updateCartItemQty, updateCartItemQtyInput, removeCartItem, updateCartItemColor, clearCart, updateCartItemUseMOQ, favorites, removeFavorite, clearFavorites, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement, setProcessOverlay } = useShop();
+    const { loadIsShopOpen, loadAllProducts, wholesaleMinOrderQty, allProducts, addOrder, cart, addToCart, setCart, updateCartItemStock, updateCartItemQty, updateCartItemQtyInput, removeCartItem, updateCartItemColor, clearCart, updateCartItemUseMOQ, favorites, removeFavorite, clearFavorites, viewingProduct, setViewingProductDetails, loadShopCategory, loadActivePage, isOpenPaymentSummary, openPaymentSummary, announcement, setProcessOverlay } = useShop();
     const navigate = useNavigate();
 
     // Drawer Interface Visibility States
@@ -85,7 +85,15 @@ export default function NavBar({ activePage, favoriteCount, cartCount, setFavori
 
     const proceedToPayment = async () => {
         try {
-            // if (true) {return}
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            const isShopOpen = shopStatusRes.data.isOpen;
+    
+            if (!isShopOpen) {
+                loadIsShopOpen(false);
+                navigate('/');
+                return;
+            }
+
             setProcessOverlay(true);
     
             const orders = cart.map(item => {

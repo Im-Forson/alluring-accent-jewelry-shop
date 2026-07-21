@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MoveRight, Heart, ChevronLeft, ChevronRight, HeartIcon, ShoppingBag, Ban } from 'lucide-react'
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router';
+import axios from 'axios';
 
 import { useShop } from '../../utilities/ShopContext'
 import { allProductsDummy } from '../../utilities/dummyData';
@@ -17,7 +18,7 @@ import collection2 from '../assets/collection-2.png'
 
 
 export default function BestSellers() {
-    const { cart, addToCart, favorites, manageFavorite, bestSellers = [], loadShopCategory, setViewingProductDetails } = useShop();
+    const { loadIsShopOpen, cart, addToCart, favorites, manageFavorite, bestSellers = [], loadShopCategory, setViewingProductDetails } = useShop();
     const navigate = useNavigate();
 
     const [] = useState([]);
@@ -34,9 +35,13 @@ export default function BestSellers() {
         }
     };
 
-    function viewProduct(product, source) {
-        setViewingProductDetails(product);
-        navigate('/product', {state: {source: source}}); 
+    async function viewProduct(product, source) {
+        try {
+            setViewingProductDetails(product);
+            navigate('/product', {state: {source: source}}); 
+        } catch (error) {
+            
+        }
     }
 
     const getOptimizedImage = (url, width) => {

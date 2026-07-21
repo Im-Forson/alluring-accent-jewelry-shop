@@ -13,100 +13,147 @@ import {
 } from "react-icons/fa";
 import Footer from '../components/Footer'
 
+import { useShop } from '../../utilities/ShopContext';
+import ShopClosed from '../components/ShopClosed';
 
+import { useEffect } from 'react';
 
  function Contact() {
+    const { isShopOpen, loadIsShopOpen, allProducts } = useShop();
+
+    useEffect(() => {
+        const fetchData = async () => {
+          try {
+            
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
+            const products = response.data;
+
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            loadIsShopOpen(shopStatusRes.data.isOpen)
+
+            // const availableProducts = products.filter(product => product.stock > 0);
+            const availableProducts = products;
+
+            availableProducts.map((product) => {
+                product.isFavorite = false
+                product.preferedColor = product.colors[0]
+                product.purchaseQty = 1 // product.minimumOrder
+                product.orderQty = 1 // product.minimumOrder
+                product.isBuyWholesale = false
+                product.purchasingPrice = product.sellingPrice
+            })
+
+            loadAllProducts(availableProducts); 
+            const bestSellers = availableProducts.filter(product => product.tag === 'Best Seller');
+            loadBestSellers(bestSellers);
+
+          } catch (error) {
+
+          } finally {
+            
+          }
+        };
+
+        if (allProducts.length <= 0) {
+            fetchData();
+        }
+    
+    }, []);
+
     return (
+        !isShopOpen ?
+        (
+            <ShopClosed/>
+        )
+        :
+        (
+            <div>
+                <NavBar activePage={'contact'} />
 
+                <div className="contact-page bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
+                    {/* LEFT SIDE */}
+                    <div className="contact-info">
 
-        <div>
-            <NavBar activePage={'contact'} />
+                        <h1>Let’s Talk</h1>
 
-            <div className="contact-page bg-[linear-gradient(90deg,#f7e9ea_0%,#e9d4d2_40%,#d8b1ad_75%,#c7938f_100%)]">
-                {/* LEFT SIDE */}
-                <div className="contact-info">
+                        <p>
+                            Have questions about our jewelry collections, custom orders,
+                            or deliveries? We would love to hear from you.
+                        </p>
 
-                    <h1>Let’s Talk</h1>
+                        <div className="info-box">
+                            <FaMapMarkerAlt className="info-icon" />
+                            <span>Accra, Ghana</span>
+                        </div>
 
-                    <p>
-                        Have questions about our jewelry collections, custom orders,
-                        or deliveries? We would love to hear from you.
-                    </p>
+                        <div className="info-box">
+                            <FaPhoneAlt className="info-icon" />
+                            <span>+233 55 698 1498</span>
+                        </div>
 
-                    <div className="info-box">
-                        <FaMapMarkerAlt className="info-icon" />
-                        <span>Accra, Ghana</span>
+                        <div className="info-box">
+                            <FaEnvelope className="info-icon" />
+                            <span>alluringaccent@gmail.com</span>
+                        </div>
+
+                        {/* SOCIALS */}
+                        <div className="socials">
+                            <a href="#">
+                                <FaInstagram />
+                            </a>
+
+                            <a href="#">
+                                <FaFacebookF />
+                            </a>
+
+                            <a href="#">
+                                <FaWhatsapp />
+                            </a>
+                        </div>
+
                     </div>
 
-                    <div className="info-box">
-                        <FaPhoneAlt className="info-icon" />
-                        <span>+233 55 698 1498</span>
-                    </div>
+                    {/* RIGHT SIDE */}
+                    <div className="contact-form-container w-[300px] md:w-[700px]">
 
-                    <div className="info-box">
-                        <FaEnvelope className="info-icon" />
-                        <span>alluringaccent@gmail.com</span>
-                    </div>
+                        <form className="contact-form">
 
-                    {/* SOCIALS */}
-                    <div className="socials">
-                        <a href="#">
-                            <FaInstagram />
-                        </a>
+                            <h2>Send a Message</h2>
 
-                        <a href="#">
-                            <FaFacebookF />
-                        </a>
+                            <div className="input-group">
+                                <label>Full Name</label>
+                                <input type="text" placeholder="Enter your name" />
+                            </div>
 
-                        <a href="#">
-                            <FaWhatsapp />
-                        </a>
+                            <div className="input-group">
+                                <label>Email Address</label>
+                                <input type="email" placeholder="Enter your email" />
+                            </div>
+
+                            <div className="input-group">
+                                <label>Subject</label>
+                                <input type="text" placeholder="Enter subject" />
+                            </div>
+
+                            <div className="input-group">
+                                <label>Message</label>
+                                <textarea
+                                    rows="6"
+                                    placeholder="Write your message..."
+                                ></textarea>
+                            </div>
+
+                            <button type="submit">Send Message</button>
+
+                        </form>
+
                     </div>
 
                 </div>
-
-                {/* RIGHT SIDE */}
-                <div className="contact-form-container w-[300px] md:w-[700px]">
-
-                    <form className="contact-form">
-
-                        <h2>Send a Message</h2>
-
-                        <div className="input-group">
-                            <label>Full Name</label>
-                            <input type="text" placeholder="Enter your name" />
-                        </div>
-
-                        <div className="input-group">
-                            <label>Email Address</label>
-                            <input type="email" placeholder="Enter your email" />
-                        </div>
-
-                        <div className="input-group">
-                            <label>Subject</label>
-                            <input type="text" placeholder="Enter subject" />
-                        </div>
-
-                        <div className="input-group">
-                            <label>Message</label>
-                            <textarea
-                                rows="6"
-                                placeholder="Write your message..."
-                            ></textarea>
-                        </div>
-
-                        <button type="submit">Send Message</button>
-
-                    </form>
-
-                </div>
+                <Footer />
 
             </div>
-            <Footer />
-
-        </div>
-
-
+        )
     )
 }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../DashBoard.css';
 import { NavLink } from 'react-router';
 import axios from 'axios'; // Imported to handle API connectivity
+import { FiLock, FiUnlock } from 'react-icons/fi';
 
 // Import the specific icons we need
 import {
@@ -13,6 +14,9 @@ import { faUserShield } from "@fortawesome/free-solid-svg-icons";
 
 import SideBar from '../components/SideBar';
 import { useAdminBackButton } from '../hooks/useAdminBackButton.jsx';
+import toast from 'react-hot-toast';
+
+
 
 // ==========================================================================
 // STATIC INLINE STYLES MOVED TO TOP TO PREVENT INITIALIZATION HOP RUNTIME ERRORS
@@ -86,6 +90,8 @@ function DashBoard() {
   // --- NOTIFICATION BELL INTERACTIVE UI STATES ---
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef(null);
+
+  const [isOpen, setIsOpen] = useState(true);
 
   // Window width tracking to adjust inline styles dynamically for mobile viewports
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
@@ -287,14 +293,133 @@ function DashBoard() {
     width: windowWidth <= 480 ? 'calc(100vw - 20px)' : '290px'
   };
 
+  async function closeShop() {
+    const loadId = toast.loading("Closing shop...");
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/close`, {
+        headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
+      });
+
+      if (response.status === 200) {
+        setIsOpen(false);
+        toast.dismiss(loadId);
+        toast.success("Shop closed", {duration: 2000});
+    }
+
+    } catch (error) {
+      toast.dismiss(loadId);
+      toast.error("Closing failed", {duration: 2000});
+    }
+  }
+
+  async function oPenShop() {
+    const loadId = toast.loading("Opening shop...");
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/open`, {
+        headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
+      });
+
+      if (response.status === 200) {
+        setIsOpen(true);
+        toast.dismiss(loadId);
+        toast.success("Shop Opened", {duration: 2000});
+    }
+
+    } catch (error) {
+      toast.dismiss(loadId);
+      toast.error("Opening failed", {duration: 2000});
+    }
+  }
+
   return (
     <div className="dashboard-container">
       <SideBar />
 
       <main className="main-content">
-        <header className="top-header" style={{ overflow: 'visible' }}>
-          <h1>Welcome back, Admin!</h1>
-          <div className="header-actions" style={{ position: 'relative' }} ref={notifRef}>
+      <header className="top-header" style={{ overflow: 'visible' }}>
+          <div>
+            <h1>Welcome, Admin!</h1>
+            {/* Context Badge showing active shop state */}
+            <span 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '12px',
+                fontWeight: '600',
+                padding: '4px 10px',
+                borderRadius: '9999px',
+                marginTop: '4px',
+                backgroundColor: isOpen ? '#dcfce7' : '#fee2e2',
+                color: isOpen ? '#15803d' : '#b91c1c'
+              }}
+            >
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOpen ? '#16a34a' : '#dc2626' }}></span>
+              Shop Status: {isOpen ? 'Open & Accepting Orders' : 'Closed to Customers'}
+            </span>
+          </div>
+
+          <div className="header-actions" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '14px' }} ref={notifRef}>
+            
+            {/* Quick Action Toggle Buttons */}
+            <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '3px', backgroundColor: '#f8fafc' }}>
+              <button
+                onClick={() => {
+                  if (isOpen) {return};
+                  const res = window.confirm('Shop will be opened to customers!');
+                  if (res) {
+                    oPenShop()
+                  }
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: isOpen ? '#fff' : 'transparent',
+                  color: isOpen ? '#16a34a' : '#64748b',
+                  boxShadow: isOpen ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <FiUnlock size={14} /> Open Shop
+              </button>
+              <button
+                onClick={() => {
+                  if (!isOpen) {return};
+                  const res = window.confirm('Shop will be closed to customers!');
+                  if (res) {
+                    closeShop()
+                  }
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: !isOpen ? '#fff' : 'transparent',
+                  color: !isOpen ? '#ef4444' : '#64748b',
+                  boxShadow: !isOpen ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <FiLock size={14} /> Close Shop
+              </button>
+            </div>
+
+            {/* Notification Control Bell */}
             <button
               className={`icon-btn badge-btn ${isNotifOpen ? 'active-bell' : ''}`}
               onClick={() => setIsNotifOpen(!isNotifOpen)}
@@ -349,6 +474,7 @@ function DashBoard() {
             <div></div>
           </div>
         </header>
+
 
         {loadingDashboardData ? (
           <div style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b', fontSize: '15px' }}>

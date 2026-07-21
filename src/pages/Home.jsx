@@ -30,6 +30,7 @@ import collection2 from '../assets/collection-2.png'
 import OrderSuccessModal from '../components/OrderSuccessModal'
 import PurchaseOrderSummary from '../components/PurchaseOrderSummary'
 import ProcessOverlay from '../components/ProcessOverlay'
+import ShopClosed from '../components/ShopClosed'
 
 const categories = [
     {title: 'Rings', image: ring},
@@ -44,7 +45,7 @@ export default function HomePage() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
-    const { allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadProductColors, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData } = useShop();
+    const { isShopOpen, loadIsShopOpen, allProducts, loadBestSellers, loadAllMainBestSellers, loadAllProducts, categories, loadCategories, loadProductColors, loadShopCategory, loadSuccessfulOrder, ishomeDataLoading, setHomeDataLoading, setShopDataLoading, setBestSellersDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData } = useShop();
 
     const [favorites, setFavorites] = useState([]);
     const [favoriteCount, setFavoriteCount] = useState(0);
@@ -55,7 +56,7 @@ export default function HomePage() {
     const [cart, setCart] = useState([]);
 
     const [] = useState(false);
-
+    
     const [dataloading, setDataLoading] = useState(true);
     const [isDataError, setDataError] = useState(false);
 
@@ -70,6 +71,11 @@ export default function HomePage() {
             const announcementResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/announcement`);
 
             const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            loadIsShopOpen(shopStatusRes.data.isOpen)
+
+            // console.log(shopResponse.data)
 
             if (announcementResponse.status === 200) {
                 setAnnouncementData(announcementResponse.data[0]);
@@ -197,6 +203,11 @@ export default function HomePage() {
                         <ErrorState page={'home'}/>
                     </div>
                 ) :
+                !isShopOpen ?
+                (
+                    <ShopClosed/>
+                )
+                :
                 (
                     <div>
                         

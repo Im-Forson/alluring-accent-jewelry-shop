@@ -27,11 +27,12 @@ import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
 import OrderSuccessModal from '../components/OrderSuccessModal'
 import ProcessOverlay from '../components/ProcessOverlay'
+import ShopClosed from '../components/ShopClosed'
 
 
 
 export default function Shop() {
-    const { allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData, loadCategories, loadProductColors, productColors, categories } = useShop();
+    const { isShopOpen, loadIsShopOpen, allProducts, loadAllProducts, loadBestSellers, setViewingProductDetails, manageFavorite, shopCategory, shopColor, shopCollection, shopPrice, setHomeDataLoading, setBestSellersDataLoading, setShopDataLoading, isShopDataLoading, isOpenPaymentSummary, openPaymentSummary, setAnnouncementData, loadCategories, loadProductColors, productColors, categories } = useShop();
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
@@ -54,6 +55,9 @@ export default function Shop() {
             const announcementResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/announcement`);
 
             const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
+
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            loadIsShopOpen(shopStatusRes.data.isOpen)
 
             if (announcementResponse.status === 200) {
                 setAnnouncementData(announcementResponse.data[0]);
@@ -298,6 +302,11 @@ export default function Shop() {
                 (
                     <ErrorState/>
                 ) : 
+                !isShopOpen ?
+                (
+                    <ShopClosed/>
+                )
+                :
                 (
                     <div>
                         <NavBar activePage={'shop'}/>

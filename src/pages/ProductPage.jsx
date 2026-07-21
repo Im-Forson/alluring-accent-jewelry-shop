@@ -16,7 +16,7 @@ import axios from 'axios';
 import ProcessOverlay from '../components/ProcessOverlay';
 
 export default function ProductPage() {
-  const { allProducts, loadAllProducts, cart, addToCart, removeCartItem, clearCart, removeFavorite, clearFavorites, viewingProduct, addOrder, setProcessOverlay } = useShop();
+  const { loadIsShopOpen, allProducts, loadAllProducts, cart, addToCart, removeCartItem, clearCart, removeFavorite, clearFavorites, viewingProduct, addOrder, setProcessOverlay } = useShop();
   const { pathname } = useLocation();
   const location = useLocation();
   const navigationSource = (location.state).source;
@@ -125,7 +125,15 @@ export default function ProductPage() {
 
     const prepareOrder = async () => {
         try {
-            // if (true) {return}
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            const isShopOpen = shopStatusRes.data.isOpen;
+    
+            if (!isShopOpen) {
+                loadIsShopOpen(false);
+                navigate('/');
+                return;
+            }
+
             setProcessOverlay(true);
     
             let buyingPrice = productPrice;

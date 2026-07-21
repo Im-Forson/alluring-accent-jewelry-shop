@@ -5,6 +5,7 @@ const ShopContext = createContext(undefined);
 
 // Structural Wrapper Component Provider
 export function ShopProvider({ children }) {
+    const [isShopOpen, setShopOpen] = useState(true);
     const [wholesaleMinOrderQty, setWholesaleMinOrderQty] = useState(6);
 
     const [allProducts, setAllProducts] = useState([]);
@@ -45,6 +46,10 @@ export function ShopProvider({ children }) {
 
     // const paystackKey = 'pk_live_b719b05ba80b43fa0efa101aabaaf40cd5fa4691';
     const paystackKey = 'pk_test_db11b399b9f558c72508d218d313f13b35e2658d';
+
+    const loadIsShopOpen = (val) => {
+        setShopOpen(val);
+    }
 
     const setHomeDataLoading = (val) => {
         setisHomeDataLoading(val);
@@ -260,6 +265,9 @@ export function ShopProvider({ children }) {
     return (
         <ShopContext.Provider 
             value={{
+                isShopOpen,
+                loadIsShopOpen,
+                
                 paystackKey,
                 wholesaleMinOrderQty,
                 
