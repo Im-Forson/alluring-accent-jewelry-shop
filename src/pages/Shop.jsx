@@ -56,7 +56,7 @@ export default function Shop() {
 
             const categoryResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/category/all`);
 
-            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/shop/status`);
             loadIsShopOpen(shopStatusRes.data.isOpen)
 
             if (announcementResponse.status === 200) {

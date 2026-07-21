@@ -75,87 +75,6 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       return str.replace(/\s+/g, '').toLowerCase();
     }
     
-    // const payWithPaystack = async (e) => {
-    //   try {
-    //     e.preventDefault();
-
-    //     // if (true) {
-    //     //   return;
-    //     // }
-
-    //     if (!orders) {
-    //       setIsOpen(false);
-    //       navigate('/');
-    //       return;
-    //     }
-
-    //     const paystackUserEmail = formData.email.trim() !== "" ? formData.email : `${formatString(formData.recipient)}@mail.com`;
-    
-    //     formData.isOrderPlaced = true
-    //     formData.deliveryCost = orderDetails.shippingFee
-    //     formData.subtotal = itemsTotalCost
-    //     formData.totalCost = grandTotal
-    //     formData.products = orders
-
-    //     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/order/payment/data`);
-    //     const paymentData = res.data
-
-    //     const finalAmount = grandTotal + serviceFee
-    //     const amountPayable = Math.round(finalAmount * 100);
-
-    
-    //     const handler = window.PaystackPop.setup({
-    //       key: paymentData.liveKey,
-    //       email: paystackUserEmail,
-    //       amount: amountPayable,
-    //       currency: "GHS",
-
-    //       metadata: {
-    //         custom_fields: [
-    //           {
-    //             display_name: "Recipient",
-    //             variable_name: "recipient",
-    //             value: formData.recipient,
-    //           },
-    //           {
-    //             display_name: "Phone Number",
-    //             variable_name: "phone",
-    //             value: formData.phone,
-    //           },
-    //           {
-    //             display_name: "Delivery Address",
-    //             variable_name: "address",
-    //             value: `${formData.city}, ${formData.region} region`,
-    //           },
-    //           {
-    //             display_name: "Products",
-    //             variable_name: "products",
-    //             value: orders.map((item, index) => `${item.name} (x${item.quantity}) - ${item.color}`).join(" || "),
-    //           },
-    //           {
-    //             display_name: "Total Amount",
-    //             variable_name: "total_amount",
-    //             value: `GHS ${grandTotal}`,
-    //           },
-    //         ],
-    //       },
-      
-    //       callback: function (response) {
-    //         // console.log("Success:", response.reference);
-    //         processReceipt()
-    //         // setProcessReceipt(true);
-    //       },
-      
-    //       onClose: function () {
-    //         toast.error('Payment closed', {duration: 2000});
-    //       },
-    //     });
-      
-    //     handler.openIframe();
-    //   } catch (error) {
-    //     toast.error('Something went wrong', {duration: 2000});
-    //   }
-    // };
 
     const payWithPaystack = async (e) => {
       try {
@@ -212,31 +131,6 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
       }
     };
     
-
-    // const payWithPaystack = async (e) => {
-    //   e.preventDefault();
-    
-    //   try {
-    //     const finalAmount = grandTotal + serviceFee;
-    
-    //     const res = await axios.post(
-    //       `${import.meta.env.VITE_API_BASE_URL_LOCAL}/order/payment/initialize`,
-    //       {
-    //         email: formData.email,
-    //         amount: finalAmount,
-    //         // orders,
-    //         // formData
-    //       }
-    //     );
-    
-    //     // Redirect to Paystack hosted page
-    //     console.log(res.data.authorization_url);
-    //     window.location.href = res.data.authorization_url;
-    
-    //   } catch (error) {
-    //     toast.error("Payment failed");
-    //   }
-    // };
 
     const sendEmail_Sms = async (orderInfo) => {
       try {
@@ -313,66 +207,6 @@ export default function PurchaseOrderSummary({ isOpen, setIsOpen }) {
         }
         else {
           reprocessReceipt();
-          // // Recreate order when first request fails
-          // const res = await axios.post(
-          //   `${import.meta.env.VITE_API_BASE_URL}/order/recreate`,
-          //     {
-          //       recipient: formData.recipient,
-          //       phone: formData.phone,
-          //       email: formData.email,
-          //       region: formData.region,
-          //       city: formData.city,
-          //       products: orders,
-          //       isOrderPlaced: true,
-          //       deliveryCost: orderDetails.shippingFee,
-          //       subtotal: itemsTotalCost,
-          //       totalCost: grandTotal,
-          //     },
-          //   {
-          //     headers: {
-          //       "Content-Type": "application/json"
-          //     }
-          //   }
-          // )
-      
-          // const receipt = res.data.orderInfo
-      
-          // if (res.status === 201) {
-          //   loadOrderReceipt(receipt)
-          //   setProcessOverlay(false)
-          //   handleRemoveOrdersFromCart();
-          //   addOrder([])
-          //   updateIsOrderSuccess(true); // show upon transaction onsuccess
-      
-          //   sendEmail_Sms(receipt);
-
-          // }
-          // else {
-          //   console.log('local genet...')
-          //   // generate locally when second request fails
-          //   const orderId = generateOrderId();
-
-          //   const manualReceipt = {
-          //       orderId: orderId,
-          //       recipient: formData.recipient,
-          //       phone: formData.phone,
-          //       email: formData.email,
-          //       region: formData.region,
-          //       city: formData.city,
-          //       products: orders,
-          //       subtotal: itemsTotalCost,
-          //       deliveryCost: orderDetails.shippingFee,
-          //       totalCost: grandTotal,
-          //   }
-
-          //   loadOrderReceipt(manualReceipt)
-          //   setProcessOverlay(false)
-          //   handleRemoveOrdersFromCart();
-          // //   addOrder([])
-          // //   updateIsOrderSuccess(true); // show upon transaction onsuccess
-      
-          // //   sendEmail_Sms(manualReceipt);
-          // }
         }
 
         if (location.key !== 'default') {

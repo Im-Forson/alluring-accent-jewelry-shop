@@ -52,7 +52,7 @@ export default function AllBestSellers() {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
             const products = response.data;
 
-            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/shop/status`);
             loadIsShopOpen(shopStatusRes.data.isOpen)
 
             // const availableProducts = products.filter(product => product.stock > 0);

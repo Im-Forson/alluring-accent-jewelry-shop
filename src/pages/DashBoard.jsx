@@ -297,7 +297,7 @@ function DashBoard() {
     const loadId = toast.loading("Closing shop...");
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/close`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/shop/close`, {
         headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
       });
 
@@ -317,7 +317,7 @@ function DashBoard() {
     const loadId = toast.loading("Opening shop...");
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/open`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/shop/open`, {
         headers: { authorization: `Bearer ${localStorage.getItem("ACCESS_TOKEN")}` }
       });
 

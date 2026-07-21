@@ -125,7 +125,7 @@ export default function ProductPage() {
 
     const prepareOrder = async () => {
         try {
-            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL_LOCAL}/shop/status`);
+            const shopStatusRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/shop/status`);
             const isShopOpen = shopStatusRes.data.isOpen;
     
             if (!isShopOpen) {
