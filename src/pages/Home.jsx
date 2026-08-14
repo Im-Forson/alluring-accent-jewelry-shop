@@ -9,6 +9,7 @@ import { apiFetcher } from '../api/client'
 
 import NavBar from '../components/NavBar'
 import Hero from '../components/Hero'
+import DeliveryNotice from '../components/DeliveryNotice'
 import BestSellers from '../components/BestSellers'
 import WhyShopWithUs from '../components/WhyShopWithUs'
 import TrackYourOrder from '../components/TrackYourOrder'
@@ -55,7 +56,7 @@ export default function HomePage() {
     const [cartCount, setCartCount] = useState(0);
     const [cart, setCart] = useState([]);
 
-    const [] = useState(false);
+    const [] = useState(true);
     
     const [dataloading, setDataLoading] = useState(true);
     const [isDataError, setDataError] = useState(false);
@@ -210,8 +211,12 @@ export default function HomePage() {
                 :
                 (
                     <div>
+
+                        
                         
                         <section className="mb-5 md:mb-10">
+
+                            
                             <NavBar 
                             activePage={'home'} 
                             favoriteCount={favoriteCount}
@@ -223,8 +228,19 @@ export default function HomePage() {
                             bestSellers={bestSellersCopy}
                             setBestSellers={setBestSellersCopy}
                             />
+
+                            
+
+                            
                             <Hero/>
+
+
                         </section>
+
+                        {/* Delivery Notice Component */}
+                        <DeliveryNotice />
+
+                       
                         {/* <PurchaseOrderSummary
                             isOpen={isOpenPaymentSummary}
                             setIsOpen={openPaymentSummary}

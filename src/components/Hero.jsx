@@ -17,6 +17,7 @@ import necklace from '../assets/hero-necklace.png'
 import necklacegold from '../assets/necklace-gold.png'
 import ring from '../assets/ring-2.png'
 import trippleRing from '../assets/tripple-ring.png'
+import DeliveryNotice from '../components/DeliveryNotice'
 
 const slides = [
   {
